@@ -11,44 +11,23 @@ class MaintenanceRequestScreen extends StatefulWidget {
 class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  final _cityController = TextEditingController();
+  final _locationController = TextEditingController();
 
-  String? _selectedSystemType;
-  String? _selectedProblemType;
-  String? _selectedUrgency;
-  String? _selectedPhoto;
-
-  final List<String> _systemTypes = ['On-Grid', 'Off-Grid', 'Hybride', 'Pompage solaire'];
-  final List<String> _problemTypes = [
-    'Aucune production',
-    'Faible production',
-    'Erreur onduleur',
-    'Batterie ne se charge pas',
-    'Problème de pompage',
-    'Maintenance périodique'
-  ];
-  final List<Map<String, dynamic>> _urgencyLevels = [
-    {'label': 'Urgent', 'color': Colors.red, 'emoji': '🔴'},
-    {'label': 'Normal', 'color': Colors.orange, 'emoji': '🟡'},
-  ];
+  List<String> _selectedMedia = [];
 
   @override
   void dispose() {
     _descriptionController.dispose();
-    _cityController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
-    return _selectedSystemType != null &&
-        _selectedProblemType != null &&
-        _descriptionController.text.isNotEmpty &&
-        _descriptionController.text.length >= 10 &&
-        _cityController.text.isNotEmpty &&
-        _selectedUrgency != null;
+    return _descriptionController.text.isNotEmpty &&
+        _locationController.text.isNotEmpty;
   }
 
-  void _submitForm() {
+  void _submitRequest() {
     if (_formKey.currentState!.validate() && _isFormValid) {
       // TODO: Save to Firebase
       _showSuccessDialog();
@@ -84,26 +63,51 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
           ],
         ),
         content: const Text(
-          'Votre demande de maintenance a été envoyée avec succès.',
-          style: TextStyle(fontSize: 16),
+          'Votre demande d\'intervention a été envoyée avec succès.',
         ),
         actions: [
-          ElevatedButton(
+          TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
             child: const Text('OK'),
           ),
         ],
       ),
+    );
+  }
+
+  void _getGPSLocation() {
+    // TODO: Implement GPS location
+    setState(() {
+      _locationController.text = 'Position GPS capturée';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Position GPS capturée')),
+    );
+  }
+
+  void _pickMedia() {
+    // TODO: Implement media picker (photo/video)
+    setState(() {
+      _selectedMedia.add('media_${_selectedMedia.length + 1}');
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Média ajouté (fonctionnalité à venir)')),
+    );
+  }
+
+  void _removeMedia(int index) {
+    setState(() {
+      _selectedMedia.removeAt(index);
+    });
+  }
+
+  void _callTechnician() {
+    // TODO: Implement phone call functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Fonctionnalité d\'appel à venir')),
     );
   }
 
@@ -114,7 +118,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
       appBar: AppBar(
         title: const Text('Demande de maintenance'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -124,48 +128,15 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section 1: Type de système
+              // Section 1: Describe Issue
               _SectionCard(
-                title: 'Type de système',
-                isRequired: true,
-                child: Column(
-                  children: _systemTypes.map((type) => _RadioOption(
-                        value: type,
-                        groupValue: _selectedSystemType,
-                        onChanged: (value) {
-                          setState(() => _selectedSystemType = value);
-                        },
-                      )).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 2: Type de problème
-              _SectionCard(
-                title: 'Type de problème',
-                isRequired: true,
-                child: Column(
-                  children: _problemTypes.map((problem) => _ListOption(
-                        value: problem,
-                        isSelected: _selectedProblemType == problem,
-                        onTap: () {
-                          setState(() => _selectedProblemType = problem);
-                        },
-                      )).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 3: Description du problème
-              _SectionCard(
-                title: 'Description du problème',
+                title: 'Décrivez le problème',
                 isRequired: true,
                 child: TextFormField(
                   controller: _descriptionController,
-                  maxLines: 4,
-                  onChanged: (_) => setState(() {}),
+                  maxLines: 6,
                   decoration: InputDecoration(
-                    hintText: 'Décrivez le problème en détail...',
+                    hintText: 'Décrivez le problème que vous rencontrez...',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -182,30 +153,155 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez décrire le problème';
                     }
-                    if (value.length < 10) {
-                      return 'Veuillez fournir plus de détails (minimum 10 caractères)';
-                    }
                     return null;
                   },
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Localisation
+              // Section 2: Add Photo/Video
               _SectionCard(
-                title: 'Localisation',
+                title: 'Ajouter photo/vidéo',
+                isRequired: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_selectedMedia.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              size: 48,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Aucun média sélectionné',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: List.generate(_selectedMedia.length, (index) {
+                          final isVideo = _selectedMedia[index].contains('video');
+                          return Stack(
+                            children: [
+                              Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: Icon(
+                                  isVideo ? Icons.videocam : Icons.image,
+                                  size: 40,
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                              if (isVideo)
+                                Positioned(
+                                  bottom: 4,
+                                  right: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Icon(
+                                      Icons.play_arrow,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                top: -8,
+                                right: -8,
+                                child: IconButton(
+                                  icon: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  onPressed: () => _removeMedia(index),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _pickMedia,
+                            icon: const Icon(Icons.photo_library),
+                            label: const Text('Photo'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _pickMedia,
+                            icon: const Icon(Icons.videocam),
+                            label: const Text('Vidéo'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Section 3: GPS Location
+              _SectionCard(
+                title: 'Localisation GPS',
                 isRequired: true,
                 child: Column(
                   children: [
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          // TODO: Get GPS location
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Fonctionnalité GPS à venir')),
-                          );
-                        },
+                        onPressed: _getGPSLocation,
                         icon: const Icon(Icons.location_on),
                         label: const Text('Utiliser ma position'),
                         style: OutlinedButton.styleFrom(
@@ -220,11 +316,11 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _cityController,
-                      onChanged: (_) => setState(() {}),
+                      controller: _locationController,
+                      readOnly: true,
                       decoration: InputDecoration(
-                        labelText: 'Ville / Région *',
-                        hintText: 'Ex: Casablanca',
+                        labelText: 'Adresse / Coordonnées GPS *',
+                        hintText: 'Cliquez sur "Utiliser ma position"',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -240,7 +336,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer votre ville ou région';
+                          return 'Veuillez capturer votre position GPS';
                         }
                         return null;
                       },
@@ -248,123 +344,14 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
 
-              // Section 5: Photo upload (Optional)
-              _SectionCard(
-                title: 'Joindre une photo du problème',
-                isRequired: false,
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.camera_alt_outlined,
-                      size: 48,
-                      color: Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _selectedPhoto ?? 'Aucune photo sélectionnée',
-                      style: TextStyle(
-                        color: _selectedPhoto != null ? Colors.black87 : Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement image picker
-                        setState(() {
-                          _selectedPhoto = 'photo_probleme.jpg'; // Placeholder
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Sélection de photo à venir')),
-                        );
-                      },
-                      icon: const Icon(Icons.add_photo_alternate),
-                      label: const Text('Choisir une photo'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 6: Niveau d'urgence
-              _SectionCard(
-                title: 'Niveau d\'urgence',
-                isRequired: true,
-                child: Row(
-                  children: _urgencyLevels.map((urgency) {
-                    final isSelected = _selectedUrgency == urgency['label'];
-                    final color = urgency['color'] as Color;
-                    final emoji = urgency['emoji'] as String;
-                    final label = urgency['label'] as String;
-                    
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              setState(() => _selectedUrgency = label);
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? color.withOpacity(0.1)
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? color
-                                      : Colors.grey.shade300,
-                                  width: isSelected ? 2 : 1,
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    emoji,
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    label,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                      color: isSelected
-                                          ? color
-                                          : Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Section 7: Submit Button
+              // Submit Buttons
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isFormValid ? _submitForm : null,
+                  onPressed: _isFormValid ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -376,7 +363,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                     elevation: 0,
                   ),
                   child: const Text(
-                    'Demander une maintenance',
+                    'Demande intervention',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -385,16 +372,21 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Note below button
-              Center(
-                child: Text(
-                  'Vous serez contacté par un technicien spécialisé.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
-                    fontStyle: FontStyle.italic,
+              
+              // Optional Call Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: _callTechnician,
+                  icon: const Icon(Icons.phone),
+                  label: const Text('Appeler technicien'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -406,7 +398,6 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   }
 }
 
-/// Section card widget for grouping form fields
 class _SectionCard extends StatelessWidget {
   final String title;
   final bool isRequired;
@@ -421,15 +412,15 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
@@ -442,19 +433,19 @@ class _SectionCard extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 17,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
               if (isRequired) ...[
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 const Text(
                   '*',
                   style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
                     color: Colors.red,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -463,158 +454,6 @@ class _SectionCard extends StatelessWidget {
           const SizedBox(height: 16),
           child,
         ],
-      ),
-    );
-  }
-}
-
-/// Radio button option widget
-class _RadioOption extends StatelessWidget {
-  final String value;
-  final String? groupValue;
-  final ValueChanged<String?> onChanged;
-
-  const _RadioOption({
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isSelected = groupValue == value;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onChanged(value),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? AppColors.primary.withOpacity(0.1)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.primary
-                    : Colors.grey.shade300,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Radio<String>(
-                  value: value,
-                  groupValue: groupValue,
-                  onChanged: onChanged,
-                  activeColor: AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.black87,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// List option widget for problem types
-class _ListOption extends StatelessWidget {
-  final String value;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ListOption({
-    required this.value,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? AppColors.primary.withOpacity(0.1)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.primary
-                    : Colors.grey.shade300,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.grey.shade400,
-                      width: 2,
-                    ),
-                    color: isSelected
-                        ? AppColors.primary
-                        : Colors.transparent,
-                  ),
-                  child: isSelected
-                      ? const Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 16,
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.black87,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                height: 180,
+                height: 190,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -96,29 +96,38 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
+                          Text(
                             'Énergie Solaire',
-                            style: TextStyle(
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Solutions durables pour\nvotre avenir énergétique',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                              height: 1.4,
+                          const SizedBox(height: 6),
+                          Flexible(
+                            child: Text(
+                              'Solutions durables pour\nvotre avenir énergétique',
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                                height: 1.3,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
@@ -127,6 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: const Text(
                               'En savoir plus',
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -175,44 +187,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 childAspectRatio: 1.1,
                 children: [
                   _FeatureCard(
-                    icon: Icons.inventory_2_outlined,
-                    title: 'Fourniture et\nÉquipement',
-                    color: const Color(0xFF4CAF50),
-                    onTap: () {},
-                  ),
-                  _FeatureCard(
                     icon: Icons.assessment_outlined,
-                    title: 'Étude de\nprojet',
+                    title: 'Étude & Devis\nGratuit',
                     color: const Color(0xFF2196F3),
                     onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.projectType);
+                      Navigator.pushNamed(context, AppRoutes.etudeDevis);
+                    },
+                  ),
+                  _FeatureCard(
+                    icon: Icons.solar_power_outlined,
+                    title: 'Installation',
+                    color: const Color(0xFFFF9800),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.installationRequest);
                     },
                   ),
                   _FeatureCard(
                     icon: Icons.build_outlined,
-                    title: 'Installation et\nMaintenance',
-                    color: const Color(0xFFFF9800),
+                    title: 'Maintenance &\nRéparation',
+                    color: const Color(0xFF4CAF50),
                     onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.installationMaintenanceChoice);
+                      Navigator.pushNamed(context, AppRoutes.maintenanceRequest);
                     },
                   ),
                   _FeatureCard(
-                    icon: Icons.account_balance_outlined,
-                    title: 'Financement\nde projet',
-                    color: const Color(0xFF9C27B0),
-                    onTap: () {},
-                  ),
-                  _FeatureCard(
-                    icon: Icons.request_quote_outlined,
-                    title: 'Demander\nun devis',
-                    color: const Color(0xFFE91E63),
-                    onTap: () {},
-                  ),
-                  _FeatureCard(
-                    icon: Icons.volunteer_activism_outlined,
-                    title: 'Boîte de\ndon',
-                    color: const Color(0xFF00BCD4),
-                    onTap: () {},
+                    icon: Icons.build_circle_outlined,
+                    title: 'Techniciens\nCertifiés',
+                    color: const Color(0xFF673AB7),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.techniciansList);
+                    },
                   ),
                 ],
               ),
@@ -306,6 +310,7 @@ class _FeatureCard extends StatelessWidget {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(14),
@@ -316,14 +321,99 @@ class _FeatureCard extends StatelessWidget {
                 child: Icon(icon, size: 32, color: color),
               ),
               const SizedBox(height: 12),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                  height: 1.2,
+              Flexible(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PartnerTechnicianCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _PartnerTechnicianCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade100),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, size: 28, color: color),
+              ),
+              const SizedBox(height: 10),
+              Flexible(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Flexible(
+                child: Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade600,
+                    height: 1.2,
+                  ),
                 ),
               ),
             ],

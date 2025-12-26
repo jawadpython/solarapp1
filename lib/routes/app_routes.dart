@@ -15,6 +15,14 @@ import 'package:noor_energy/features/quote/screens/quote_request_screen.dart';
 import 'package:noor_energy/features/installation/screens/installation_maintenance_choice_screen.dart';
 import 'package:noor_energy/features/installation/screens/installation_request_screen.dart';
 import 'package:noor_energy/features/installation/screens/maintenance_request_screen.dart';
+import 'package:noor_energy/features/partners/presentation/pages/partners_list_screen.dart';
+import 'package:noor_energy/features/technicians/presentation/pages/technicians_list_screen.dart';
+import 'package:noor_energy/features/intervention/presentation/pages/intervention_choice_screen.dart';
+import 'package:noor_energy/features/etude_devis/presentation/pages/etude_devis_screen.dart';
+import 'package:noor_energy/features/financing/presentation/pages/financing_form_screen.dart';
+import 'package:noor_energy/features/espace_pro/presentation/pages/espace_pro_screen.dart';
+import 'package:noor_energy/features/espace_pro/presentation/pages/partner_registration_screen.dart';
+import 'package:noor_energy/features/espace_pro/presentation/pages/technician_registration_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -35,6 +43,14 @@ class AppRoutes {
   static const String installationMaintenanceChoice = '/installation-maintenance-choice';
   static const String installationRequest = '/installation-request';
   static const String maintenanceRequest = '/maintenance-request';
+  static const String partnersList = '/partners-list';
+  static const String techniciansList = '/technicians-list';
+  static const String interventionChoice = '/intervention-choice';
+  static const String etudeDevis = '/etude-devis';
+  static const String financingForm = '/financing-form';
+  static const String espacePro = '/espace-pro';
+  static const String partnerRegistration = '/partner-registration';
+  static const String technicianRegistration = '/technician-registration';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -79,6 +95,22 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const InstallationRequestScreen());
       case maintenanceRequest:
         return MaterialPageRoute(builder: (_) => const MaintenanceRequestScreen());
+      case partnersList:
+        return MaterialPageRoute(builder: (_) => const PartnersListScreen());
+      case techniciansList:
+        return MaterialPageRoute(builder: (_) => const TechniciansListScreen());
+      case interventionChoice:
+        return MaterialPageRoute(builder: (_) => const InterventionChoiceScreen());
+      case etudeDevis:
+        return MaterialPageRoute(builder: (_) => const EtudeDevisScreen());
+      case financingForm:
+        return MaterialPageRoute(builder: (_) => const FinancingFormScreen());
+      case espacePro:
+        return MaterialPageRoute(builder: (_) => const EspaceProScreen());
+      case partnerRegistration:
+        return MaterialPageRoute(builder: (_) => const PartnerRegistrationScreen());
+      case technicianRegistration:
+        return MaterialPageRoute(builder: (_) => const TechnicianRegistrationScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

@@ -1,39 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/routes/app_routes.dart';
 
-class InstallationRequestScreen extends StatefulWidget {
-  const InstallationRequestScreen({super.key});
+class EtudeDevisScreen extends StatefulWidget {
+  const EtudeDevisScreen({super.key});
 
   @override
-  State<InstallationRequestScreen> createState() => _InstallationRequestScreenState();
+  State<EtudeDevisScreen> createState() => _EtudeDevisScreenState();
 }
 
-class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
+class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _consumptionController = TextEditingController();
   final _locationController = TextEditingController();
 
   String? _selectedSystemType;
-  List<String> _selectedPhotos = [];
+  String? _consumptionMethod;
+  String? _selectedFile;
 
   final List<String> _systemTypes = ['On-grid', 'Off-grid', 'Hybride', 'Pompe'];
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
+    _consumptionController.dispose();
     _locationController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
     return _selectedSystemType != null &&
-        _nameController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty &&
-        _locationController.text.isNotEmpty;
+        _consumptionMethod != null &&
+        _locationController.text.isNotEmpty &&
+        (_consumptionMethod == 'Entrer kWh' || _selectedFile != null) &&
+        (_consumptionMethod == 'Télécharger facture' || _consumptionController.text.isNotEmpty);
   }
 
   void _submitRequest() {
@@ -62,7 +61,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
-                'Demande créée',
+                'Demande envoyée',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -72,7 +71,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
           ],
         ),
         content: const Text(
-          'Votre demande d\'installation a été créée avec succès.',
+          'Votre demande de devis a été envoyée avec succès. Nous vous contacterons bientôt.',
         ),
         actions: [
           TextButton(
@@ -87,38 +86,12 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
     );
   }
 
-  void _getGPSLocation() {
-    // TODO: Implement GPS location
-    setState(() {
-      _locationController.text = 'Position GPS capturée';
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Position GPS capturée')),
-    );
-  }
-
-  void _pickPhoto() {
-    // TODO: Implement image picker
-    setState(() {
-      _selectedPhotos.add('photo_${_selectedPhotos.length + 1}.jpg');
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Photo ajoutée (fonctionnalité à venir)')),
-    );
-  }
-
-  void _removePhoto(int index) {
-    setState(() {
-      _selectedPhotos.removeAt(index);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Demande d\'installation'),
+        title: const Text('Demande de devis'),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -146,85 +119,112 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 2: User Info
+              // Section 2: Consumption Input
               _SectionCard(
-                title: 'Informations personnelles',
+                title: 'Consommation',
                 isRequired: true,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Nom complet *',
-                        hintText: 'Ex: Jean Dupont',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.person),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer votre nom';
-                        }
-                        return null;
+                    // Radio buttons for consumption method
+                    _RadioOption(
+                      value: 'Entrer kWh',
+                      groupValue: _consumptionMethod,
+                      onChanged: (value) {
+                        setState(() {
+                          _consumptionMethod = value;
+                          _selectedFile = null;
+                        });
+                      },
+                    ),
+                    _RadioOption(
+                      value: 'Télécharger facture',
+                      groupValue: _consumptionMethod,
+                      onChanged: (value) {
+                        setState(() {
+                          _consumptionMethod = value;
+                          _consumptionController.clear();
+                        });
                       },
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Téléphone *',
-                        hintText: 'Ex: +212 612 345 678',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                    // Conditional field for kWh input
+                    if (_consumptionMethod == 'Entrer kWh')
+                      TextFormField(
+                        controller: _consumptionController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Consommation (kWh)',
+                          hintText: 'Ex: 500',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                          prefixIcon: const Icon(Icons.bolt),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.phone),
+                        validator: (value) {
+                          if (_consumptionMethod == 'Entrer kWh' &&
+                              (value == null || value.isEmpty)) {
+                            return 'Veuillez entrer la consommation';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer votre numéro de téléphone';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email (optionnel)',
-                        hintText: 'Ex: email@example.com',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
+                    // File upload section
+                    if (_consumptionMethod == 'Télécharger facture') ...[
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          border: Border.all(color: Colors.grey.shade300),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.cloud_upload_outlined,
+                              size: 48,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              _selectedFile ?? 'Aucun fichier sélectionné',
+                              style: TextStyle(
+                                color: _selectedFile != null ? Colors.black87 : Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed: () {
+                                // TODO: Implement file picker
+                                setState(() {
+                                  _selectedFile = 'facture.pdf';
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Sélection de fichier à venir')),
+                                );
+                              },
+                              icon: const Icon(Icons.attach_file),
+                              label: const Text('Choisir une facture'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                side: const BorderSide(color: AppColors.primary),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.email),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -239,7 +239,15 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: _getGPSLocation,
+                        onPressed: () {
+                          // TODO: Get GPS location
+                          setState(() {
+                            _locationController.text = 'Position GPS capturée';
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Position GPS capturée')),
+                          );
+                        },
                         icon: const Icon(Icons.location_on),
                         label: const Text('Utiliser ma position'),
                         style: OutlinedButton.styleFrom(
@@ -257,7 +265,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       controller: _locationController,
                       readOnly: true,
                       decoration: InputDecoration(
-                        labelText: 'Adresse / Coordonnées GPS *',
+                        labelText: 'Adresse / Coordonnées GPS',
                         hintText: 'Cliquez sur "Utiliser ma position"',
                         filled: true,
                         fillColor: Colors.white,
@@ -284,96 +292,27 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Optional Photos
+              // Section 4: Financing Option
               _SectionCard(
-                title: 'Photos (optionnel)',
+                title: 'Option Financement',
                 isRequired: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_selectedPhotos.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.camera_alt_outlined,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Aucune photo sélectionnée',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: List.generate(_selectedPhotos.length, (index) {
-                          return Stack(
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: Icon(
-                                  Icons.image,
-                                  size: 40,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                              Positioned(
-                                top: -8,
-                                right: -8,
-                                child: IconButton(
-                                  icon: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  onPressed: () => _removePhoto(index),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _pickPhoto,
-                      icon: const Icon(Icons.add_photo_alternate),
-                      label: const Text('Ajouter une photo'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.financingForm);
+                    },
+                    icon: const Icon(Icons.account_balance),
+                    label: const Text('Accéder au formulaire de financement'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary, width: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -381,21 +320,19 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               // Submit Button
               SizedBox(
                 width: double.infinity,
-                height: 56,
                 child: ElevatedButton(
                   onPressed: _isFormValid ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    disabledForegroundColor: Colors.grey.shade600,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'Créer demande',
+                    'Demander un devis',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -530,3 +467,4 @@ class _RadioOption extends StatelessWidget {
     );
   }
 }
+
