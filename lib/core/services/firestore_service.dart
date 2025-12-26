@@ -26,6 +26,10 @@ class FirestoreService {
   /// Reference to the 'project_requests' collection.
   /// Stores all solar project study requests.
   CollectionReference get projectRequestsCollection => _db.collection('project_requests');
+  
+  /// Reference to the 'installation_requests' collection.
+  /// Stores all installation requests.
+  CollectionReference get installationRequestsCollection => _db.collection('installation_requests');
 
   // ============================================================
   // USER OPERATIONS
@@ -173,6 +177,41 @@ class FirestoreService {
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots(); // .snapshots() returns a Stream instead of Future
+  }
+
+  // ============================================================
+  // INSTALLATION REQUEST OPERATIONS
+  // ============================================================
+
+  /// Saves a new installation request to Firestore.
+  /// 
+  /// Returns the auto-generated document ID.
+  Future<String> saveInstallationRequest({
+    required String name,
+    required String phone,
+    required String systemType,
+    required String locationType,
+    String? description,
+    String? location,
+    String? city,
+    List<String>? photoUrls,
+    String? userId,
+  }) async {
+    final DocumentReference docRef = await installationRequestsCollection.add({
+      'userId': userId,
+      'name': name,
+      'phone': phone,
+      'systemType': systemType,
+      'locationType': locationType,
+      'description': description,
+      'location': location,
+      'city': city,
+      'photoUrls': photoUrls ?? [],
+      'status': 'pending', // pending, approved, rejected, in_progress, completed
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    
+    return docRef.id;
   }
 }
 

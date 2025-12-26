@@ -16,49 +16,35 @@ class EspaceProScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Rejoignez notre réseau',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Choisissez votre profil professionnel',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              
-              // Devenir Partenaire Button
+              const SizedBox(height: 20),
+              // Devenir Partenaire Card
               _RegistrationCard(
                 title: 'Devenir Partenaire',
+                subtitle: 'Entreprise',
                 description: 'Pour les entreprises certifiées en énergie solaire',
-                icon: Icons.business,
-                color: const Color(0xFF00BCD4),
+                icon: Icons.business_outlined,
+                iconColor: const Color(0xFF00BCD4),
+                backgroundColor: const Color(0xFF00BCD4).withOpacity(0.1),
+                borderColor: const Color(0xFF00BCD4),
                 onTap: () {
                   Navigator.pushNamed(context, AppRoutes.partnerRegistration);
                 },
               ),
-              const SizedBox(height: 24),
-              
-              // Devenir Technicien Button
+              const SizedBox(height: 20),
+              // Devenir Technicien Card
               _RegistrationCard(
                 title: 'Devenir Technicien',
-                description: 'Pour les techniciens certifiés',
-                icon: Icons.build_circle,
-                color: const Color(0xFF673AB7),
+                subtitle: null,
+                description: 'Pour les techniciens certifiés en maintenance et installation',
+                icon: Icons.build_circle_outlined,
+                iconColor: const Color(0xFF673AB7),
+                backgroundColor: const Color(0xFF673AB7).withOpacity(0.1),
+                borderColor: const Color(0xFF673AB7),
                 onTap: () {
                   Navigator.pushNamed(context, AppRoutes.technicianRegistration);
                 },
@@ -73,16 +59,22 @@ class EspaceProScreen extends StatelessWidget {
 
 class _RegistrationCard extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final String description;
   final IconData icon;
-  final Color color;
+  final Color iconColor;
+  final Color backgroundColor;
+  final Color borderColor;
   final VoidCallback onTap;
 
   const _RegistrationCard({
     required this.title,
+    this.subtitle,
     required this.description,
     required this.icon,
-    required this.color,
+    required this.iconColor,
+    required this.backgroundColor,
+    required this.borderColor,
     required this.onTap,
   });
 
@@ -95,12 +87,12 @@ class _RegistrationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: borderColor.withOpacity(0.3),
               width: 2,
             ),
             boxShadow: [
@@ -112,43 +104,98 @@ class _RegistrationCard extends StatelessWidget {
             ],
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Icon Container
               Container(
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: backgroundColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
                   icon,
                   size: 40,
-                  color: color,
+                  color: iconColor,
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+              // Title
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: iconColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        subtitle!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: iconColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 12),
+              // Description
               Text(
                 description,
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.grey.shade600,
+                  height: 1.5,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              Icon(
-                Icons.arrow_forward,
-                color: color,
-                size: 24,
+              const SizedBox(height: 24),
+              // Action Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onTap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: iconColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Commencer',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward, size: 20),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -157,4 +204,3 @@ class _RegistrationCard extends StatelessWidget {
     );
   }
 }
-

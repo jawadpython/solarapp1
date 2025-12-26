@@ -378,7 +378,7 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
                     elevation: 0,
                   ),
                   child: const Text(
-                    'Soumettre',
+                    'Envoyer demande',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,

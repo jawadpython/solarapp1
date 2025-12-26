@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/firestore_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class InstallationRequestScreen extends StatefulWidget {
   const InstallationRequestScreen({super.key});
@@ -12,34 +14,80 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
 
   String? _selectedSystemType;
+  String? _selectedLocationType;
   List<String> _selectedPhotos = [];
 
   final List<String> _systemTypes = ['On-grid', 'Off-grid', 'Hybride', 'Pompe'];
+  final List<String> _locationTypes = ['Maison', 'Entreprise', 'Ferme', 'Autre'];
+
+  final FirestoreService _firestoreService = FirestoreService();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
+    _descriptionController.dispose();
     _locationController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
     return _selectedSystemType != null &&
+        _selectedLocationType != null &&
         _nameController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
         _locationController.text.isNotEmpty;
   }
 
-  void _submitRequest() {
-    if (_formKey.currentState!.validate() && _isFormValid) {
-      // TODO: Save to Firebase
-      _showSuccessDialog();
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate() || !_isFormValid) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      
+      await _firestoreService.saveInstallationRequest(
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        systemType: _selectedSystemType!,
+        locationType: _selectedLocationType!,
+        description: _descriptionController.text.trim().isEmpty 
+            ? null 
+            : _descriptionController.text.trim(),
+        city: _locationController.text.trim(),
+        location: _locationController.text.trim(),
+        photoUrls: _selectedPhotos.isEmpty ? null : _selectedPhotos,
+        userId: userId,
+      );
+
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -98,6 +146,13 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
   }
 
   void _pickPhoto() {
+    if (_selectedPhotos.length >= 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Maximum 3 photos autorisées')),
+      );
+      return;
+    }
+    
     // TODO: Implement image picker
     setState(() {
       _selectedPhotos.add('photo_${_selectedPhotos.length + 1}.jpg');
@@ -146,7 +201,23 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 2: User Info
+              // Section 2: Location Type
+              _SectionCard(
+                title: 'Type d\'emplacement',
+                isRequired: true,
+                child: Column(
+                  children: _locationTypes.map((type) => _RadioOption(
+                        value: type,
+                        groupValue: _selectedLocationType,
+                        onChanged: (value) {
+                          setState(() => _selectedLocationType = value);
+                        },
+                      )).toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Section 3: User Info
               _SectionCard(
                 title: 'Informations personnelles',
                 isRequired: true,
@@ -155,7 +226,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Nom complet *',
+                        labelText: 'Nom *',
                         hintText: 'Ex: Jean Dupont',
                         filled: true,
                         fillColor: Colors.white,
@@ -206,11 +277,11 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
+                      controller: _descriptionController,
+                      maxLines: 3,
                       decoration: InputDecoration(
-                        labelText: 'Email (optionnel)',
-                        hintText: 'Ex: email@example.com',
+                        labelText: 'Description courte',
+                        hintText: 'Décrivez brièvement votre demande...',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -222,7 +293,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                           borderSide: const BorderSide(color: AppColors.primary, width: 2),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.email),
+                        prefixIcon: const Icon(Icons.description),
                       ),
                     ),
                   ],
@@ -230,9 +301,9 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 3: GPS Location
+              // Section 4: Location
               _SectionCard(
-                title: 'Localisation GPS',
+                title: 'Localisation',
                 isRequired: true,
                 child: Column(
                   children: [
@@ -241,7 +312,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       child: OutlinedButton.icon(
                         onPressed: _getGPSLocation,
                         icon: const Icon(Icons.location_on),
-                        label: const Text('Utiliser ma position'),
+                        label: const Text('Utiliser ma position GPS'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
                           side: const BorderSide(color: AppColors.primary, width: 2),
@@ -255,10 +326,9 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _locationController,
-                      readOnly: true,
                       decoration: InputDecoration(
-                        labelText: 'Adresse / Coordonnées GPS *',
-                        hintText: 'Cliquez sur "Utiliser ma position"',
+                        labelText: 'Ville / Adresse *',
+                        hintText: 'Ex: Casablanca ou saisir manuellement',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -274,7 +344,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez capturer votre position GPS';
+                          return 'Veuillez saisir votre ville ou adresse';
                         }
                         return null;
                       },
@@ -284,9 +354,9 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Optional Photos
+              // Section 5: Photos (1-3)
               _SectionCard(
-                title: 'Photos (optionnel)',
+                title: 'Photos (optionnel, max 3)',
                 isRequired: false,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,9 +432,9 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
-                      onPressed: _pickPhoto,
+                      onPressed: _selectedPhotos.length >= 3 ? null : _pickPhoto,
                       icon: const Icon(Icons.add_photo_alternate),
-                      label: const Text('Ajouter une photo'),
+                      label: Text('Ajouter une photo (${_selectedPhotos.length}/3)'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: const BorderSide(color: AppColors.primary),
@@ -383,7 +453,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isFormValid ? _submitRequest : null,
+                  onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -394,13 +464,22 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Créer demande',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Créer demande',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

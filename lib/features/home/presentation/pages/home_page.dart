@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Noor Energy'),
+        title: const Text('Tawfir Energy'),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
                   const Icon(Icons.solar_power, size: 48, color: Colors.white),
                   const SizedBox(height: 16),
                   Text(
-                    'Welcome to Noor Energy',
+                    'Welcome to Tawfir Energy',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

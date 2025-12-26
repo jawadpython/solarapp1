@@ -378,7 +378,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                     elevation: 0,
                   ),
                   child: const Text(
-                    'Soumettre',
+                    'Envoyer demande',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
