@@ -23,6 +23,11 @@ import 'package:noor_energy/features/financing/presentation/pages/financing_form
 import 'package:noor_energy/features/espace_pro/presentation/pages/espace_pro_screen.dart';
 import 'package:noor_energy/features/espace_pro/presentation/pages/partner_registration_screen.dart';
 import 'package:noor_energy/features/espace_pro/presentation/pages/technician_registration_screen.dart';
+import 'package:noor_energy/features/calculator/views/calculator_input_screen.dart';
+import 'package:noor_energy/features/pumping/screens/pumping_input_screen.dart';
+import 'package:noor_energy/features/pumping/screens/pumping_devis_form_screen.dart';
+import 'package:noor_energy/core/guards/admin_guard.dart';
+import 'package:noor_energy/features/admin/screens/admin_dashboard_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -51,6 +56,10 @@ class AppRoutes {
   static const String espacePro = '/espace-pro';
   static const String partnerRegistration = '/partner-registration';
   static const String technicianRegistration = '/technician-registration';
+  static const String calulatorInput = '/calculator';
+  static const String pumpingCalculator = '/pumping-calculator';
+  static const String pumpingDevisForm = '/pumping-devis-form';
+  static const String adminDashboard = '/admin-dashboard';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -111,6 +120,21 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const PartnerRegistrationScreen());
       case technicianRegistration:
         return MaterialPageRoute(builder: (_) => const TechnicianRegistrationScreen());
+      case calulatorInput:
+        return MaterialPageRoute(builder: (_) => const CalculatorInputScreen());
+      case pumpingCalculator:
+        return MaterialPageRoute(builder: (_) => const PumpingInputScreen());
+      case pumpingDevisForm:
+        final result = settings.arguments;
+        return MaterialPageRoute(
+          builder: (_) => PumpingDevisFormScreen(result: result as dynamic),
+        );
+      case adminDashboard:
+        return MaterialPageRoute(
+          builder: (_) => AdminGuard.guard(
+            child: const AdminDashboardScreen(),
+          ),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

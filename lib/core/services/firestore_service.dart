@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 /// FirestoreService handles all database operations using Cloud Firestore.
 /// 
@@ -12,8 +13,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// - Documents contain Fields (key-value pairs)
 /// - Documents can also contain Sub-collections
 class FirestoreService {
-  // FirebaseFirestore instance - the main entry point for Firestore
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // Lazy getter for FirebaseFirestore instance to avoid errors if Firebase isn't initialized
+  FirebaseFirestore get _db {
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase is not initialized. Please configure Firebase first.');
+    }
+    return FirebaseFirestore.instance;
+  }
 
   // ============================================================
   // COLLECTION REFERENCES
@@ -31,6 +37,10 @@ class FirestoreService {
   /// Stores all installation requests.
   CollectionReference get installationRequestsCollection => _db.collection('installation_requests');
 
+  /// Reference to the 'pumping_requests' collection.
+  /// Stores all pumping devis requests.
+  CollectionReference get pumpingRequestsCollection => _db.collection('pumping_requests');
+
   // ============================================================
   // USER OPERATIONS
   // ============================================================
@@ -43,18 +53,22 @@ class FirestoreService {
   /// [userId] - The Firebase Auth UID
   /// [email] - User's email address
   /// [name] - User's display name
+  /// [role] - User role: 'admin', 'technician', or 'client' (default: 'client')
   Future<void> createUserDocument({
     required String userId,
     required String email,
     required String name,
     String? phone,
+    String role = 'client',
   }) async {
     // .doc(userId) creates/references a document with that ID
     // .set() creates the document or overwrites if it exists
     await usersCollection.doc(userId).set({
+      'uid': userId,
       'email': email,
       'name': name,
       'phone': phone,
+      'role': role, // 'admin', 'technician', or 'client'
       'createdAt': FieldValue.serverTimestamp(), // Server-side timestamp
       'updatedAt': FieldValue.serverTimestamp(),
     });
@@ -72,6 +86,20 @@ class FirestoreService {
       return doc.data() as Map<String, dynamic>;
     }
     return null;
+  }
+
+  /// Gets user role from Firestore
+  /// Returns 'client' as default if role not found
+  Future<String> getUserRole(String userId) async {
+    try {
+      final userDoc = await getUserDocument(userId);
+      if (userDoc != null && userDoc['role'] != null) {
+        return userDoc['role'] as String;
+      }
+      return 'client'; // Default role
+    } catch (e) {
+      return 'client'; // Default on error
+    }
   }
 
   /// Updates specific fields in a user document.
@@ -197,6 +225,11 @@ class FirestoreService {
     List<String>? photoUrls,
     String? userId,
   }) async {
+    // Check if Firebase is initialized
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase is not initialized. Please configure Firebase first.');
+    }
+    
     final DocumentReference docRef = await installationRequestsCollection.add({
       'userId': userId,
       'name': name,
@@ -208,6 +241,55 @@ class FirestoreService {
       'city': city,
       'photoUrls': photoUrls ?? [],
       'status': 'pending', // pending, approved, rejected, in_progress, completed
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    
+    return docRef.id;
+  }
+
+  // ============================================================
+  // PUMPING REQUEST OPERATIONS
+  // ============================================================
+
+  /// Saves a new pumping devis request to Firestore.
+  /// 
+  /// Returns the auto-generated document ID.
+  Future<String> savePumpingRequest({
+    required String name,
+    required String phone,
+    required String city,
+    String? gps,
+    String? note,
+    required double q,
+    required double h,
+    required double pumpKW,
+    required double pvPower,
+    required int panels,
+    required double savingMonth,
+    required double savingYear,
+    required String regionCode,
+    String? userId,
+  }) async {
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase is not initialized. Please configure Firebase first.');
+    }
+    
+    final DocumentReference docRef = await pumpingRequestsCollection.add({
+      'userId': userId,
+      'name': name,
+      'phone': phone,
+      'city': city,
+      'gps': gps,
+      'note': note,
+      'Q': q,
+      'H': h,
+      'pumpKW': pumpKW,
+      'PVpower': pvPower,
+      'panels': panels,
+      'savingMonth': savingMonth,
+      'savingYear': savingYear,
+      'regionCode': regionCode,
+      'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
     

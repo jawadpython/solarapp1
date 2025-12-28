@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class InstallationRequestScreen extends StatefulWidget {
   const InstallationRequestScreen({super.key});
@@ -49,12 +50,41 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
       return;
     }
 
+    // Check if Firebase is initialized
+    if (Firebase.apps.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur: Firebase n\'est pas initialisé. Veuillez configurer Firebase.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      // Check Firebase Auth is available
+      String? userId;
+      try {
+        userId = FirebaseAuth.instance.currentUser?.uid;
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur: Firebase Auth n\'est pas disponible. Veuillez configurer Firebase.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+        return;
+      }
       
       await _firestoreService.saveInstallationRequest(
         name: _nameController.text.trim(),

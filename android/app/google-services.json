@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "355955928136",
+    "project_id": "tawfir-energy",
+    "storage_bucket": "tawfir-energy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355955928136:android:149aebaa3710c13491bc7d",
+        "android_client_info": {
+          "package_name": "com.example.noor_energy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMhsjeBVc5KdTDL5lgsJ4eZy6PDPM5zeM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

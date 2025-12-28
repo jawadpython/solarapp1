@@ -1,0 +1,15 @@
+[
+  {"regionCode":"R01_TTA","regionNameFr":"Tanger-Tétouan-Al Hoceïma"},
+  {"regionCode":"R02_ORI","regionNameFr":"L'Oriental"},
+  {"regionCode":"R03_FMK","regionNameFr":"Fès-Meknès"},
+  {"regionCode":"R04_RSK","regionNameFr":"Rabat-Salé-Kénitra"},
+  {"regionCode":"R05_CST","regionNameFr":"Casablanca-Settat"},
+  {"regionCode":"R06_MSF","regionNameFr":"Marrakech-Safi"},
+  {"regionCode":"R07_BKH","regionNameFr":"Béni Mellal-Khénifra"},
+  {"regionCode":"R08_SMA","regionNameFr":"Souss-Massa"},
+  {"regionCode":"R09_DRT","regionNameFr":"Drâa-Tafilalet"},
+  {"regionCode":"R10_GON","regionNameFr":"Guelmim-Oued Noun"},
+  {"regionCode":"R11_LSH","regionNameFr":"Laâyoune-Sakia El Hamra"},
+  {"regionCode":"R12_DOD","regionNameFr":"Dakhla-Oued Ed-Dahab"}
+]
+

@@ -33,8 +33,8 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
         _cityController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
         _emailController.text.isNotEmpty &&
-        _specialityController.text.isNotEmpty &&
-        _selectedDocument != null;
+        _specialityController.text.isNotEmpty;
+    // Document upload temporarily disabled - removed from validation
   }
 
   void _submitForm() {
@@ -89,12 +89,12 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
   }
 
   void _uploadDocument() {
-    // TODO: Implement document picker
-    setState(() {
-      _selectedDocument = 'certificat_technicien.pdf';
-    });
+    // Firebase Storage temporarily disabled - billing not enabled
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Document sélectionné (fonctionnalité à venir)')),
+      const SnackBar(
+        content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 
@@ -283,7 +283,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
               // Section 6: Upload Documents
               _SectionCard(
                 title: 'Certificats et documents',
-                isRequired: true,
+                isRequired: false, // Temporarily optional - Firebase Storage disabled
                 child: Column(
                   children: [
                     if (_selectedDocument == null)

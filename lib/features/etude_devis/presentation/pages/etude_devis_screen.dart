@@ -31,8 +31,11 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
     return _selectedSystemType != null &&
         _consumptionMethod != null &&
         _locationController.text.isNotEmpty &&
-        (_consumptionMethod == 'Entrer kWh' || _selectedFile != null) &&
-        (_consumptionMethod == 'Télécharger facture' || _consumptionController.text.isNotEmpty);
+        // File upload temporarily disabled - removed from validation
+        // Form is valid if: method is 'Entrer kWh' with filled consumption, OR method is 'Télécharger facture' (file optional now)
+        (_consumptionMethod == 'Entrer kWh' 
+            ? _consumptionController.text.isNotEmpty
+            : true); // 'Télécharger facture' method allowed but file upload disabled
   }
 
   void _submitRequest() {
@@ -203,12 +206,12 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                             const SizedBox(height: 12),
                             OutlinedButton.icon(
                               onPressed: () {
-                                // TODO: Implement file picker
-                                setState(() {
-                                  _selectedFile = 'facture.pdf';
-                                });
+                                // Firebase Storage temporarily disabled - billing not enabled
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Sélection de fichier à venir')),
+                                  const SnackBar(
+                                    content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
+                                    duration: Duration(seconds: 3),
+                                  ),
                                 );
                               },
                               icon: const Icon(Icons.attach_file),

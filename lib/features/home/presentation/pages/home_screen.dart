@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/user_state_service.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -37,6 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          // Admin Dashboard Button (only visible to admins)
+          if (UserStateService.instance.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings, color: AppColors.primary),
+              tooltip: 'Admin Dashboard',
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.adminDashboard);
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
             onPressed: () {},
@@ -49,11 +59,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Search Bar
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Rechercher...',
@@ -65,29 +76,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  isDense: true,
                 ),
               ),
             ),
             // Banner
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 18,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
                   width: double.infinity,
-
-                  height: 300,
+                  height: 210,
                   child: Image.asset(
                     'assets/images/banner_solar.png',
                     fit: BoxFit.cover,
@@ -97,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             // Section Title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -158,6 +159,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: const Color(0xFF673AB7),
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.techniciansList);
+                    },
+                  ),
+                  _FeatureCard(
+                    icon: Icons.solar_power,
+                    title: 'Calculateur\nSolaire',
+                    color: const Color(0xFFF4B400),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.calulatorInput);
                     },
                   ),
                 ],

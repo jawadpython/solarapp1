@@ -16,7 +16,16 @@ void main() async {
     debugPrint('✅ Firebase initialized successfully');
   } catch (e) {
     debugPrint('❌ Firebase initialization failed: $e');
+    debugPrint('⚠️ Firebase features will not work. Make sure Firebase configuration files are set up.');
+    debugPrint('⚠️ For Android: Add google-services.json to android/app/');
+    debugPrint('⚠️ For iOS: Add GoogleService-Info.plist to ios/Runner/');
+    debugPrint('⚠️ For Web: Configure Firebase in web/index.html or use FlutterFire CLI');
     // App will still run but Firebase features won't work
+  }
+  
+  // Verify Firebase is initialized
+  if (Firebase.apps.isEmpty) {
+    debugPrint('⚠️ WARNING: No Firebase apps initialized. Firebase features will not work.');
   }
   
   runApp(const NoorEnergyApp());

@@ -33,8 +33,8 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
         _cityController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
         _emailController.text.isNotEmpty &&
-        _specialityController.text.isNotEmpty &&
-        _selectedDocument != null;
+        _specialityController.text.isNotEmpty;
+    // Document upload temporarily disabled - removed from validation
   }
 
   void _submitForm() {
@@ -89,12 +89,12 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
   }
 
   void _uploadDocument() {
-    // TODO: Implement document picker
-    setState(() {
-      _selectedDocument = 'document_partenaire.pdf';
-    });
+    // Firebase Storage temporarily disabled - billing not enabled
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Document sélectionné (fonctionnalité à venir)')),
+      const SnackBar(
+        content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 
@@ -283,7 +283,7 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               // Section 6: Upload Documents
               _SectionCard(
                 title: 'Documents (certificats, licences)',
-                isRequired: true,
+                isRequired: false, // Temporarily optional - Firebase Storage disabled
                 child: Column(
                   children: [
                     if (_selectedDocument == null)
