@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:noor_energy/core/services/notification_service.dart';
 
 /// AdminService handles all admin-related Firestore operations
 class AdminService {
@@ -165,10 +166,66 @@ class AdminService {
     required String status,
   }) async {
     try {
+      // Get request data to find userId
+      final requestDoc = await _db.collection(collection).doc(requestId).get();
+      if (!requestDoc.exists) return false;
+      
+      final requestData = requestDoc.data() as Map<String, dynamic>;
+      final userId = requestData['userId'] as String?;
+      
       await _db.collection(collection).doc(requestId).update({
         'status': status,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      
+      // Create user notification if userId exists
+      if (userId != null && userId.isNotEmpty) {
+        try {
+          String title = '';
+          String message = '';
+          
+          switch (collection) {
+            case 'devis_requests':
+              title = 'Mise à jour de votre demande de devis';
+              message = status == 'approved' 
+                  ? 'Votre demande de devis a été approuvée'
+                  : 'Votre demande de devis a été rejetée';
+              break;
+            case 'installation_requests':
+              title = 'Mise à jour de votre demande d\'installation';
+              message = status == 'approved'
+                  ? 'Votre demande d\'installation a été approuvée'
+                  : 'Votre demande d\'installation a été rejetée';
+              break;
+            case 'maintenance_requests':
+              title = 'Mise à jour de votre demande de maintenance';
+              message = status == 'approved'
+                  ? 'Votre demande de maintenance a été approuvée'
+                  : 'Votre demande de maintenance a été rejetée';
+              break;
+            case 'pumping_requests':
+              title = 'Mise à jour de votre demande de pompage';
+              message = status == 'approved'
+                  ? 'Votre demande de pompage a été approuvée'
+                  : 'Votre demande de pompage a été rejetée';
+              break;
+          }
+          
+          if (title.isNotEmpty) {
+            await NotificationService().createUserNotification(
+              userId: userId,
+              type: NotificationType.statusUpdate,
+              title: title,
+              message: message,
+              requestId: requestId,
+              requestCollection: collection,
+            );
+          }
+        } catch (e) {
+          // Silently fail - notification is not critical
+        }
+      }
+      
       return true;
     } catch (e) {
       return false;
@@ -184,6 +241,13 @@ class AdminService {
     required String technicianPhone,
   }) async {
     try {
+      // Get request data to find userId
+      final requestDoc = await _db.collection(collection).doc(requestId).get();
+      if (!requestDoc.exists) return false;
+      
+      final requestData = requestDoc.data() as Map<String, dynamic>;
+      final userId = requestData['userId'] as String?;
+      
       await _db.collection(collection).doc(requestId).update({
         'assignedTechnicianId': technicianId,
         'assignedTechnicianName': technicianName,
@@ -191,6 +255,41 @@ class AdminService {
         'status': 'assigned',
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      
+      // Create user notification
+      if (userId != null && userId.isNotEmpty) {
+        try {
+          String title = '';
+          switch (collection) {
+            case 'devis_requests':
+              title = 'Technicien assigné à votre demande de devis';
+              break;
+            case 'installation_requests':
+              title = 'Technicien assigné à votre demande d\'installation';
+              break;
+            case 'maintenance_requests':
+              title = 'Technicien assigné à votre demande de maintenance';
+              break;
+            case 'pumping_requests':
+              title = 'Technicien assigné à votre demande de pompage';
+              break;
+          }
+          
+          if (title.isNotEmpty) {
+            await NotificationService().createUserNotification(
+              userId: userId,
+              type: NotificationType.statusUpdate,
+              title: title,
+              message: 'Un technicien ($technicianName) a été assigné à votre demande',
+              requestId: requestId,
+              requestCollection: collection,
+            );
+          }
+        } catch (e) {
+          // Silently fail - notification is not critical
+        }
+      }
+      
       return true;
     } catch (e) {
       return false;
@@ -335,7 +434,8 @@ class AdminService {
       
       // Create partner document
       await _partners.add({
-        'name': appData['name'] ?? '',
+        'companyName': appData['companyName'] ?? appData['name'] ?? '',
+        'name': appData['companyName'] ?? appData['name'] ?? '', // Keep for backward compatibility
         'phone': appData['phone'] ?? '',
         'city': appData['city'] ?? '',
         'email': appData['email'] ?? '',

@@ -108,6 +108,7 @@ class PumpingService {
       savingYear: savings['yearly'] ?? 0,
       sunHoursUsed: sunH,
       regionCode: input.regionCode,
+      mode: input.mode,
     );
   }
 

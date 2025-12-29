@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/features/admin/services/admin_service.dart';
 
 class TechniciansListScreen extends StatefulWidget {
   const TechniciansListScreen({super.key});
@@ -9,42 +10,78 @@ class TechniciansListScreen extends StatefulWidget {
 }
 
 class _TechniciansListScreenState extends State<TechniciansListScreen> {
+  final _adminService = AdminService();
   String? _selectedCity;
   String? _selectedSpeciality;
-  List<Technician> _filteredTechnicians = [];
+  List<Map<String, dynamic>> _allTechnicians = [];
+  List<Map<String, dynamic>> _filteredTechnicians = [];
+  bool _isLoading = true;
 
-  final List<String> _cities = [
-    'Tous',
-    'Casablanca',
-    'Rabat',
-    'Marrakech',
-    'Fès',
-    'Tanger',
-    'Agadir',
-  ];
-
-  final List<String> _specialities = [
-    'Tous',
-    'Maintenance',
-    'Installation',
-    'Réparation',
-    'Diagnostic',
-    'Pompage solaire',
-  ];
+  List<String> _cities = ['Tous'];
+  List<String> _specialities = ['Tous'];
 
   @override
   void initState() {
     super.initState();
     _selectedCity = 'Tous';
     _selectedSpeciality = 'Tous';
-    _filteredTechnicians = _sampleTechnicians;
+    _loadTechnicians();
+  }
+
+  Future<void> _loadTechnicians() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final technicians = await _adminService.getActiveTechnicians();
+      
+      // Extract unique cities and specialities
+      final citiesSet = <String>{'Tous'};
+      final specialitiesSet = <String>{'Tous'};
+      
+      for (var tech in technicians) {
+        final city = tech['city']?.toString();
+        final speciality = tech['speciality']?.toString();
+        if (city != null && city.isNotEmpty) {
+          citiesSet.add(city);
+        }
+        if (speciality != null && speciality.isNotEmpty) {
+          specialitiesSet.add(speciality);
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _allTechnicians = technicians;
+          _cities = citiesSet.toList()..sort();
+          _specialities = specialitiesSet.toList()..sort();
+          _applyFilters();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors du chargement: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _applyFilters() {
     setState(() {
-      _filteredTechnicians = _sampleTechnicians.where((tech) {
-        final cityMatch = _selectedCity == 'Tous' || tech.city == _selectedCity;
-        final specialityMatch = _selectedSpeciality == 'Tous' || tech.speciality == _selectedSpeciality;
+      _filteredTechnicians = _allTechnicians.where((tech) {
+        final city = tech['city']?.toString() ?? '';
+        final speciality = tech['speciality']?.toString() ?? '';
+        final cityMatch = _selectedCity == 'Tous' || city == _selectedCity;
+        final specialityMatch = _selectedSpeciality == 'Tous' || speciality == _selectedSpeciality;
         return cityMatch && specialityMatch;
       }).toList();
     });
@@ -160,142 +197,54 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
           
           // Technicians List
           Expanded(
-            child: _filteredTechnicians.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Colors.grey.shade400,
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filteredTechnicians.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Aucun technicien trouvé',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Aucun technicien trouvé',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey.shade600,
-                          ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadTechnicians,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _filteredTechnicians.length,
+                          itemBuilder: (context, index) {
+                            final tech = _filteredTechnicians[index];
+                            return _TechnicianCard(
+                              technician: tech,
+                              onCall: () => _callTechnician(tech['phone']?.toString() ?? ''),
+                              onWhatsApp: () => _whatsappTechnician(tech['phone']?.toString() ?? ''),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _filteredTechnicians.length,
-                    itemBuilder: (context, index) {
-                      final technician = _filteredTechnicians[index];
-                      return _TechnicianCard(
-                        technician: technician,
-                        onCall: () => _callTechnician(technician.phone),
-                        onWhatsApp: () => _whatsappTechnician(technician.phone),
-                      );
-                    },
-                  ),
+                      ),
           ),
         ],
       ),
     );
   }
 
-  // Sample data - Replace with actual data from backend
-  static final List<Technician> _sampleTechnicians = [
-    Technician(
-      name: 'Ahmed Benali',
-      speciality: 'Maintenance',
-      city: 'Casablanca',
-      phone: '+212 612 345 678',
-      rating: 4.8,
-      reviewCount: 24,
-      availability: 'Disponible',
-      serviceArea: 'Casablanca, Rabat, Settat',
-      isAvailable: true,
-    ),
-    Technician(
-      name: 'Mohamed Alami',
-      speciality: 'Installation',
-      city: 'Rabat',
-      phone: '+212 623 456 789',
-      rating: 4.9,
-      reviewCount: 18,
-      availability: 'Disponible aujourd\'hui',
-      serviceArea: 'Rabat, Salé, Témara',
-      isAvailable: true,
-    ),
-    Technician(
-      name: 'Fatima Zahra',
-      speciality: 'Réparation',
-      city: 'Marrakech',
-      phone: '+212 634 567 890',
-      rating: 4.7,
-      reviewCount: 32,
-      availability: 'Occupé jusqu\'à 16h',
-      serviceArea: 'Marrakech, Essaouira',
-      isAvailable: false,
-    ),
-    Technician(
-      name: 'Hassan Bensaid',
-      speciality: 'Diagnostic',
-      city: 'Casablanca',
-      phone: '+212 645 678 901',
-      rating: 4.6,
-      reviewCount: 15,
-      availability: 'Disponible',
-      serviceArea: 'Casablanca, Mohammedia',
-      isAvailable: true,
-    ),
-    Technician(
-      name: 'Karim El Fassi',
-      speciality: 'Pompage solaire',
-      city: 'Fès',
-      phone: '+212 656 789 012',
-      rating: 5.0,
-      reviewCount: 28,
-      availability: 'Disponible',
-      serviceArea: 'Fès, Meknès, Taza',
-      isAvailable: true,
-    ),
-    Technician(
-      name: 'Youssef Amrani',
-      speciality: 'Maintenance',
-      city: 'Tanger',
-      phone: '+212 667 890 123',
-      rating: 4.5,
-      reviewCount: 12,
-      availability: 'Disponible demain',
-      serviceArea: 'Tanger, Tétouan',
-      isAvailable: false,
-    ),
-  ];
-}
-
-class Technician {
-  final String name;
-  final String speciality;
-  final String city;
-  final String phone;
-  final double rating;
-  final int reviewCount;
-  final String availability;
-  final String serviceArea;
-  final bool isAvailable;
-
-  Technician({
-    required this.name,
-    required this.speciality,
-    required this.city,
-    required this.phone,
-    required this.rating,
-    required this.reviewCount,
-    required this.availability,
-    required this.serviceArea,
-    required this.isAvailable,
-  });
 }
 
 class _TechnicianCard extends StatelessWidget {
-  final Technician technician;
+  final Map<String, dynamic> technician;
   final VoidCallback onCall;
   final VoidCallback onWhatsApp;
 
@@ -333,7 +282,7 @@ class _TechnicianCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        technician.name,
+                        technician['name']?.toString() ?? 'N/A',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -342,7 +291,7 @@ class _TechnicianCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        technician.speciality,
+                        technician['speciality']?.toString() ?? 'N/A',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade600,
@@ -354,12 +303,12 @@ class _TechnicianCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: technician.isAvailable
+                    color: (technician['active'] ?? true)
                         ? Colors.green.withOpacity(0.1)
                         : Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: technician.isAvailable
+                      color: (technician['active'] ?? true)
                           ? Colors.green
                           : Colors.orange,
                       width: 1,
@@ -369,17 +318,17 @@ class _TechnicianCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        technician.isAvailable ? Icons.check_circle : Icons.schedule,
+                        (technician['active'] ?? true) ? Icons.check_circle : Icons.schedule,
                         size: 16,
-                        color: technician.isAvailable ? Colors.green : Colors.orange,
+                        color: (technician['active'] ?? true) ? Colors.green : Colors.orange,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        technician.isAvailable ? 'Disponible' : 'Occupé',
+                        (technician['active'] ?? true) ? 'Actif' : 'Inactif',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: technician.isAvailable ? Colors.green : Colors.orange,
+                          color: (technician['active'] ?? true) ? Colors.green : Colors.orange,
                         ),
                       ),
                     ],
@@ -390,59 +339,34 @@ class _TechnicianCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Rating and Reviews
-            Row(
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 20),
-                    const SizedBox(width: 4),
-                    Text(
-                      technician.rating.toStringAsFixed(1),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+            if (technician['rating'] != null)
+              Row(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 20),
+                      const SizedBox(width: 4),
+                      Text(
+                        (technician['rating'] as num?)?.toStringAsFixed(1) ?? 'N/A',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  '${technician.reviewCount} avis',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
+                    ],
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             const SizedBox(height: 12),
 
-            // Availability Status
+            // City
             Row(
               children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey.shade600),
+                Icon(Icons.location_city, size: 16, color: Colors.grey.shade600),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    technician.availability,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // Service Area
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Zone: ${technician.serviceArea}',
+                    technician['city']?.toString() ?? 'N/A',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade700,

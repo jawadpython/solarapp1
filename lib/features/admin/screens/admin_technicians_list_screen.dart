@@ -265,113 +265,146 @@ class _AdminTechniciansListScreenState extends State<AdminTechniciansListScreen>
                       final tech = _filteredTechnicians[index];
           final isActive = tech['active'] ?? true;
           return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          tech['name'] ?? 'N/A',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+            margin: const EdgeInsets.only(bottom: 16),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.build_circle,
+                            color: Colors.purple,
+                            size: 24,
                           ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isActive ? Colors.green : Colors.red,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tech['name'] ?? 'N/A',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                formatDate(tech['createdAt']),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Text(
-                          isActive ? 'Actif' : 'Inactif',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isActive ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatDate(tech['createdAt']),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
+                        StatusBadge(status: isActive ? 'approved' : 'rejected'),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  InfoRow(icon: Icons.phone, label: 'Téléphone', value: tech['phone'] ?? 'N/A'),
-                  const SizedBox(height: 8),
-                  InfoRow(icon: Icons.location_city, label: 'Ville', value: tech['city'] ?? 'N/A'),
-                  const SizedBox(height: 8),
-                  InfoRow(icon: Icons.build, label: 'Spécialité', value: tech['speciality'] ?? 'N/A'),
-                  if (tech['rating'] != null) ...[
-                    const SizedBox(height: 8),
-                    InfoRow(
-                      icon: Icons.star,
-                      label: 'Note',
-                      value: '${tech['rating']?.toStringAsFixed(1) ?? 'N/A'} / 5.0',
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          InfoRow(icon: Icons.phone, label: 'Téléphone', value: tech['phone'] ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          InfoRow(icon: Icons.location_city, label: 'Ville', value: tech['city'] ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          InfoRow(icon: Icons.build, label: 'Spécialité', value: tech['speciality'] ?? 'N/A'),
+                          if (tech['rating'] != null) ...[
+                            const SizedBox(height: 12),
+                            InfoRow(
+                              icon: Icons.star,
+                              label: 'Note',
+                              value: '${tech['rating']?.toStringAsFixed(1) ?? 'N/A'} / 5.0',
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _callTechnician(tech['phone'] ?? ''),
+                            icon: const Icon(Icons.phone, size: 18),
+                            label: const Text('Appeler'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _toggleTechnicianStatus(
+                              tech['id'] ?? '',
+                              isActive,
+                            ),
+                            icon: Icon(
+                              isActive ? Icons.block : Icons.check_circle,
+                              size: 20,
+                            ),
+                            label: Text(isActive ? 'Désactiver' : 'Activer'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isActive ? Colors.orange : Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _deleteTechnician(tech['id'] ?? ''),
+                        icon: const Icon(Icons.delete_outline, size: 18),
+                        label: const Text('Désactiver définitivement'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _callTechnician(tech['phone'] ?? ''),
-                          icon: const Icon(Icons.phone, size: 18),
-                          label: const Text('Appeler'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _toggleTechnicianStatus(
-                            tech['id'] ?? '',
-                            isActive,
-                          ),
-                          icon: Icon(
-                            isActive ? Icons.block : Icons.check_circle,
-                            size: 18,
-                          ),
-                          label: Text(isActive ? 'Désactiver' : 'Activer'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isActive ? Colors.orange : Colors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _deleteTechnician(tech['id'] ?? ''),
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('Désactiver définitivement'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           );

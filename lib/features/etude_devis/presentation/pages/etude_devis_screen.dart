@@ -1,5 +1,9 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/firestore_service.dart';
+import 'package:noor_energy/core/services/notification_service.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class EtudeDevisScreen extends StatefulWidget {
@@ -13,10 +17,12 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
   final _formKey = GlobalKey<FormState>();
   final _consumptionController = TextEditingController();
   final _locationController = TextEditingController();
+  final _firestoreService = FirestoreService();
 
   String? _selectedSystemType;
   String? _consumptionMethod;
   String? _selectedFile;
+  bool _isSubmitting = false;
 
   final List<String> _systemTypes = ['On-grid', 'Off-grid', 'Hybride', 'Pompe'];
 
@@ -38,10 +44,127 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
             : true); // 'Télécharger facture' method allowed but file upload disabled
   }
 
-  void _submitRequest() {
-    if (_formKey.currentState!.validate() && _isFormValid) {
-      // TODO: Save to Firebase
-      _showSuccessDialog();
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate() || !_isFormValid) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      print('🚀🚀🚀 Étude Devis submission started 🚀🚀🚀');
+      debugPrint('🚀 Étude Devis submission started');
+      developer.log('Étude Devis submission started', name: 'EtudeDevisScreen');
+
+      // Parse consumption value
+      double consumption = 0.0;
+      bool isKwh = _consumptionMethod == 'Entrer kWh';
+      
+      if (isKwh) {
+        consumption = double.tryParse(_consumptionController.text.trim()) ?? 0.0;
+        if (consumption <= 0) {
+          throw Exception('Consommation invalide');
+        }
+      }
+
+      // Map system type to project type
+      String projectType = _selectedSystemType ?? 'On-grid';
+      if (projectType == 'Pompe') {
+        projectType = 'PUMPING';
+      } else if (projectType == 'Hybride') {
+        projectType = 'HYBRID';
+      } else if (projectType == 'Off-grid') {
+        projectType = 'OFF-GRID';
+      } else {
+        projectType = 'ON-GRID';
+      }
+
+      print('📋 Data: projectType=$projectType, consumption=$consumption, isKwh=$isKwh, location=${_locationController.text}');
+      debugPrint('📋 Data: projectType=$projectType, consumption=$consumption, isKwh=$isKwh');
+
+      // Estimate power (simplified calculation - 1kW per 100kWh/month)
+      double estimatedPower = isKwh ? (consumption / 100).clamp(1.0, 100.0) : 5.0;
+      int panelPower = 400; // Default panel power in watts
+
+      print('💾 Saving to Firestore...');
+      debugPrint('💾 Saving to Firestore...');
+
+      // Save to Firestore using project_requests collection
+      final requestId = await _firestoreService.saveProjectRequest(
+        userId: '', // No user ID for anonymous requests
+        projectType: projectType,
+        consumption: consumption,
+        isKwh: isKwh,
+        panelPower: panelPower,
+        estimatedPower: estimatedPower,
+      );
+
+      print('✅✅✅ Successfully saved! Request ID: $requestId ✅✅✅');
+      debugPrint('✅ Successfully saved! Request ID: $requestId');
+
+      // Create admin notification
+      try {
+        await NotificationService().createAdminNotification(
+          type: NotificationType.projectRequest,
+          title: 'Nouvelle demande d\'étude de devis',
+          message: 'Type: $projectType - Consommation: ${isKwh ? "$consumption kWh" : "Facture"}',
+          requestId: requestId,
+          requestCollection: 'project_requests',
+        );
+        print('✅ Admin notification created');
+      } catch (e) {
+        print('⚠️ Failed to create notification: $e');
+        // Don't fail the whole operation
+      }
+
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e, stackTrace) {
+      print('❌❌❌ ERROR: $e ❌❌❌');
+      print('📋 Stack trace: $stackTrace');
+      debugPrint('❌ ERROR: $e');
+      debugPrint('📋 Stack trace: $stackTrace');
+      developer.log('ERROR in _submitRequest', error: e, stackTrace: stackTrace, name: 'EtudeDevisScreen');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'envoi: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Détails',
+              textColor: Colors.white,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Détails de l\'erreur'),
+                    content: SingleChildScrollView(
+                      child: Text('$e\n\n$stackTrace'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Fermer'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -324,7 +447,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isFormValid ? _submitRequest : null,
+                  onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -334,13 +457,22 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Demander un devis',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Demander un devis',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

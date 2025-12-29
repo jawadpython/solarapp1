@@ -58,6 +58,7 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
         savingMonth: widget.result.savingMonth,
         savingYear: widget.result.savingYear,
         regionCode: widget.result.regionCode,
+        mode: widget.result.mode,
       );
 
       await _firestoreService.savePumpingRequest(
@@ -74,6 +75,7 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
         savingMonth: request.savingMonth,
         savingYear: request.savingYear,
         regionCode: request.regionCode,
+        mode: request.mode.toString().split('.').last,
       );
 
       if (mounted) {

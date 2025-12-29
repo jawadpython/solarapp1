@@ -18,6 +18,10 @@ dependencies:
   url_launcher: ^6.3.2
   # image_picker: ^1.2.1  # Temporarily disabled - Firebase Storage disabled
   fl_chart: ^0.69.0  # Lightweight chart library for analytics
+  intl: ^0.20.2  # Internationalization and date formatting (pinned by flutter_localizations)
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: ^2.2.2  # Local storage for language preference
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +30,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/images/banner_solar.png

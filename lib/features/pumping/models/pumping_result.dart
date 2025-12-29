@@ -1,3 +1,5 @@
+import 'package:noor_energy/features/pumping/models/pumping_input.dart';
+
 class PumpingResult {
   final double q; // m3/h
   final double h; // meters
@@ -8,6 +10,7 @@ class PumpingResult {
   final double savingYear;
   final double sunHoursUsed;
   final String regionCode;
+  final PumpingMode mode;
 
   PumpingResult({
     required this.q,
@@ -19,6 +22,7 @@ class PumpingResult {
     required this.savingYear,
     required this.sunHoursUsed,
     required this.regionCode,
+    required this.mode,
   });
 
   @override

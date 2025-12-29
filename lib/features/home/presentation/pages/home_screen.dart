@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/user_state_service.dart';
+import 'package:noor_energy/features/profile/screens/profile_screen.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,6 +13,34 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+
+  void _showMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Profil'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-            onPressed: () {},
+            onPressed: () {
+              _showMenu(context);
+            },
           ),
         ],
       ),
@@ -190,10 +221,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
+            if (index == 3) {
+              Navigator.pushNamed(context, AppRoutes.adminDashboard);
+              return;
+            }
             if (index == 1) {
               // Espace Pro navigation - navigate to screen
               Navigator.pushNamed(context, AppRoutes.espacePro);
               // Don't update currentIndex since we're navigating away
+            } else if (index == 4) {
+              // Profile navigation
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
             } else {
               // For other items, update the index (future: navigate to respective screens)
               setState(() => _currentIndex = index);

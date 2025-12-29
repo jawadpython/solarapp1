@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/firestore_service.dart';
 
 class MaintenanceRequestScreen extends StatefulWidget {
   const MaintenanceRequestScreen({super.key});
@@ -12,6 +15,12 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _firestoreService = FirestoreService();
+  bool _isSubmitting = false;
+  String? _selectedUrgency;
 
   List<String> _selectedMedia = [];
 
@@ -19,18 +28,74 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   void dispose() {
     _descriptionController.dispose();
     _locationController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _cityController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
     return _descriptionController.text.isNotEmpty &&
-        _locationController.text.isNotEmpty;
+        _locationController.text.isNotEmpty &&
+        _nameController.text.isNotEmpty &&
+        _phoneController.text.isNotEmpty &&
+        _cityController.text.isNotEmpty;
   }
 
-  void _submitRequest() {
-    if (_formKey.currentState!.validate() && _isFormValid) {
-      // TODO: Save to Firebase
-      _showSuccessDialog();
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate() || !_isFormValid) {
+      return;
+    }
+
+    if (Firebase.apps.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur: Firebase n\'est pas initialisé. Veuillez configurer Firebase.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      String? userId;
+      try {
+        userId = FirebaseAuth.instance.currentUser?.uid;
+      } catch (e) {
+        // Continue without userId
+      }
+
+      await _firestoreService.saveMaintenanceRequest(
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        city: _cityController.text.trim(),
+        description: _descriptionController.text.trim(),
+        location: _locationController.text.trim(),
+        urgency: _selectedUrgency,
+        userId: userId,
+      );
+
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -128,7 +193,95 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section 1: Describe Issue
+              // Section 1: Personal Info
+              _SectionCard(
+                title: 'Informations personnelles',
+                isRequired: true,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Nom complet *',
+                        hintText: 'Ex: Ahmed Benali',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer votre nom';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: 'Téléphone *',
+                        hintText: 'Ex: +212 612 345 678',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.phone),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer votre numéro de téléphone';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _cityController,
+                      decoration: InputDecoration(
+                        labelText: 'Ville *',
+                        hintText: 'Ex: Casablanca',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.location_city),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer votre ville';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Section 2: Describe Issue
               _SectionCard(
                 title: 'Décrivez le problème',
                 isRequired: true,
@@ -158,8 +311,44 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              
+              // Section 2.5: Urgency
+              _SectionCard(
+                title: 'Urgence',
+                isRequired: false,
+                child: DropdownButtonFormField<String>(
+                  value: _selectedUrgency,
+                  decoration: InputDecoration(
+                    hintText: 'Sélectionnez le niveau d\'urgence',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.priority_high),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'low', child: Text('Faible')),
+                    DropdownMenuItem(value: 'normal', child: Text('Normale')),
+                    DropdownMenuItem(value: 'high', child: Text('Élevée')),
+                    DropdownMenuItem(value: 'urgent', child: Text('Urgente')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedUrgency = value;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
 
-              // Section 2: Add Photo/Video
+              // Section 3: Add Photo/Video
               _SectionCard(
                 title: 'Ajouter photo/vidéo',
                 isRequired: false,
@@ -292,7 +481,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 3: GPS Location
+              // Section 4: GPS Location
               _SectionCard(
                 title: 'Localisation GPS',
                 isRequired: true,
@@ -351,7 +540,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isFormValid ? _submitRequest : null,
+                  onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -362,13 +551,22 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Demande intervention',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Demande intervention',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 12),

@@ -1,3 +1,5 @@
+import 'package:noor_energy/features/pumping/models/pumping_input.dart';
+
 class PumpingDevisRequest {
   final String name;
   final String phone;
@@ -12,6 +14,7 @@ class PumpingDevisRequest {
   final double savingMonth;
   final double savingYear;
   final String regionCode;
+  final PumpingMode mode;
 
   PumpingDevisRequest({
     required this.name,
@@ -27,6 +30,6 @@ class PumpingDevisRequest {
     required this.savingMonth,
     required this.savingYear,
     required this.regionCode,
+    required this.mode,
   });
 }
-

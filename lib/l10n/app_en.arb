@@ -1,0 +1,32 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tawfir Energy",
+  "@appTitle": {
+    "description": "The application title"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language selection label"
+  },
+  "french": "French",
+  "@french": {
+    "description": "French language option"
+  },
+  "arabic": "Arabic",
+  "@arabic": {
+    "description": "Arabic language option"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile page title"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  }
+}
+

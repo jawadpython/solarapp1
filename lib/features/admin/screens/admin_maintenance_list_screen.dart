@@ -143,125 +143,185 @@ class _AdminMaintenanceListScreenState extends State<AdminMaintenanceListScreen>
       onRefresh: _loadRequests,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
+        physics: const BouncingScrollPhysics(),
         itemCount: _requests.length,
         itemBuilder: (context, index) {
           final request = _requests[index];
           final status = request['status'] ?? 'pending';
           return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          request['name'] ?? 'N/A',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      StatusBadge(status: status),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatDate(request['createdAt']),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  InfoRow(icon: Icons.phone, label: 'Téléphone', value: request['phone'] ?? 'N/A'),
-                  const SizedBox(height: 8),
-                  InfoRow(icon: Icons.location_city, label: 'Ville', value: request['city'] ?? 'N/A'),
-                  if (request['assignedTechnicianName'] != null) ...[
-                    const SizedBox(height: 8),
-                    InfoRow(
-                      icon: Icons.person,
-                      label: 'Technicien assigné',
-                      value: request['assignedTechnicianName'] ?? 'N/A',
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  if (status == 'pending') ...[
+            margin: const EdgeInsets.only(bottom: 16),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.build,
+                            color: Colors.purple,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () => _approveRequest(request['id'] ?? ''),
-                            icon: const Icon(Icons.check, size: 18),
-                            label: const Text('Approuver'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                request['name'] ?? 'N/A',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                formatDate(request['createdAt']),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        StatusBadge(status: status),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          InfoRow(icon: Icons.phone, label: 'Téléphone', value: request['phone'] ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          InfoRow(icon: Icons.location_city, label: 'Ville', value: request['city'] ?? 'N/A'),
+                          if (request['assignedTechnicianName'] != null) ...[
+                            const SizedBox(height: 12),
+                            InfoRow(
+                              icon: Icons.person,
+                              label: 'Technicien assigné',
+                              value: request['assignedTechnicianName'] ?? 'N/A',
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (status == 'pending') ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _approveRequest(request['id'] ?? ''),
+                              icon: const Icon(Icons.check_circle, size: 20),
+                              label: const Text('Valider'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => _rejectRequest(request['id'] ?? ''),
+                              icon: const Icon(Icons.cancel, size: 20),
+                              label: const Text('Refuser'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.red,
+                                side: const BorderSide(color: Colors.red, width: 1.5),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _assignTechnician(
+                            request['id'] ?? '',
+                            request['city'],
+                          ),
+                          icon: const Icon(Icons.person_add, size: 20),
+                          label: const Text('Assigner technicien'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.blue,
+                            side: const BorderSide(color: Colors.blue, width: 1.5),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Row(
+                      children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => _rejectRequest(request['id'] ?? ''),
-                            icon: const Icon(Icons.close, size: 18),
-                            label: const Text('Rejeter'),
+                            onPressed: () => _callClient(request['phone'] ?? ''),
+                            icon: const Icon(Icons.phone, size: 18),
+                            label: const Text('Appeler'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
+                              foregroundColor: AppColors.primary,
+                              side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _whatsappClient(request['phone'] ?? ''),
+                            icon: const Icon(Icons.chat, size: 18),
+                            label: const Text('WhatsApp'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                              side: BorderSide(color: Colors.green.withOpacity(0.5)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () => _assignTechnician(
-                          request['id'] ?? '',
-                          request['city'],
-                        ),
-                        icon: const Icon(Icons.person_add, size: 18),
-                        label: const Text('Assigner un technicien'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue,
-                          side: const BorderSide(color: Colors.blue),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                   ],
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _callClient(request['phone'] ?? ''),
-                          icon: const Icon(Icons.phone, size: 18),
-                          label: const Text('Appeler'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _whatsappClient(request['phone'] ?? ''),
-                          icon: const Icon(Icons.chat, size: 18),
-                          label: const Text('WhatsApp'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           );

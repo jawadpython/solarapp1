@@ -1,4 +1,6 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/calculator/models/devis_request.dart';
 import 'package:noor_energy/features/calculator/models/solar_result.dart';
@@ -40,15 +42,28 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
   }
 
   Future<void> _submitRequest() async {
+    print('🔘🔘🔘 SUBMIT BUTTON CLICKED! 🔘🔘🔘');
+    debugPrint('🔘 Submit button clicked!');
+    developer.log('Submit button clicked', name: 'DevisRequestScreen');
+    
     if (!_formKey.currentState!.validate()) {
+      print('❌ Form validation failed!');
+      debugPrint('❌ Form validation failed!');
       return;
     }
+    
+    print('✅ Form validation passed!');
+    debugPrint('✅ Form validation passed!');
 
     setState(() {
       _isSubmitting = true;
     });
 
     try {
+      print('🚀🚀🚀 Starting devis request submission... 🚀🚀🚀');
+      debugPrint('🚀 Starting devis request submission...');
+      developer.log('Starting devis request submission', name: 'DevisRequestScreen');
+      
       final request = DevisRequest(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         date: DateTime.now(),
@@ -71,17 +86,53 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
         savingsYear: widget.result.savingYear,
       );
 
+      print('📝 Request object created: ${request.fullName}, ${request.phone}, ${request.city}');
+      print('💾 Calling DevisService.saveRequest...');
+      debugPrint('📝 Request object created: ${request.fullName}, ${request.phone}, ${request.city}');
+      debugPrint('💾 Calling DevisService.saveRequest...');
+      
       await DevisService.saveRequest(request);
 
+      print('✅✅✅ DevisService.saveRequest completed successfully! ✅✅✅');
+      debugPrint('✅ DevisService.saveRequest completed successfully!');
+      
       if (mounted) {
         _showSuccessDialog();
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌❌❌ ERROR in _submitRequest: $e ❌❌❌');
+      print('📋 Stack trace: $stackTrace');
+      debugPrint('❌ ERROR in _submitRequest: $e');
+      debugPrint('📋 Stack trace: $stackTrace');
+      developer.log('ERROR in _submitRequest', error: e, stackTrace: stackTrace, name: 'DevisRequestScreen');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de l\'envoi: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 10),
+            action: SnackBarAction(
+              label: 'Détails',
+              textColor: Colors.white,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Détails de l\'erreur'),
+                    content: SingleChildScrollView(
+                      child: Text('$e\n\n$stackTrace'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Fermer'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         );
       }
@@ -151,7 +202,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRoutes.home,
+                AppRoutes.homeScreen,
                 (route) => false,
               );
             },

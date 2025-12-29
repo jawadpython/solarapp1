@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:noor_energy/core/services/notification_service.dart';
 
 /// FirestoreService handles all database operations using Cloud Firestore.
 /// 
@@ -40,6 +41,10 @@ class FirestoreService {
   /// Reference to the 'pumping_requests' collection.
   /// Stores all pumping devis requests.
   CollectionReference get pumpingRequestsCollection => _db.collection('pumping_requests');
+
+  /// Reference to the 'maintenance_requests' collection.
+  /// Stores all maintenance requests.
+  CollectionReference get maintenanceRequestsCollection => _db.collection('maintenance_requests');
 
   // ============================================================
   // USER OPERATIONS
@@ -244,6 +249,19 @@ class FirestoreService {
       'createdAt': FieldValue.serverTimestamp(),
     });
     
+    // Create admin notification
+    try {
+      await NotificationService().createAdminNotification(
+        type: NotificationType.installationRequest,
+        title: 'Nouvelle demande d\'installation',
+        message: '$name ($city) - $systemType',
+        requestId: docRef.id,
+        requestCollection: 'installation_requests',
+      );
+    } catch (e) {
+      // Silently fail - notification is not critical
+    }
+    
     return docRef.id;
   }
 
@@ -268,6 +286,7 @@ class FirestoreService {
     required double savingMonth,
     required double savingYear,
     required String regionCode,
+    required String mode,
     String? userId,
   }) async {
     if (Firebase.apps.isEmpty) {
@@ -281,6 +300,7 @@ class FirestoreService {
       'city': city,
       'gps': gps,
       'note': note,
+      'mode': mode,
       'Q': q,
       'H': h,
       'pumpKW': pumpKW,
@@ -292,6 +312,157 @@ class FirestoreService {
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
+    
+    // Create admin notification
+    try {
+      await NotificationService().createAdminNotification(
+        type: NotificationType.pumpingRequest,
+        title: 'Nouvelle demande de pompage',
+        message: '$name ($city) - ${panels} panneaux',
+        requestId: docRef.id,
+        requestCollection: 'pumping_requests',
+      );
+    } catch (e) {
+      // Silently fail - notification is not critical
+    }
+    
+    return docRef.id;
+  }
+
+  // ============================================================
+  // MAINTENANCE REQUEST OPERATIONS
+  // ============================================================
+
+  /// Saves a new maintenance request to Firestore.
+  /// 
+  /// Returns the auto-generated document ID.
+  Future<String> saveMaintenanceRequest({
+    required String name,
+    required String phone,
+    required String city,
+    required String description,
+    String? location,
+    String? urgency,
+    String? userId,
+  }) async {
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase is not initialized. Please configure Firebase first.');
+    }
+    
+    final DocumentReference docRef = await maintenanceRequestsCollection.add({
+      'userId': userId,
+      'name': name,
+      'phone': phone,
+      'city': city,
+      'problemDescription': description,
+      'location': location,
+      'gps': location,
+      'urgency': urgency ?? 'normal',
+      'status': 'pending', // pending, approved, rejected, assigned, in_progress, completed
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    
+    // Create admin notification
+    try {
+      await NotificationService().createAdminNotification(
+        type: NotificationType.maintenanceRequest,
+        title: 'Nouvelle demande de maintenance',
+        message: '$name ($city)',
+        requestId: docRef.id,
+        requestCollection: 'maintenance_requests',
+      );
+    } catch (e) {
+      // Silently fail - notification is not critical
+    }
+    
+    return docRef.id;
+  }
+
+  // ============================================================
+  // APPLICATION OPERATIONS
+  // ============================================================
+
+  /// Saves a new technician application to Firestore.
+  /// 
+  /// Returns the auto-generated document ID.
+  Future<String> saveTechnicianApplication({
+    required String name,
+    required String phone,
+    required String city,
+    required String email,
+    required String speciality,
+    String? userId,
+  }) async {
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase is not initialized. Please configure Firebase first.');
+    }
+    
+    final DocumentReference docRef = await _db.collection('technician_applications').add({
+      'userId': userId,
+      'name': name,
+      'phone': phone,
+      'city': city,
+      'email': email,
+      'speciality': speciality,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    
+    // Create admin notification
+    try {
+      await NotificationService().createAdminNotification(
+        type: NotificationType.technicianApplication,
+        title: 'Nouvelle candidature technicien',
+        message: '$name ($city) - $speciality',
+        requestId: docRef.id,
+        requestCollection: 'technician_applications',
+      );
+    } catch (e) {
+      // Silently fail - notification is not critical
+    }
+    
+    return docRef.id;
+  }
+
+  /// Saves a new partner application to Firestore.
+  /// 
+  /// Returns the auto-generated document ID.
+  Future<String> savePartnerApplication({
+    required String companyName,
+    required String phone,
+    required String city,
+    required String email,
+    required String speciality,
+    String? userId,
+  }) async {
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase is not initialized. Please configure Firebase first.');
+    }
+    
+    final DocumentReference docRef = await _db.collection('partner_applications').add({
+      'userId': userId,
+      'companyName': companyName,
+      'name': companyName, // Keep for backward compatibility
+      'phone': phone,
+      'city': city,
+      'email': email,
+      'speciality': speciality,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    
+    // Create admin notification
+    try {
+      await NotificationService().createAdminNotification(
+        type: NotificationType.partnerApplication,
+        title: 'Nouvelle candidature partenaire',
+        message: '$companyName ($city) - $speciality',
+        requestId: docRef.id,
+        requestCollection: 'partner_applications',
+      );
+    } catch (e) {
+      // Silently fail - notification is not critical
+    }
     
     return docRef.id;
   }

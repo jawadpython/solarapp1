@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/firestore_service.dart';
 
 class TechnicianRegistrationScreen extends StatefulWidget {
   const TechnicianRegistrationScreen({super.key});
@@ -15,6 +18,8 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _specialityController = TextEditingController();
+  final _firestoreService = FirestoreService();
+  bool _isSubmitting = false;
 
   String? _selectedDocument;
 
@@ -37,10 +42,59 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
     // Document upload temporarily disabled - removed from validation
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate() && _isFormValid) {
-      // TODO: Save to Firebase
-      _showSuccessDialog();
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate() || !_isFormValid) {
+      return;
+    }
+
+    if (Firebase.apps.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur: Firebase n\'est pas initialisé. Veuillez configurer Firebase.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      String? userId;
+      try {
+        userId = FirebaseAuth.instance.currentUser?.uid;
+      } catch (e) {
+        // Continue without userId
+      }
+
+      await _firestoreService.saveTechnicianApplication(
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        city: _cityController.text.trim(),
+        email: _emailController.text.trim(),
+        speciality: _specialityController.text.trim(),
+        userId: userId,
+      );
+
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -366,7 +420,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isFormValid ? _submitForm : null,
+                  onPressed: (_isFormValid && !_isSubmitting) ? _submitForm : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -377,13 +431,22 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Envoyer demande',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Envoyer demande',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

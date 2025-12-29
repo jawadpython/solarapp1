@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/admin/services/admin_analytics_service.dart';
-import 'package:noor_energy/features/admin/services/admin_service.dart';
 import 'package:noor_energy/features/admin/widgets/admin_stat_card.dart';
 import 'package:noor_energy/features/admin/widgets/admin_chart_card.dart';
 import 'package:noor_energy/features/admin/widgets/admin_latest_items_card.dart';
@@ -74,7 +73,7 @@ class _AdminHomeDashboardScreenState extends State<AdminHomeDashboardScreen> {
     return RefreshIndicator(
       onRefresh: _loadDashboardData,
       child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

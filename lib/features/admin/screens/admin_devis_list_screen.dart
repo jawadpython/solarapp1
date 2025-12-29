@@ -124,6 +124,7 @@ class _AdminDevisListScreenState extends State<AdminDevisListScreen> {
       onRefresh: _loadRequests,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
+        physics: const BouncingScrollPhysics(),
         itemCount: _requests.length,
         itemBuilder: (context, index) {
           final request = _requests[index];
@@ -176,97 +177,153 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.person,
+                      color: AppColors.primary,
+                      size: 24,
                     ),
                   ),
-                ),
-                StatusBadge(status: status),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              formatDate(date),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formatDate(date),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  StatusBadge(status: status),
+                ],
               ),
-            ),
-            InfoRow(icon: Icons.phone, label: 'Téléphone', value: phone),
-            const SizedBox(height: 8),
-            InfoRow(icon: Icons.location_city, label: 'Ville', value: city),
-            const SizedBox(height: 8),
-            InfoRow(icon: Icons.solar_power, label: 'Système', value: systemType),
-            const SizedBox(height: 12),
-            if (status == 'pending') ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    InfoRow(icon: Icons.phone, label: 'Téléphone', value: phone),
+                    const SizedBox(height: 12),
+                    InfoRow(icon: Icons.location_city, label: 'Ville', value: city),
+                    const SizedBox(height: 12),
+                    InfoRow(icon: Icons.solar_power, label: 'Système', value: systemType),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (status == 'pending') ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: onApprove,
+                        icon: const Icon(Icons.check_circle, size: 20),
+                        label: const Text('Valider'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onReject,
+                        icon: const Icon(Icons.cancel, size: 20),
+                        label: const Text('Refuser'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onApprove,
-                      icon: const Icon(Icons.check, size: 18),
-                      label: const Text('Approuver'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
+                    child: OutlinedButton.icon(
+                      onPressed: onCall,
+                      icon: const Icon(Icons.phone, size: 18),
+                      label: const Text('Appeler'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: onReject,
-                      icon: const Icon(Icons.close, size: 18),
-                      label: const Text('Rejeter'),
+                      onPressed: onWhatsApp,
+                      icon: const Icon(Icons.chat, size: 18),
+                      label: const Text('WhatsApp'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
+                        foregroundColor: Colors.green,
+                        side: BorderSide(color: Colors.green.withOpacity(0.5)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
             ],
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onCall,
-                    icon: const Icon(Icons.phone, size: 18),
-                    label: const Text('Appeler'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onWhatsApp,
-                    icon: const Icon(Icons.chat, size: 18),
-                    label: const Text('WhatsApp'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

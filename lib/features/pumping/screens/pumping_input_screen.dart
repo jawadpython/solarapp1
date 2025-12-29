@@ -86,11 +86,34 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
   }
 
   Future<void> _calculate() async {
-    if (_selectedMode == null || _selectedRegionCode == null || _selectedCurrentSource == null) {
+    if (_selectedMode == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez remplir tous les champs obligatoires'),
-          backgroundColor: Colors.red,
+          content: Text('Veuillez sélectionner une méthode de calcul'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    
+    if (_selectedRegionCode == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner votre région'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    
+    if (_selectedCurrentSource == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner votre source d\'énergie actuelle'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -184,8 +207,14 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du calcul: $e'),
+            content: Text('Une erreur s\'est produite lors du calcul. Veuillez vérifier vos données et réessayer.'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
           ),
         );
       }
@@ -216,18 +245,102 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 10),
-              // Mode Selection
-              const Text(
-                'Comment voulez-vous calculer ?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              // Header Introduction Card
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade600, Colors.blue.shade800],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.water_drop,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Calculez votre système de pompage solaire avec précision.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Résultats estimatifs basés sur votre région et vos besoins réels.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+              // Step 1
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '1',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Étape 1 — Choisir la méthode de calcul',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
               _ModeCard(
-                title: 'J\'ai un débit (Q)',
+                title: 'J\'ai déjà le débit (Q)',
+                description: 'Utilisez ce mode si vous connaissez déjà le débit de votre pompe.',
                 icon: Icons.water_drop,
                 isSelected: _selectedMode == PumpingMode.flow,
                 onTap: () {
@@ -236,10 +349,11 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _ModeCard(
-                title: 'J\'ai une surface de terrain',
-                icon: Icons.landscape,
+                title: 'Je ne connais pas le débit (superficie agricole)',
+                description: 'Idéal pour les agriculteurs qui connaissent la surface et le type de culture.',
+                icon: Icons.agriculture,
                 isSelected: _selectedMode == PumpingMode.area,
                 onTap: () {
                   setState(() {
@@ -247,9 +361,10 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _ModeCard(
-                title: 'J\'ai un réservoir d\'eau',
+                title: 'J\'ai un réservoir',
+                description: 'Utilisez ce mode si vous remplissez un château d\'eau ou une citerne.',
                 icon: Icons.water,
                 isSelected: _selectedMode == PumpingMode.tank,
                 onTap: () {
@@ -258,7 +373,43 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
+              
+              // Step 2
+              if (_selectedMode != null) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '2',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Étape 2 — Renseigner les informations',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
               
               // Mode-specific forms
               if (_selectedMode == PumpingMode.flow) _buildFlowForm(),
@@ -357,6 +508,42 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               ),
               const SizedBox(height: 32),
               
+              // Step 3
+              if (_selectedMode != null && _selectedRegionCode != null && _selectedCurrentSource != null) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '3',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Étape 3 — Calcul des résultats',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+              
               // Calculate button
               SizedBox(
                 width: double.infinity,
@@ -419,10 +606,14 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Requis';
+                    return 'Veuillez saisir le débit';
                   }
-                  if (double.tryParse(value) == null) {
-                    return 'Nombre invalide';
+                  final numValue = double.tryParse(value);
+                  if (numValue == null) {
+                    return 'Veuillez saisir un nombre valide';
+                  }
+                  if (numValue <= 0) {
+                    return 'Le débit doit être supérieur à 0';
                   }
                   return null;
                 },
@@ -509,10 +700,14 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Requis';
+                    return 'Veuillez saisir le débit';
                   }
-                  if (double.tryParse(value) == null) {
-                    return 'Nombre invalide';
+                  final numValue = double.tryParse(value);
+                  if (numValue == null) {
+                    return 'Veuillez saisir un nombre valide';
+                  }
+                  if (numValue <= 0) {
+                    return 'Le débit doit être supérieur à 0';
                   }
                   return null;
                 },
@@ -704,10 +899,14 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Requis';
+              return 'Ce champ est obligatoire';
             }
-            if (double.tryParse(value) == null) {
-              return 'Nombre invalide';
+            final numValue = double.tryParse(value);
+            if (numValue == null) {
+              return 'Veuillez saisir un nombre valide';
+            }
+            if (numValue <= 0) {
+              return 'La valeur doit être supérieure à 0';
             }
             return null;
           },
@@ -733,12 +932,14 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
 
 class _ModeCard extends StatelessWidget {
   final String title;
+  final String description;
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _ModeCard({
     required this.title,
+    required this.description,
     required this.icon,
     required this.isSelected,
     required this.onTap,
@@ -753,49 +954,86 @@ class _ModeCard extends StatelessWidget {
       shadowColor: Colors.black.withOpacity(0.1),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected ? AppColors.primary : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
+              width: isSelected ? 3 : 1.5,
             ),
-            color: isSelected ? AppColors.primary.withOpacity(0.05) : Colors.white,
+            color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.white,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary.withOpacity(0.2)
+                      ? AppColors.primary.withOpacity(0.15)
                       : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
                   icon,
                   color: isSelected ? AppColors.primary : Colors.grey.shade600,
-                  size: 28,
+                  size: 32,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (isSelected)
-                const Icon(
-                  Icons.check_circle,
-                  color: AppColors.primary,
-                  size: 24,
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
             ],
           ),
