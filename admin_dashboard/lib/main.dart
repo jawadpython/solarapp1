@@ -12,17 +12,18 @@ void main() async {
   try {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        // Add your Firebase config here
-            apiKey: "AIzaSyCfSewr0e506aoWVj-ho-X-FipAEnIvpdU",
-            authDomain: "tawfir-energy.firebaseapp.com",
-            projectId: "tawfir-energy",
-            storageBucket: "tawfir-energy.firebasestorage.app",
-            messagingSenderId: "355955928136",
-            appId: "1:355955928136:web:6361bad1b397464f91bc7d",
+        // Production Firebase configuration
+        apiKey: "AIzaSyBIJ17OtVeS218IBjnmf1UoWsxsu3YY0-k",
+        authDomain: "tawfir-energy-prod-98053.firebaseapp.com",
+        projectId: "tawfir-energy-prod-98053",
+        storageBucket: "tawfir-energy-prod-98053.firebasestorage.app",
+        messagingSenderId: "751649516744",
+        appId: "1:751649516744:web:a43278ec8ae222cba449fd",
       ),
     );
+    debugPrint('✅ Admin Dashboard: Firebase initialized successfully');
   } catch (e) {
-    debugPrint('Firebase initialization error: $e');
+    debugPrint('❌ Admin Dashboard: Firebase initialization error: $e');
   }
   
   runApp(const AdminDashboardApp());
@@ -41,8 +42,28 @@ class AdminDashboardApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+            return Scaffold(
+              backgroundColor: AppTheme.backgroundColor,
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                      strokeWidth: 3,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Chargement...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           }
           if (snapshot.hasData) {

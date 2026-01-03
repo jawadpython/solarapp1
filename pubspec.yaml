@@ -1,7 +1,7 @@
 name: noor_energy
 description: Tawfir Energy - Solar Application
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+5
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -22,6 +22,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   shared_preferences: ^2.2.2  # Local storage for language preference
+  geolocator: ^13.0.1  # GPS location services
+  geocoding: ^3.0.0  # Reverse geocoding (coordinates to address)
 
 dev_dependencies:
   flutter_test:
@@ -33,7 +35,7 @@ flutter:
   generate: true
 
   assets:
-    - assets/images/banner_solar.png
+    - assets/images/
     - assets/data/regions.json
     - assets/data/regionSunHours.json
 

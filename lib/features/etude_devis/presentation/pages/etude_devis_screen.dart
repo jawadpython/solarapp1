@@ -5,6 +5,7 @@ import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/firestore_service.dart';
 import 'package:noor_energy/core/services/notification_service.dart';
 import 'package:noor_energy/routes/app_routes.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class EtudeDevisScreen extends StatefulWidget {
   const EtudeDevisScreen({super.key});
@@ -132,24 +133,24 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'envoi: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorSending}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
-              label: 'Détails',
+              label: AppLocalizations.of(context)!.details,
               textColor: Colors.white,
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Détails de l\'erreur'),
+                    title: Text(AppLocalizations.of(context)!.errorDetails),
                     content: SingleChildScrollView(
                       child: Text('$e\n\n$stackTrace'),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Fermer'),
+                        child: Text(AppLocalizations.of(context)!.close),
                       ),
                     ],
                   ),
@@ -217,7 +218,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Demande de devis'),
+        title: Text(AppLocalizations.of(context)!.quoteRequest),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -231,7 +232,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
             children: [
               // Section 1: System Type
               _SectionCard(
-                title: 'Type de système',
+                title: AppLocalizations.of(context)!.systemTypeLabel,
                 isRequired: true,
                 child: Column(
                   children: _systemTypes.map((type) => _RadioOption(
@@ -247,7 +248,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
 
               // Section 2: Consumption Input
               _SectionCard(
-                title: 'Consommation',
+                title: AppLocalizations.of(context)!.consumption,
                 isRequired: true,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,14 +332,14 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                               onPressed: () {
                                 // Firebase Storage temporarily disabled - billing not enabled
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
-                                    duration: Duration(seconds: 3),
+                                  SnackBar(
+                                    content: Text(AppLocalizations.of(context)!.uploadDisabled),
+                                    duration: const Duration(seconds: 3),
                                   ),
                                 );
                               },
                               icon: const Icon(Icons.attach_file),
-                              label: const Text('Choisir une facture'),
+                              label: Text(AppLocalizations.of(context)!.chooseBill),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.primary,
                                 side: const BorderSide(color: AppColors.primary),
@@ -356,71 +357,42 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 3: GPS Location
+              // Section 3: GPS Location - Manual Entry
               _SectionCard(
-                title: 'Localisation GPS',
+                title: AppLocalizations.of(context)!.gpsLocation,
                 isRequired: true,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          // TODO: Get GPS location
-                          setState(() {
-                            _locationController.text = 'Position GPS capturée';
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Position GPS capturée')),
-                          );
-                        },
-                        icon: const Icon(Icons.location_on),
-                        label: const Text('Utiliser ma position'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary, width: 2),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
+                child: TextFormField(
+                  controller: _locationController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.addressGps,
+                    hintText: AppLocalizations.of(context)!.cityHint,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _locationController,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Adresse / Coordonnées GPS',
-                        hintText: 'Cliquez sur "Utiliser ma position"',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.location_city),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez capturer votre position GPS';
-                        }
-                        return null;
-                      },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
                     ),
-                  ],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.location_city),
+                    helperText: 'Entrez votre adresse ou coordonnées GPS manuellement',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez saisir votre adresse ou localisation';
+                    }
+                    return null;
+                  },
                 ),
               ),
               const SizedBox(height: 20),
 
               // Section 4: Financing Option
               _SectionCard(
-                title: 'Option Financement',
+                title: AppLocalizations.of(context)!.financingOption,
                 isRequired: false,
                 child: SizedBox(
                   width: double.infinity,
@@ -429,7 +401,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                       Navigator.pushNamed(context, AppRoutes.financingForm);
                     },
                     icon: const Icon(Icons.account_balance),
-                    label: const Text('Accéder au formulaire de financement'),
+                    label: Text(AppLocalizations.of(context)!.accessFinancingForm),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: const BorderSide(color: AppColors.primary, width: 2),
@@ -466,8 +438,8 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Demander un devis',
+                      : Text(
+                          AppLocalizations.of(context)!.requestFreeStudy,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

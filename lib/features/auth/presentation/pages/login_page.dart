@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
               AppButton(
                 text: 'Login',
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, AppRoutes.home);
+                  Navigator.pushReplacementNamed(context, AppRoutes.homeScreen);
                 },
               ),
               const SizedBox(height: 16),

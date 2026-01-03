@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/date_formatter.dart';
+import '../widgets/skeleton_loader.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -30,7 +31,7 @@ class NotificationsPage extends StatelessWidget {
               stream: firestoreService.streamNotifications(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ListSkeletonLoader(items: 8);
                 }
 
                 if (snapshot.hasError) {

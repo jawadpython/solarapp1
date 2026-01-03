@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Language Service manages app language preferences
-class LanguageService {
+class LanguageService extends ChangeNotifier {
   static LanguageService? _instance;
   static LanguageService get instance {
     _instance ??= LanguageService._();
@@ -24,6 +24,7 @@ class LanguageService {
       final languageCode = prefs.getString(_languageKey);
       if (languageCode != null) {
         _currentLocale = Locale(languageCode);
+        notifyListeners();
       }
     } catch (e) {
       // Use default locale on error
@@ -37,6 +38,7 @@ class LanguageService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_languageKey, locale.languageCode);
       _currentLocale = locale;
+      notifyListeners(); // Notify listeners that language has changed
     } catch (e) {
       // Silently fail
     }

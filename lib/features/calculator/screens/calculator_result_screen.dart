@@ -3,6 +3,7 @@ import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/calculator/models/solar_result.dart';
 import 'package:noor_energy/features/calculator/screens/devis_request_screen.dart';
 import 'package:noor_energy/features/calculator/services/region_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class CalculatorResultScreen extends StatefulWidget {
   final SolarResult result;
@@ -45,7 +46,7 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Résultat du Calcul'),
+        title: Text(AppLocalizations.of(context)!.calculationResult),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -89,10 +90,10 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Résultats du Calcul',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.calculationResults,
+                          style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
@@ -105,15 +106,15 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                   // Consommation estimée
                   _ResultItem(
                     icon: Icons.bolt,
-                    label: 'Consommation estimée',
-                    value: '${result.kwhMonth.toStringAsFixed(1)} kWh / mois',
+                    label: AppLocalizations.of(context)!.estimatedConsumption,
+                    value: '${result.kwhMonth.toStringAsFixed(1)} kWh / ${AppLocalizations.of(context)!.monthly.toLowerCase()}',
                     color: Colors.blue,
                   ),
                   const SizedBox(height: 16),
                   // Puissance système recommandée
                   _ResultItem(
                     icon: Icons.power,
-                    label: 'Puissance système recommandée',
+                    label: AppLocalizations.of(context)!.recommendedSystemPower,
                     value: '${result.powerKW.toStringAsFixed(2)} kW',
                     color: AppColors.primary,
                   ),
@@ -121,15 +122,15 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                   // Nombre de panneaux
                   _ResultItem(
                     icon: Icons.grid_view,
-                    label: 'Nombre de panneaux',
-                    value: '${result.panels} panneaux',
+                    label: AppLocalizations.of(context)!.numberOfPanels,
+                    value: '${result.panels}',
                     color: Colors.orange,
                   ),
                   const SizedBox(height: 16),
                   // Taux d'économie
                   _ResultItem(
                     icon: Icons.percent,
-                    label: 'Taux d\'économie',
+                    label: AppLocalizations.of(context)!.savingRate,
                     value: '$savingRatePercent%',
                     color: Colors.green,
                   ),
@@ -169,10 +170,10 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Économie',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.savings,
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
@@ -183,23 +184,23 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                   ),
                   const SizedBox(height: 20),
                   _SavingsRow(
-                    label: 'Mensuelle',
+                    label: AppLocalizations.of(context)!.monthly,
                     value: '${result.savingMonth.toStringAsFixed(2)} DH',
                   ),
                   const SizedBox(height: 12),
                   _SavingsRow(
-                    label: 'Annuelle',
+                    label: AppLocalizations.of(context)!.yearly,
                     value: '${result.savingYear.toStringAsFixed(2)} DH',
                   ),
                   const SizedBox(height: 12),
                   _SavingsRow(
-                    label: '10 ans',
+                    label: AppLocalizations.of(context)!.tenYears,
                     value: '${result.saving10Y.toStringAsFixed(2)} DH',
                     isHighlight: true,
                   ),
                   const SizedBox(height: 12),
                   _SavingsRow(
-                    label: '20 ans',
+                    label: AppLocalizations.of(context)!.twentyYears,
                     value: '${result.saving20Y.toStringAsFixed(2)} DH',
                     isHighlight: true,
                   ),
@@ -221,7 +222,7 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Basé sur les heures solaires de ${result.monthName} – ${_regionName ?? result.regionCode}',
+                      AppLocalizations.of(context)!.basedOnSunHours(result.monthName, _regionName ?? result.regionCode),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.blue.shade900,
@@ -235,7 +236,7 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
             const SizedBox(height: 20),
             // Footer Text
             Text(
-              'Résultats estimatifs — devis final après étude technique',
+              AppLocalizations.of(context)!.estimatedResults,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
@@ -260,9 +261,9 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                   );
                 },
                 icon: const Icon(Icons.request_quote, size: 24),
-                label: const Text(
-                  'Demander un Devis',
-                  style: TextStyle(
+                label: Text(
+                  AppLocalizations.of(context)!.requestDevis,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),

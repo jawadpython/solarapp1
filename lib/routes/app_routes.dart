@@ -26,8 +26,7 @@ import 'package:noor_energy/features/espace_pro/presentation/pages/technician_re
 import 'package:noor_energy/features/calculator/views/calculator_input_screen.dart';
 import 'package:noor_energy/features/pumping/screens/pumping_input_screen.dart';
 import 'package:noor_energy/features/pumping/screens/pumping_devis_form_screen.dart';
-import 'package:noor_energy/core/guards/admin_guard.dart';
-import 'package:noor_energy/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:noor_energy/core/utils/admin_access_helper.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -64,7 +63,8 @@ class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case home:
-        return MaterialPageRoute(builder: (_) => const HomePage());
+        // Redirect old home route to HomeScreen
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
       case homeScreen:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case login:
@@ -130,9 +130,27 @@ class AppRoutes {
           builder: (_) => PumpingDevisFormScreen(result: result as dynamic),
         );
       case adminDashboard:
-        // Temporarily bypass admin guard for testing - Boutique button navigation
+        // Admin dashboard is web-only - show dialog instead
         return MaterialPageRoute(
-          builder: (_) => const AdminDashboardScreen(),
+          builder: (context) {
+            // Show dialog immediately when route is accessed
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Pop the route first, then show dialog
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+              // Show dialog after a short delay to ensure route is popped
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (context.mounted) {
+                  AdminAccessHelper.showAdminAccessDialog(context);
+                }
+              });
+            });
+            // Return a temporary scaffold while dialog shows
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
         );
       default:
         return MaterialPageRoute(

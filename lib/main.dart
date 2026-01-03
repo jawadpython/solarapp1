@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/theme/app_theme.dart';
 import 'package:noor_energy/core/services/language_service.dart';
 import 'package:noor_energy/routes/app_routes.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 // Set to false to require login
 const bool isDevMode = true;
@@ -19,12 +20,12 @@ void main() async {
   try {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyCfSewr0e506aoWVj-ho-X-FipAEnIvpdU",
-        authDomain: "tawfir-energy.firebaseapp.com",
-        projectId: "tawfir-energy",
-        storageBucket: "tawfir-energy.firebasestorage.app",
-        messagingSenderId: "355955928136",
-        appId: "1:355955928136:web:6361bad1b397464f91bc7d",
+        apiKey: "AIzaSyBIJ17OtVeS218IBjnmf1UoWsxsu3YY0-k",
+        authDomain: "tawfir-energy-prod-98053.firebaseapp.com",
+        projectId: "tawfir-energy-prod-98053",
+        storageBucket: "tawfir-energy-prod-98053.firebasestorage.app",
+        messagingSenderId: "751649516744",
+        appId: "1:751649516744:web:a43278ec8ae222cba449fd",
       ),
     );
     debugPrint('✅ Firebase initialized successfully');
@@ -56,29 +57,52 @@ class _NoorEnergyAppState extends State<NoorEnergyApp> {
   @override
   void initState() {
     super.initState();
-    // Listen to language changes
+    // Initialize language service
     LanguageService.instance.initialize().then((_) {
       if (mounted) {
         setState(() {});
       }
     });
+    // Listen to language changes
+    LanguageService.instance.addListener(_onLanguageChanged);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener when widget is disposed
+    LanguageService.instance.removeListener(_onLanguageChanged);
+    super.dispose();
+  }
+
+  void _onLanguageChanged() {
+    // Rebuild the app when language changes
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get current locale - this will be updated when language changes
+    final currentLocale = LanguageService.instance.currentLocale;
+    final isRTL = currentLocale.languageCode == 'ar';
+    
     return MaterialApp(
       title: 'Tawfir Energy',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
-      locale: LanguageService.instance.currentLocale,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: LanguageService.supportedLocales,
+      locale: currentLocale,
+      // Enable RTL layout for Arabic
+      builder: (context, child) {
+        return Directionality(
+          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+          child: child!,
+        );
+      },
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: isDevMode ? AppRoutes.homeScreen : AppRoutes.loginScreen,
       onGenerateRoute: AppRoutes.generateRoute,
     );

@@ -19,6 +19,7 @@ class AdminFirestoreService {
   CollectionReference get _technicians => _db.collection('technicians');
   CollectionReference get _partners => _db.collection('partners');
   CollectionReference get _notifications => _db.collection('notifications');
+  CollectionReference get _projectRequests => _db.collection('project_requests');
 
   // Streams for real-time updates
   Stream<QuerySnapshot> streamDevisRequests() {
@@ -35,6 +36,10 @@ class AdminFirestoreService {
 
   Stream<QuerySnapshot> streamPumpingRequests() {
     return _pumpingRequests.orderBy('createdAt', descending: true).snapshots();
+  }
+
+  Stream<QuerySnapshot> streamProjectRequests() {
+    return _projectRequests.orderBy('createdAt', descending: true).snapshots();
   }
 
   Stream<QuerySnapshot> streamTechnicianApplications() {
@@ -67,6 +72,105 @@ class AdminFirestoreService {
       'status': status,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+    
+    // Create admin notification
+    await _createAdminNotification(
+      type: collection.replaceAll('_requests', ''),
+      title: 'Statut mis à jour',
+      message: 'Le statut de la demande a été changé en: $status',
+      requestId: requestId,
+      requestCollection: collection,
+    );
+  }
+
+  // Assign technician to request
+  Future<void> assignTechnician({
+    required String collection,
+    required String requestId,
+    required Map<String, dynamic> technician,
+  }) async {
+    await _db.collection(collection).doc(requestId).update({
+      'status': 'assigned',
+      'assignedTechnician': {
+        'id': technician['id'],
+        'name': technician['name'],
+        'phone': technician['phone'],
+        'city': technician['city'],
+      },
+      'assignedAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    
+    // Create admin notification
+    await _createAdminNotification(
+      type: collection.replaceAll('_requests', ''),
+      title: 'Technicien assigné',
+      message: '${technician['name']} a été assigné à cette demande',
+      requestId: requestId,
+      requestCollection: collection,
+    );
+  }
+
+  // Bulk update status
+  Future<void> bulkUpdateStatus({
+    required String collection,
+    required List<String> requestIds,
+    required String status,
+  }) async {
+    final batch = _db.batch();
+    for (final id in requestIds) {
+      final ref = _db.collection(collection).doc(id);
+      batch.update(ref, {
+        'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+    await batch.commit();
+    
+    // Create admin notification
+    await _createAdminNotification(
+      type: collection.replaceAll('_requests', ''),
+      title: 'Mise à jour en masse',
+      message: '${requestIds.length} demande(s) mise(s) à jour: $status',
+      requestId: requestIds.first,
+      requestCollection: collection,
+    );
+  }
+
+  // Get active technicians for assignment
+  Future<List<Map<String, dynamic>>> getActiveTechnicians() async {
+    final snapshot = await _technicians.where('active', isEqualTo: true).get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return <String, dynamic>{
+        ...data,
+        'id': doc.id,
+      };
+    }).toList();
+  }
+
+  // Helper to create admin notifications
+  Future<void> _createAdminNotification({
+    required String type,
+    required String title,
+    required String message,
+    required String requestId,
+    required String requestCollection,
+  }) async {
+    try {
+      await _notifications.add({
+        'type': type,
+        'title': title,
+        'message': message,
+        'user': 'admin',
+        'date': FieldValue.serverTimestamp(),
+        'seen': false,
+        'requestId': requestId,
+        'requestCollection': requestCollection,
+      });
+    } catch (e) {
+      // Silently fail - notification is not critical
+    }
   }
 
   // Approve technician application

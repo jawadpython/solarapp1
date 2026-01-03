@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/firestore_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class MaintenanceRequestScreen extends StatefulWidget {
   const MaintenanceRequestScreen({super.key});
@@ -25,7 +26,31 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   List<String> _selectedMedia = [];
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to update form validation state when text changes
+    _descriptionController.addListener(_onFieldChanged);
+    _locationController.addListener(_onFieldChanged);
+    _nameController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _cityController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {
+        // Trigger rebuild to update form validation state
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _descriptionController.removeListener(_onFieldChanged);
+    _locationController.removeListener(_onFieldChanged);
+    _nameController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
+    _cityController.removeListener(_onFieldChanged);
     _descriptionController.dispose();
     _locationController.dispose();
     _nameController.dispose();
@@ -50,8 +75,8 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
     if (Firebase.apps.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur: Firebase n\'est pas initialisé. Veuillez configurer Firebase.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.firebaseNotInitialized),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 5),
           ),
@@ -81,13 +106,14 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
       );
 
       if (mounted) {
+        _clearForm();
         _showSuccessDialog();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.error}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -116,9 +142,9 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               child: const Icon(Icons.check, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+              Expanded(
               child: Text(
-                'Demande envoyée',
+                AppLocalizations.of(context)!.success,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -127,8 +153,8 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
             ),
           ],
         ),
-        content: const Text(
-          'Votre demande d\'intervention a été envoyée avec succès.',
+        content: Text(
+          AppLocalizations.of(context)!.success,
         ),
         actions: [
           TextButton(
@@ -136,22 +162,25 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
     );
   }
 
-  void _getGPSLocation() {
-    // TODO: Implement GPS location
+  void _clearForm() {
+    _descriptionController.clear();
+    _locationController.clear();
+    _nameController.clear();
+    _phoneController.clear();
+    _cityController.clear();
     setState(() {
-      _locationController.text = 'Position GPS capturée';
+      _selectedUrgency = null;
+      _selectedMedia = [];
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Position GPS capturée')),
-    );
   }
+
 
   void _pickMedia() {
     // TODO: Implement media picker (photo/video)
@@ -159,7 +188,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
       _selectedMedia.add('media_${_selectedMedia.length + 1}');
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Média ajouté (fonctionnalité à venir)')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.mediaAdded)),
     );
   }
 
@@ -172,7 +201,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   void _callTechnician() {
     // TODO: Implement phone call functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Fonctionnalité d\'appel à venir')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.callFeatureComing)),
     );
   }
 
@@ -181,7 +210,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Demande de maintenance'),
+        title: Text(AppLocalizations.of(context)!.maintenanceRequest),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -195,15 +224,15 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
             children: [
               // Section 1: Personal Info
               _SectionCard(
-                title: 'Informations personnelles',
+                title: AppLocalizations.of(context)!.personalInfo,
                 isRequired: true,
                 child: Column(
                   children: [
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Nom complet *',
-                        hintText: 'Ex: Ahmed Benali',
+                        labelText: AppLocalizations.of(context)!.fullNameLabel,
+                        hintText: AppLocalizations.of(context)!.nameHint,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -230,7 +259,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         labelText: 'Téléphone *',
-                        hintText: 'Ex: +212 612 345 678',
+                        hintText: AppLocalizations.of(context)!.phoneHint,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -256,7 +285,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                       controller: _cityController,
                       decoration: InputDecoration(
                         labelText: 'Ville *',
-                        hintText: 'Ex: Casablanca',
+                        hintText: AppLocalizations.of(context)!.cityHint,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -283,13 +312,13 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               const SizedBox(height: 20),
               // Section 2: Describe Issue
               _SectionCard(
-                title: 'Décrivez le problème',
+                title: AppLocalizations.of(context)!.describeProblem,
                 isRequired: true,
                 child: TextFormField(
                   controller: _descriptionController,
                   maxLines: 6,
                   decoration: InputDecoration(
-                    hintText: 'Décrivez le problème que vous rencontrez...',
+                    hintText: AppLocalizations.of(context)!.describeProblemHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -314,12 +343,12 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               
               // Section 2.5: Urgency
               _SectionCard(
-                title: 'Urgence',
+                title: AppLocalizations.of(context)!.urgency,
                 isRequired: false,
                 child: DropdownButtonFormField<String>(
                   value: _selectedUrgency,
                   decoration: InputDecoration(
-                    hintText: 'Sélectionnez le niveau d\'urgence',
+                    hintText: AppLocalizations.of(context)!.selectUrgency,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -333,11 +362,11 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     prefixIcon: const Icon(Icons.priority_high),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'low', child: Text('Faible')),
-                    DropdownMenuItem(value: 'normal', child: Text('Normale')),
-                    DropdownMenuItem(value: 'high', child: Text('Élevée')),
-                    DropdownMenuItem(value: 'urgent', child: Text('Urgente')),
+                  items: [
+                    DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.urgencyLow)),
+                    DropdownMenuItem(value: 'normal', child: Text(AppLocalizations.of(context)!.urgencyNormal)),
+                    DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.urgencyHigh)),
+                    DropdownMenuItem(value: 'urgent', child: Text(AppLocalizations.of(context)!.urgencyUrgent)),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -350,7 +379,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
 
               // Section 3: Add Photo/Video
               _SectionCard(
-                title: 'Ajouter photo/vidéo',
+                title: AppLocalizations.of(context)!.addPhotoVideo,
                 isRequired: false,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,7 +478,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                           child: OutlinedButton.icon(
                             onPressed: _pickMedia,
                             icon: const Icon(Icons.photo_library),
-                            label: const Text('Photo'),
+                            label: Text(AppLocalizations.of(context)!.photo),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
                               side: const BorderSide(color: AppColors.primary),
@@ -464,7 +493,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                           child: OutlinedButton.icon(
                             onPressed: _pickMedia,
                             icon: const Icon(Icons.videocam),
-                            label: const Text('Vidéo'),
+                            label: Text(AppLocalizations.of(context)!.video),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
                               side: const BorderSide(color: AppColors.primary),
@@ -481,56 +510,35 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 4: GPS Location
+              // Section 4: GPS Location - Manual Entry
               _SectionCard(
-                title: 'Localisation GPS',
+                title: AppLocalizations.of(context)!.gpsLocation,
                 isRequired: true,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _getGPSLocation,
-                        icon: const Icon(Icons.location_on),
-                        label: const Text('Utiliser ma position'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary, width: 2),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
+                child: TextFormField(
+                  controller: _locationController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.addressGps,
+                    hintText: AppLocalizations.of(context)!.cityHint,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _locationController,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Adresse / Coordonnées GPS *',
-                        hintText: 'Cliquez sur "Utiliser ma position"',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.location_city),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez capturer votre position GPS';
-                        }
-                        return null;
-                      },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
                     ),
-                  ],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.location_city),
+                    helperText: 'Entrez votre adresse ou coordonnées GPS manuellement',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez saisir votre adresse ou localisation';
+                    }
+                    return null;
+                  },
                 ),
               ),
               const SizedBox(height: 32),
@@ -560,8 +568,8 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Demande intervention',
+                      : Text(
+                          AppLocalizations.of(context)!.submit,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -578,7 +586,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _callTechnician,
                   icon: const Icon(Icons.phone),
-                  label: const Text('Appeler technicien'),
+                  label: Text(AppLocalizations.of(context)!.callFeatureComing),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary, width: 2),

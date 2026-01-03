@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,7 +30,27 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to update form validation state when text changes
+    _nameController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _locationController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {
+        // Trigger rebuild to update form validation state
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
+    _locationController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _phoneController.dispose();
     _descriptionController.dispose();
@@ -54,10 +75,10 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
     if (Firebase.apps.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur: Firebase n\'est pas initialisé. Veuillez configurer Firebase.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.firebaseNotInitialized),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 5),
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -76,10 +97,10 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Erreur: Firebase Auth n\'est pas disponible. Veuillez configurer Firebase.'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.firebaseNotInitialized),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 5),
+              duration: const Duration(seconds: 5),
             ),
           );
         }
@@ -101,13 +122,14 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
       );
 
       if (mounted) {
+        _clearForm();
         _showSuccessDialog();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.error}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -149,8 +171,8 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
             ),
           ],
         ),
-        content: const Text(
-          'Votre demande d\'installation a été créée avec succès.',
+        content: Text(
+          AppLocalizations.of(context)!.requestSentSuccess,
         ),
         actions: [
           TextButton(
@@ -158,27 +180,30 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
     );
   }
 
-  void _getGPSLocation() {
-    // TODO: Implement GPS location
+  void _clearForm() {
+    _nameController.clear();
+    _phoneController.clear();
+    _descriptionController.clear();
+    _locationController.clear();
     setState(() {
-      _locationController.text = 'Position GPS capturée';
+      _selectedSystemType = null;
+      _selectedLocationType = null;
+      _selectedPhotos = [];
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Position GPS capturée')),
-    );
   }
+
 
   void _pickPhoto() {
     if (_selectedPhotos.length >= 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum 3 photos autorisées')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.maxPhotosAllowed)),
       );
       return;
     }
@@ -188,7 +213,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
       _selectedPhotos.add('photo_${_selectedPhotos.length + 1}.jpg');
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Photo ajoutée (fonctionnalité à venir)')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.photoAdded)),
     );
   }
 
@@ -203,7 +228,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Demande d\'installation'),
+        title: Text(AppLocalizations.of(context)!.installation),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -233,7 +258,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
 
               // Section 2: Location Type
               _SectionCard(
-                title: 'Type d\'emplacement',
+                title: AppLocalizations.of(context)!.locationType,
                 isRequired: true,
                 child: Column(
                   children: _locationTypes.map((type) => _RadioOption(
@@ -249,7 +274,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
 
               // Section 3: User Info
               _SectionCard(
-                title: 'Informations personnelles',
+                title: AppLocalizations.of(context)!.personalInfo,
                 isRequired: true,
                 child: Column(
                   children: [
@@ -257,7 +282,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Nom *',
-                        hintText: 'Ex: Jean Dupont',
+                        hintText: AppLocalizations.of(context)!.nameHint,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -284,7 +309,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         labelText: 'Téléphone *',
-                        hintText: 'Ex: +212 612 345 678',
+                        hintText: AppLocalizations.of(context)!.phoneHint,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -311,7 +336,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                       maxLines: 3,
                       decoration: InputDecoration(
                         labelText: 'Description courte',
-                        hintText: 'Décrivez brièvement votre demande...',
+                        hintText: AppLocalizations.of(context)!.describeBriefly,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -331,62 +356,42 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Location
+              // Section 4: Location - Manual Entry
               _SectionCard(
-                title: 'Localisation',
+                title: AppLocalizations.of(context)!.gpsLocation,
                 isRequired: true,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _getGPSLocation,
-                        icon: const Icon(Icons.location_on),
-                        label: const Text('Utiliser ma position GPS'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary, width: 2),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
+                child: TextFormField(
+                  controller: _locationController,
+                  decoration: InputDecoration(
+                    labelText: 'Ville / Adresse *',
+                    hintText: AppLocalizations.of(context)!.cityHint,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _locationController,
-                      decoration: InputDecoration(
-                        labelText: 'Ville / Adresse *',
-                        hintText: 'Ex: Casablanca ou saisir manuellement',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.location_city),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez saisir votre ville ou adresse';
-                        }
-                        return null;
-                      },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
                     ),
-                  ],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.location_city),
+                    helperText: 'Entrez votre adresse ou ville manuellement',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez saisir votre ville ou adresse';
+                    }
+                    return null;
+                  },
                 ),
               ),
               const SizedBox(height: 20),
 
               // Section 5: Photos (1-3)
               _SectionCard(
-                title: 'Photos (optionnel, max 3)',
+                title: AppLocalizations.of(context)!.photosOptional,
                 isRequired: false,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,8 +508,8 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Créer demande',
+                      : Text(
+                          AppLocalizations.of(context)!.submit,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

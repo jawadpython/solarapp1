@@ -22,11 +22,20 @@ class AppTheme {
       background: backgroundColor,
     ),
     scaffoldBackgroundColor: backgroundColor,
-    cardTheme: CardTheme(
-      elevation: 2,
+    cardTheme: CardThemeData(
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
+      shadowColor: Colors.black.withValues(alpha: 0.04),
+    ),
+    // Page transitions for smooth navigation
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+      },
     ),
     appBarTheme: const AppBarTheme(
       elevation: 0,
@@ -38,10 +47,14 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+      ).copyWith(
+        overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(

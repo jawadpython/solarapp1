@@ -6,15 +6,18 @@ import 'package:noor_energy/features/calculator/models/devis_request.dart';
 import 'package:noor_energy/features/calculator/models/solar_result.dart';
 import 'package:noor_energy/features/calculator/services/devis_service.dart';
 import 'package:noor_energy/routes/app_routes.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class DevisRequestScreen extends StatefulWidget {
   final SolarResult result;
   final String systemType;
+  final String? initialNote;
 
   const DevisRequestScreen({
     super.key,
     required this.result,
     required this.systemType,
+    this.initialNote,
   });
 
   @override
@@ -32,7 +35,31 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Pre-fill note field if initialNote is provided
+    if (widget.initialNote != null && widget.initialNote!.isNotEmpty) {
+      _noteController.text = widget.initialNote!;
+    }
+    // Add listeners to update form validation state when text changes
+    _fullNameController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _cityController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {
+        // Trigger rebuild to update form validation state
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _fullNameController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
+    _cityController.removeListener(_onFieldChanged);
     _fullNameController.dispose();
     _phoneController.dispose();
     _cityController.dispose();
@@ -97,6 +124,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
       debugPrint('✅ DevisService.saveRequest completed successfully!');
       
       if (mounted) {
+        _clearForm();
         _showSuccessDialog();
       }
     } catch (e, stackTrace) {
@@ -109,24 +137,24 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'envoi: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorSending}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 10),
             action: SnackBarAction(
-              label: 'Détails',
+              label: AppLocalizations.of(context)!.errorDetails,
               textColor: Colors.white,
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Détails de l\'erreur'),
+                    title: Text(AppLocalizations.of(context)!.errorDetails),
                     content: SingleChildScrollView(
                       child: Text('$e\n\n$stackTrace'),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Fermer'),
+                        child: Text(AppLocalizations.of(context)!.close),
                       ),
                     ],
                   ),
@@ -143,6 +171,21 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
         });
       }
     }
+  }
+
+  void _clearForm() {
+    _fullNameController.clear();
+    _phoneController.clear();
+    _cityController.clear();
+    _gpsController.clear();
+    _noteController.clear();
+  }
+
+
+  bool get _isFormValid {
+    return _fullNameController.text.trim().isNotEmpty &&
+           _phoneController.text.trim().isNotEmpty &&
+           _cityController.text.trim().isNotEmpty;
   }
 
   void _showSuccessDialog() {
@@ -168,10 +211,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Succès',
-                style: TextStyle(
+                AppLocalizations.of(context)!.success,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -179,9 +222,9 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
             ),
           ],
         ),
-        content: const Text(
-          'Votre demande de devis a été envoyée avec succès.',
-          style: TextStyle(fontSize: 16),
+        content: Text(
+          AppLocalizations.of(context)!.devisRequestSentSuccess,
+          style: const TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
@@ -190,13 +233,13 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               // WhatsApp placeholder - can be implemented later
               // For now, just show a message
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fonction WhatsApp à venir'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.whatsAppFeatureComing),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },
-            child: const Text('WhatsApp Contact'),
+            child: Text(AppLocalizations.of(context)!.whatsAppContact),
           ),
           ElevatedButton(
             onPressed: () {
@@ -213,7 +256,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Retour à l\'accueil'),
+            child: Text(AppLocalizations.of(context)!.backToHome),
           ),
         ],
       ),
@@ -227,7 +270,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Demander un Devis'),
+        title: Text(AppLocalizations.of(context)!.requestQuote),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -256,7 +299,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Données techniques (lecture seule)',
+                          AppLocalizations.of(context)!.technicalData,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -267,37 +310,37 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                     ),
                     const SizedBox(height: 16),
                     _ReadOnlyField(
-                      label: 'Type de système',
+                      label: AppLocalizations.of(context)!.systemTypeLabel,
                       value: widget.systemType,
                     ),
                     const SizedBox(height: 12),
                     _ReadOnlyField(
-                      label: 'Code région',
+                      label: AppLocalizations.of(context)!.regionCode,
                       value: result.regionCode,
                     ),
                     const SizedBox(height: 12),
                     _ReadOnlyField(
-                      label: 'Consommation (kWh/mois)',
+                      label: AppLocalizations.of(context)!.consumptionKwhMonth,
                       value: '${result.kwhMonth.toStringAsFixed(1)} kWh',
                     ),
                     const SizedBox(height: 12),
                     _ReadOnlyField(
-                      label: 'Puissance recommandée',
+                      label: AppLocalizations.of(context)!.recommendedPower,
                       value: '${result.powerKW.toStringAsFixed(2)} kW',
                     ),
                     const SizedBox(height: 12),
                     _ReadOnlyField(
-                      label: 'Nombre de panneaux',
-                      value: '${result.panels} panneaux',
+                      label: AppLocalizations.of(context)!.numberOfPanels,
+                      value: '${result.panels}',
                     ),
                     const SizedBox(height: 12),
                     _ReadOnlyField(
-                      label: 'Économie mensuelle',
+                      label: '${AppLocalizations.of(context)!.savings} ${AppLocalizations.of(context)!.monthly.toLowerCase()}',
                       value: '${result.savingMonth.toStringAsFixed(2)} DH',
                     ),
                     const SizedBox(height: 12),
                     _ReadOnlyField(
-                      label: 'Économie annuelle',
+                      label: '${AppLocalizations.of(context)!.savings} ${AppLocalizations.of(context)!.yearly.toLowerCase()}',
                       value: '${result.savingYear.toStringAsFixed(2)} DH',
                     ),
                   ],
@@ -305,9 +348,9 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               ),
               const SizedBox(height: 24),
               // User Input Section
-              const Text(
-                'Informations de contact',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.contactInfo,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -315,8 +358,8 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               ),
               const SizedBox(height: 20),
               // Full Name
-              const Text(
-                'Nom complet *',
+              Text(
+                AppLocalizations.of(context)!.fullNameLabel,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -328,12 +371,12 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 controller: _fullNameController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Veuillez remplir ce champ';
+                    return AppLocalizations.of(context)!.fillThisField;
                   }
                   return null;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Ex: Ahmed Benali',
+                  hintText: AppLocalizations.of(context)!.nameHint,
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -353,9 +396,9 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               ),
               const SizedBox(height: 20),
               // Phone
-              const Text(
-                'Téléphone *',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.phoneLabel,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -367,12 +410,12 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Veuillez remplir ce champ';
+                    return AppLocalizations.of(context)!.fillThisField;
                   }
                   return null;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Ex: 0612345678',
+                  hintText: AppLocalizations.of(context)!.phoneHint,
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -392,9 +435,9 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               ),
               const SizedBox(height: 20),
               // City
-              const Text(
-                'Ville *',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.cityLabel,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -405,12 +448,12 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 controller: _cityController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Veuillez remplir ce champ';
+                    return AppLocalizations.of(context)!.fillThisField;
                   }
                   return null;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Ex: Casablanca',
+                  hintText: AppLocalizations.of(context)!.cityHint,
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -429,10 +472,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // GPS Location (Optional)
-              const Text(
-                'Localisation GPS (optionnel)',
-                style: TextStyle(
+              // GPS Location (Optional) - Manual Entry
+              Text(
+                AppLocalizations.of(context)!.gpsOptional,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -442,7 +485,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               TextFormField(
                 controller: _gpsController,
                 decoration: InputDecoration(
-                  hintText: 'Ex: 33.5731, -7.5898',
+                  hintText: AppLocalizations.of(context)!.gpsCoordinates,
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -458,13 +501,14 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                     vertical: 16,
                   ),
                   prefixIcon: const Icon(Icons.location_on_outlined),
+                  helperText: 'Entrez votre adresse ou coordonnées GPS manuellement',
                 ),
               ),
               const SizedBox(height: 20),
               // Note (Optional)
-              const Text(
-                'Note (optionnel)',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.noteOptional,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -475,7 +519,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 controller: _noteController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: 'Ajoutez des informations supplémentaires...',
+                  hintText: AppLocalizations.of(context)!.addAdditionalInfo,
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -519,10 +563,12 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submitRequest,
+                  onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade300,
+                    disabledForegroundColor: Colors.grey.shade600,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),

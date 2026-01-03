@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
@@ -18,31 +19,57 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _specialityController = TextEditingController();
+  final _noteController = TextEditingController();
+  final _gpsController = TextEditingController();
   final _firestoreService = FirestoreService();
   bool _isSubmitting = false;
 
   String? _selectedDocument;
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to update form state when fields change
+    _nameController.addListener(_onFieldChanged);
+    _cityController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _specialityController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    setState(() {}); // Trigger rebuild to update button state
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _cityController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
+    _specialityController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _cityController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _specialityController.dispose();
+    _noteController.dispose();
+    _gpsController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
-    return _nameController.text.isNotEmpty &&
-        _cityController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty &&
-        _emailController.text.isNotEmpty &&
-        _specialityController.text.isNotEmpty;
-    // Document upload temporarily disabled - removed from validation
+    return _nameController.text.trim().isNotEmpty &&
+        _cityController.text.trim().isNotEmpty &&
+        _phoneController.text.trim().isNotEmpty &&
+        _specialityController.text.trim().isNotEmpty;
+    // Email, Note, GPS, and Document upload are optional
   }
 
   Future<void> _submitForm() async {
+    // Prevent double submission
+    if (_isSubmitting) {
+      return;
+    }
+
     if (!_formKey.currentState!.validate() || !_isFormValid) {
       return;
     }
@@ -50,10 +77,10 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
     if (Firebase.apps.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur: Firebase n\'est pas initialisé. Veuillez configurer Firebase.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.firebaseNotInitialized),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 5),
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -74,19 +101,22 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
         city: _cityController.text.trim(),
-        email: _emailController.text.trim(),
         speciality: _specialityController.text.trim(),
         userId: userId,
+        email: _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : null,
+        note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+        gps: _gpsController.text.trim().isNotEmpty ? _gpsController.text.trim() : null,
       );
 
       if (mounted) {
+        _clearForm();
         _showSuccessDialog();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.error}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -115,9 +145,9 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
               child: const Icon(Icons.check, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Demande envoyée',
+                AppLocalizations.of(context)!.requestSent,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -135,19 +165,31 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
     );
   }
 
+  void _clearForm() {
+    _nameController.clear();
+    _cityController.clear();
+    _phoneController.clear();
+    _emailController.clear();
+    _specialityController.clear();
+    _noteController.clear();
+    _gpsController.clear();
+    _selectedDocument = null;
+    _formKey.currentState?.reset();
+  }
+
   void _uploadDocument() {
     // Firebase Storage temporarily disabled - billing not enabled
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
-        duration: Duration(seconds: 3),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.uploadDisabled),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -157,7 +199,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Devenir Technicien'),
+        title: Text(AppLocalizations.of(context)!.becomeTechnician),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -171,13 +213,13 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
             children: [
               // Section 1: Name
               _SectionCard(
-                title: 'Nom complet',
+                title: AppLocalizations.of(context)!.fullName,
                 isRequired: true,
                 child: TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
                     labelText: 'Nom *',
-                    hintText: 'Ex: Ahmed Benali',
+                    hintText: AppLocalizations.of(context)!.nameHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -203,13 +245,13 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
 
               // Section 2: City
               _SectionCard(
-                title: 'Ville',
+                title: AppLocalizations.of(context)!.city,
                 isRequired: true,
                 child: TextFormField(
                   controller: _cityController,
                   decoration: InputDecoration(
                     labelText: 'Ville *',
-                    hintText: 'Ex: Casablanca',
+                    hintText: AppLocalizations.of(context)!.cityHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -235,14 +277,14 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
 
               // Section 3: Phone
               _SectionCard(
-                title: 'Téléphone',
+                title: AppLocalizations.of(context)!.phone,
                 isRequired: true,
                 child: TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: 'Téléphone *',
-                    hintText: 'Ex: +212 612 345 678',
+                    hintText: AppLocalizations.of(context)!.phoneHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -266,16 +308,16 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Email
+              // Section 4: Email (Optional)
               _SectionCard(
-                title: 'Email',
-                isRequired: true,
+                title: AppLocalizations.of(context)!.email,
+                isRequired: false,
                 child: TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email *',
-                    hintText: 'Ex: ahmed@example.com',
+                    labelText: 'Email (optionnel)',
+                    hintText: AppLocalizations.of(context)!.emailExample,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -290,10 +332,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                     prefixIcon: const Icon(Icons.email),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre email';
-                    }
-                    if (!value.contains('@')) {
+                    if (value != null && value.isNotEmpty && !value.contains('@')) {
                       return 'Veuillez entrer un email valide';
                     }
                     return null;
@@ -302,15 +341,68 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
               ),
               const SizedBox(height: 20),
 
+              // Section 4.5: GPS (Optional)
+              _SectionCard(
+                title: AppLocalizations.of(context)!.gpsLocation,
+                isRequired: false,
+                child: TextFormField(
+                  controller: _gpsController,
+                  decoration: InputDecoration(
+                    labelText: 'GPS (optionnel)',
+                    hintText: AppLocalizations.of(context)!.gpsCoordinates,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.location_on),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Section 4.6: Note (Optional)
+              _SectionCard(
+                title: AppLocalizations.of(context)!.note,
+                isRequired: false,
+                child: TextFormField(
+                  controller: _noteController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Note (optionnel)',
+                    hintText: AppLocalizations.of(context)!.addAdditionalInfo,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.note),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // Section 5: Speciality
               _SectionCard(
-                title: 'Spécialité',
+                title: AppLocalizations.of(context)!.specialty,
                 isRequired: true,
                 child: TextFormField(
                   controller: _specialityController,
                   decoration: InputDecoration(
                     labelText: 'Spécialité *',
-                    hintText: 'Ex: Maintenance, Installation, Réparation...',
+                    hintText: AppLocalizations.of(context)!.specialtyHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -336,7 +428,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
 
               // Section 6: Upload Documents
               _SectionCard(
-                title: 'Certificats et documents',
+                title: AppLocalizations.of(context)!.certificatesDocuments,
                 isRequired: false, // Temporarily optional - Firebase Storage disabled
                 child: Column(
                   children: [
@@ -401,7 +493,7 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                     OutlinedButton.icon(
                       onPressed: _uploadDocument,
                       icon: const Icon(Icons.upload_file),
-                      label: const Text('Téléverser des documents'),
+                      label: Text(AppLocalizations.of(context)!.uploadDocuments),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: const BorderSide(color: AppColors.primary),
@@ -440,8 +532,8 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Envoyer demande',
+                      : Text(
+                          AppLocalizations.of(context)!.submit,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

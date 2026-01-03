@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
@@ -18,31 +19,60 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _specialityController = TextEditingController();
+  final _noteController = TextEditingController();
+  final _gpsController = TextEditingController();
   final _firestoreService = FirestoreService();
   bool _isSubmitting = false;
 
   String? _selectedDocument;
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to update form state when fields change
+    _nameController.addListener(_onFieldChanged);
+    _cityController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _emailController.addListener(_onFieldChanged);
+    _specialityController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    setState(() {}); // Trigger rebuild to update button state
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _cityController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
+    _emailController.removeListener(_onFieldChanged);
+    _specialityController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _cityController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _specialityController.dispose();
+    _noteController.dispose();
+    _gpsController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
-    return _nameController.text.isNotEmpty &&
-        _cityController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty &&
-        _emailController.text.isNotEmpty &&
-        _specialityController.text.isNotEmpty;
-    // Document upload temporarily disabled - removed from validation
+    return _nameController.text.trim().isNotEmpty &&
+        _cityController.text.trim().isNotEmpty &&
+        _phoneController.text.trim().isNotEmpty &&
+        _emailController.text.trim().isNotEmpty &&
+        _specialityController.text.trim().isNotEmpty;
+    // Note, GPS, and Document upload are optional
   }
 
   Future<void> _submitForm() async {
+    // Prevent double submission
+    if (_isSubmitting) {
+      return;
+    }
+
     if (!_formKey.currentState!.validate() || !_isFormValid) {
       return;
     }
@@ -77,16 +107,19 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
         email: _emailController.text.trim(),
         speciality: _specialityController.text.trim(),
         userId: userId,
+        note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+        gps: _gpsController.text.trim().isNotEmpty ? _gpsController.text.trim() : null,
       );
 
       if (mounted) {
+        _clearForm();
         _showSuccessDialog();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.error}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -115,9 +148,9 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               child: const Icon(Icons.check, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Demande envoyée',
+                AppLocalizations.of(context)!.requestSent,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -135,11 +168,23 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
     );
+  }
+
+  void _clearForm() {
+    _nameController.clear();
+    _cityController.clear();
+    _phoneController.clear();
+    _emailController.clear();
+    _specialityController.clear();
+    _noteController.clear();
+    _gpsController.clear();
+    _selectedDocument = null;
+    _formKey.currentState?.reset();
   }
 
   void _uploadDocument() {
@@ -157,7 +202,7 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Devenir Partenaire'),
+        title: Text(AppLocalizations.of(context)!.becomePartner),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -171,13 +216,13 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
             children: [
               // Section 1: Name
               _SectionCard(
-                title: 'Nom de l\'entreprise',
+                title: AppLocalizations.of(context)!.companyName,
                 isRequired: true,
                 child: TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
                     labelText: 'Nom de l\'entreprise *',
-                    hintText: 'Ex: Solar Energy Maroc',
+                    hintText: AppLocalizations.of(context)!.companyNameHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -203,13 +248,13 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
 
               // Section 2: City
               _SectionCard(
-                title: 'Ville',
+                title: AppLocalizations.of(context)!.city,
                 isRequired: true,
                 child: TextFormField(
                   controller: _cityController,
                   decoration: InputDecoration(
                     labelText: 'Ville *',
-                    hintText: 'Ex: Casablanca',
+                    hintText: AppLocalizations.of(context)!.cityHintPartner,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -235,14 +280,14 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
 
               // Section 3: Phone
               _SectionCard(
-                title: 'Téléphone',
+                title: AppLocalizations.of(context)!.phone,
                 isRequired: true,
                 child: TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: 'Téléphone *',
-                    hintText: 'Ex: +212 612 345 678',
+                    hintText: AppLocalizations.of(context)!.phoneHintPartner,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -268,14 +313,14 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
 
               // Section 4: Email
               _SectionCard(
-                title: 'Email',
+                title: AppLocalizations.of(context)!.email,
                 isRequired: true,
                 child: TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email *',
-                    hintText: 'Ex: contact@entreprise.com',
+                    hintText: AppLocalizations.of(context)!.emailHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -304,13 +349,13 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
 
               // Section 5: Speciality
               _SectionCard(
-                title: 'Spécialité',
+                title: AppLocalizations.of(context)!.specialty,
                 isRequired: true,
                 child: TextFormField(
                   controller: _specialityController,
                   decoration: InputDecoration(
                     labelText: 'Spécialité *',
-                    hintText: 'Ex: Installation solaire, Maintenance...',
+                    hintText: AppLocalizations.of(context)!.specialtyHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -334,9 +379,62 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               ),
               const SizedBox(height: 20),
 
+              // Section 5.5: GPS (Optional)
+              _SectionCard(
+                title: AppLocalizations.of(context)!.gpsLocation,
+                isRequired: false,
+                child: TextFormField(
+                  controller: _gpsController,
+                  decoration: InputDecoration(
+                    labelText: 'GPS (optionnel)',
+                    hintText: AppLocalizations.of(context)!.gpsCoordinates,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.location_on),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Section 5.6: Note (Optional)
+              _SectionCard(
+                title: AppLocalizations.of(context)!.note,
+                isRequired: false,
+                child: TextFormField(
+                  controller: _noteController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Note (optionnel)',
+                    hintText: AppLocalizations.of(context)!.addAdditionalInfo,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.note),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // Section 6: Upload Documents
               _SectionCard(
-                title: 'Documents (certificats, licences)',
+                title: AppLocalizations.of(context)!.documents,
                 isRequired: false, // Temporarily optional - Firebase Storage disabled
                 child: Column(
                   children: [
@@ -440,8 +538,8 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Envoyer demande',
+                      : Text(
+                          AppLocalizations.of(context)!.submit,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

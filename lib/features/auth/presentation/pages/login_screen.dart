@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/routes/app_routes.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       itemBuilder: (context) => [
                         const PopupMenuItem(value: 'FR', child: Text('Français')),
-                        const PopupMenuItem(value: 'EN', child: Text('English')),
                         const PopupMenuItem(value: 'AR', child: Text('العربية')),
                       ],
                       child: Padding(
@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Tawfir Energy',
+                  AppLocalizations.of(context)!.appTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Connectez-vous à votre compte',
+                  AppLocalizations.of(context)!.connectToAccount,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'Adresse e-mail',
+                    hintText: AppLocalizations.of(context)!.email,
                     prefixIcon: Icon(Icons.email_outlined, color: Colors.grey.shade600),
                     filled: true,
                     fillColor: Colors.grey.shade100,
@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'Mot de passe',
+                    hintText: AppLocalizations.of(context)!.password,
                     prefixIcon: Icon(Icons.lock_outlined, color: Colors.grey.shade600),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -154,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton(
                     onPressed: () {},
                     child: Text(
-                      'Mot de passe oublié ?',
+                      AppLocalizations.of(context)!.forgotPassword,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -179,8 +179,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Connexion',
+                    child: Text(
+                      AppLocalizations.of(context)!.login,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -194,15 +194,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Pas encore de compte ?',
+                      AppLocalizations.of(context)!.noAccount,
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, AppRoutes.register);
                       },
-                      child: const Text(
-                        'Créer un compte',
+                      child: Text(
+                        AppLocalizations.of(context)!.createAccount,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,

@@ -27,7 +27,27 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to update form validation state when text changes
+    _nameController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _cityController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {
+        // Trigger rebuild to update form validation state
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
+    _cityController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _phoneController.dispose();
     _cityController.dispose();
@@ -36,8 +56,22 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
     super.dispose();
   }
 
+  void _clearForm() {
+    _nameController.clear();
+    _phoneController.clear();
+    _cityController.clear();
+    _gpsController.clear();
+    _noteController.clear();
+  }
+
+  bool get _isFormValid {
+    return _nameController.text.trim().isNotEmpty &&
+           _phoneController.text.trim().isNotEmpty &&
+           _cityController.text.trim().isNotEmpty;
+  }
+
   Future<void> _submitRequest() async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate() || !_isFormValid) {
       return;
     }
 
@@ -79,6 +113,7 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
       );
 
       if (mounted) {
+        _clearForm();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Demande de devis envoyée avec succès'),
@@ -208,7 +243,7 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   prefixIcon: const Icon(Icons.location_on),
-                  helperText: 'Ex: 33.5731, -7.5898',
+                  helperText: 'Entrez votre adresse ou coordonnées GPS manuellement (Ex: 33.5731, -7.5898)',
                 ),
               ),
               const SizedBox(height: 16),
@@ -225,14 +260,17 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitRequest,
+                onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledForegroundColor: Colors.grey.shade600,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: 0,
                 ),
                 child: _isSubmitting
                     ? const SizedBox(

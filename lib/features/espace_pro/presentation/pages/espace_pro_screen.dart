@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/routes/app_routes.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class EspaceProScreen extends StatelessWidget {
   const EspaceProScreen({super.key});
@@ -10,7 +11,7 @@ class EspaceProScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Espace Pro'),
+        title: Text(AppLocalizations.of(context)!.proSpace),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -24,9 +25,9 @@ class EspaceProScreen extends StatelessWidget {
               const SizedBox(height: 20),
               // Devenir Partenaire Card
               _RegistrationCard(
-                title: 'Devenir Partenaire',
-                subtitle: 'Entreprise',
-                description: 'Pour les entreprises certifiées en énergie solaire',
+                title: AppLocalizations.of(context)!.becomePartner,
+                subtitle: AppLocalizations.of(context)!.company,
+                description: AppLocalizations.of(context)!.partnerDescription,
                 icon: Icons.business_outlined,
                 iconColor: const Color(0xFF00BCD4),
                 backgroundColor: const Color(0xFF00BCD4).withOpacity(0.1),
@@ -38,9 +39,9 @@ class EspaceProScreen extends StatelessWidget {
               const SizedBox(height: 20),
               // Devenir Technicien Card
               _RegistrationCard(
-                title: 'Devenir Technicien',
+                title: AppLocalizations.of(context)!.becomeTechnician,
                 subtitle: null,
-                description: 'Pour les techniciens certifiés en maintenance et installation',
+                description: AppLocalizations.of(context)!.technicianDescription,
                 icon: Icons.build_circle_outlined,
                 iconColor: const Color(0xFF673AB7),
                 backgroundColor: const Color(0xFF673AB7).withOpacity(0.1),
@@ -184,8 +185,8 @@ class _RegistrationCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Commencer',
+                      Text(
+                        AppLocalizations.of(context)!.start,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

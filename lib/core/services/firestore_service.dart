@@ -389,24 +389,39 @@ class FirestoreService {
     required String name,
     required String phone,
     required String city,
-    required String email,
     required String speciality,
     String? userId,
+    String? email,
+    String? note,
+    String? gps,
   }) async {
     if (Firebase.apps.isEmpty) {
       throw Exception('Firebase is not initialized. Please configure Firebase first.');
     }
     
-    final DocumentReference docRef = await _db.collection('technician_applications').add({
+    final Map<String, dynamic> data = {
       'userId': userId,
       'name': name,
       'phone': phone,
       'city': city,
-      'email': email,
       'speciality': speciality,
       'status': 'pending',
+      'source': 'mobile_app',
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
+    
+    // Add optional fields only if provided
+    if (email != null && email.isNotEmpty) {
+      data['email'] = email;
+    }
+    if (note != null && note.isNotEmpty) {
+      data['note'] = note;
+    }
+    if (gps != null && gps.isNotEmpty) {
+      data['gps'] = gps;
+    }
+    
+    final DocumentReference docRef = await _db.collection('technician_applications').add(data);
     
     // Create admin notification
     try {
@@ -434,12 +449,14 @@ class FirestoreService {
     required String email,
     required String speciality,
     String? userId,
+    String? note,
+    String? gps,
   }) async {
     if (Firebase.apps.isEmpty) {
       throw Exception('Firebase is not initialized. Please configure Firebase first.');
     }
     
-    final DocumentReference docRef = await _db.collection('partner_applications').add({
+    final Map<String, dynamic> data = {
       'userId': userId,
       'companyName': companyName,
       'name': companyName, // Keep for backward compatibility
@@ -448,8 +465,19 @@ class FirestoreService {
       'email': email,
       'speciality': speciality,
       'status': 'pending',
+      'source': 'mobile_app',
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
+    
+    // Add optional fields only if provided
+    if (note != null && note.isNotEmpty) {
+      data['note'] = note;
+    }
+    if (gps != null && gps.isNotEmpty) {
+      data['gps'] = gps;
+    }
+    
+    final DocumentReference docRef = await _db.collection('partner_applications').add(data);
     
     // Create admin notification
     try {

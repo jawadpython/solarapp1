@@ -3,6 +3,7 @@ import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/calculator/services/calculator_service.dart';
 import 'package:noor_energy/features/calculator/services/region_service.dart';
 import 'package:noor_energy/features/calculator/screens/calculator_result_screen.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class CalculatorInputScreen extends StatefulWidget {
   const CalculatorInputScreen({super.key});
@@ -19,7 +20,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
 
   String? _selectedSystemType;
   String? _selectedRegionCode; // Store regionCode internally
-  String? _selectedUsageType = 'Maison';
+  String? _selectedUsageType;
   int? _selectedPanelWp = 550;
   bool _isCalculating = false;
 
@@ -27,12 +28,14 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
   bool _isLoadingRegions = true;
 
   final List<String> _systemTypes = ['ON-GRID', 'HYBRID', 'OFF-GRID'];
-  final List<String> _usageTypes = ['Maison', 'Commerce', 'Industrie'];
   final List<int> _panelWpOptions = [240, 280, 300, 450, 500, 550, 600];
 
   @override
   void initState() {
     super.initState();
+    // Default usage type - will be set to localized value when needed
+    // Using null initially, will default to localized "house" in calculation
+    _selectedUsageType = null;
     _loadRegions();
   }
 
@@ -52,7 +55,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement des régions: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorLoadingRegions}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -71,8 +74,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
     if (_selectedSystemType == null || _selectedRegionCode == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Veuillez remplir tous les champs obligatoires'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.fillAllFields),
             backgroundColor: Colors.red,
           ),
         );
@@ -90,8 +93,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
     if (factureDH == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Montant de facture invalide'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.invalidBillAmount),
             backgroundColor: Colors.red,
           ),
         );
@@ -112,7 +115,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
         factureDH: factureDH,
         systemType: _selectedSystemType!,
         regionCode: _selectedRegionCode!,
-        usageType: _selectedUsageType ?? 'Maison',
+        usageType: _selectedUsageType ?? AppLocalizations.of(context)!.house,
         panelWp: _selectedPanelWp ?? 550,
       );
 
@@ -132,7 +135,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du calcul: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorCalculating}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -151,7 +154,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Calculateur Solaire'),
+        title: Text(AppLocalizations.of(context)!.solarCalculator),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -165,8 +168,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
             children: [
               const SizedBox(height: 20),
               // A) Facture DH TextField
-              const Text(
-                'Montant facture mensuelle (DH) *',
+              Text(
+                AppLocalizations.of(context)!.monthlyBillAmount,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -179,19 +182,19 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez remplir ce champ';
+                    return AppLocalizations.of(context)!.fillThisField;
                   }
                   final amount = double.tryParse(value);
                   if (amount == null) {
-                    return 'Veuillez entrer un nombre valide';
+                    return AppLocalizations.of(context)!.enterValidNumber;
                   }
                   if (amount <= 50) {
-                    return 'Le montant doit être supérieur à 50 DH';
+                    return AppLocalizations.of(context)!.amountMustBeGreater;
                   }
                   return null;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Ex: 500',
+                  hintText: '500',
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -209,8 +212,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
               const SizedBox(height: 24),
 
               // B) System Type Dropdown (Required)
-              const Text(
-                'Type du système *',
+              Text(
+                '${AppLocalizations.of(context)!.systemType} *',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -230,7 +233,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                     value: _selectedSystemType,
                     isExpanded: true,
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    hint: const Text('Sélectionnez un type'),
+                    hint: Text(AppLocalizations.of(context)!.selectType),
                     items: _systemTypes.map((type) {
                       return DropdownMenuItem(
                         value: type,
@@ -247,7 +250,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 4),
                   child: Text(
-                    'Veuillez remplir ce champ',
+                    AppLocalizations.of(context)!.fillThisField,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.red.shade700,
@@ -257,8 +260,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
               const SizedBox(height: 24),
 
               // C) Region Dropdown (Required)
-              const Text(
-                'Région *',
+              Text(
+                '${AppLocalizations.of(context)!.region} *',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -283,7 +286,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                           value: _selectedRegionCode,
                           isExpanded: true,
                           icon: const Icon(Icons.keyboard_arrow_down),
-                          hint: const Text('Sélectionnez une région'),
+                          hint: Text(AppLocalizations.of(context)!.selectRegionHint),
                           items: _regions.map((region) {
                             return DropdownMenuItem(
                               value: region.regionCode,
@@ -300,7 +303,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 4),
                   child: Text(
-                    'Veuillez remplir ce champ',
+                    AppLocalizations.of(context)!.fillThisField,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.red.shade700,
@@ -310,8 +313,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
               const SizedBox(height: 24),
 
               // D) Usage Type Dropdown (Optional, default = Maison)
-              const Text(
-                'Type d\'utilisation',
+              Text(
+                AppLocalizations.of(context)!.usageType,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -331,12 +334,20 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                     value: _selectedUsageType,
                     isExpanded: true,
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    items: _usageTypes.map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
+                    items: [
+                      DropdownMenuItem(
+                        value: AppLocalizations.of(context)!.house,
+                        child: Text(AppLocalizations.of(context)!.house),
+                      ),
+                      DropdownMenuItem(
+                        value: AppLocalizations.of(context)!.commerce,
+                        child: Text(AppLocalizations.of(context)!.commerce),
+                      ),
+                      DropdownMenuItem(
+                        value: AppLocalizations.of(context)!.industry,
+                        child: Text(AppLocalizations.of(context)!.industry),
+                      ),
+                    ],
                     onChanged: (value) {
                       setState(() => _selectedUsageType = value);
                     },
@@ -346,8 +357,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
               const SizedBox(height: 24),
 
               // E) Panel WP Dropdown (Optional, default = 550)
-              const Text(
-                'Puissance du panneau',
+              Text(
+                AppLocalizations.of(context)!.panelPower,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -404,8 +415,8 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Calculer',
+                      : Text(
+                          AppLocalizations.of(context)!.calculate,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

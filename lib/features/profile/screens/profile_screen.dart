@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/language_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,7 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(AppLocalizations.of(context)!.profile),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -38,8 +39,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Icon(Icons.language, color: AppColors.primary, size: 24),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Langue',
+                        Text(
+                          AppLocalizations.of(context)!.language,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -50,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 20),
                     _LanguageOption(
-                      label: 'Français',
+                      label: AppLocalizations.of(context)!.french,
                       locale: const Locale('fr'),
                       isSelected: currentLocale.languageCode == 'fr',
                       flag: '🇫🇷',
@@ -58,14 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         await LanguageService.instance.setLanguage(const Locale('fr'));
                         if (mounted) {
                           setState(() {});
-                          // Restart app to apply language change
-                          Navigator.of(context).pushReplacementNamed('/home-screen');
                         }
                       },
                     ),
                     const SizedBox(height: 12),
                     _LanguageOption(
-                      label: 'Arabe',
+                      label: AppLocalizations.of(context)!.arabic,
                       locale: const Locale('ar'),
                       isSelected: currentLocale.languageCode == 'ar',
                       flag: '🇸🇦',
@@ -73,23 +72,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         await LanguageService.instance.setLanguage(const Locale('ar'));
                         if (mounted) {
                           setState(() {});
-                          // Restart app to apply language change
-                          Navigator.of(context).pushReplacementNamed('/home-screen');
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _LanguageOption(
-                      label: 'Anglais',
-                      locale: const Locale('en'),
-                      isSelected: currentLocale.languageCode == 'en',
-                      flag: '🇬🇧',
-                      onTap: () async {
-                        await LanguageService.instance.setLanguage(const Locale('en'));
-                        if (mounted) {
-                          setState(() {});
-                          // Restart app to apply language change
-                          Navigator.of(context).pushReplacementNamed('/home-screen');
                         }
                       },
                     ),
@@ -109,8 +91,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Icon(Icons.settings, color: AppColors.primary, size: 24),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Paramètres',
+                        Text(
+                          AppLocalizations.of(context)!.settings,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -121,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Autres paramètres à venir...',
+                      AppLocalizations.of(context)!.otherSettingsComing,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade600,

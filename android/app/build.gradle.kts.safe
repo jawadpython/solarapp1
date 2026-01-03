@@ -1,0 +1,90 @@
+// SAFE BUILD CONFIGURATION - Use this if the main build.gradle.kts fails
+// This disables minify/shrink to help identify the issue
+// Once build works, re-enable optimization in the main file
+
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
+}
+
+// Load keystore properties from key.properties file
+val keystoreProperties = java.util.Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace = "com.tawfir.energy"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+
+    defaultConfig {
+        applicationId = "com.tawfir.energy"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        multiDexEnabled = true
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                val keyAliasValue = keystoreProperties["keyAlias"] as String?
+                val keyPasswordValue = keystoreProperties["keyPassword"] as String?
+                val storeFileValue = keystoreProperties["storeFile"] as String?
+                val storePasswordValue = keystoreProperties["storePassword"] as String?
+                
+                if (keyAliasValue != null && keyPasswordValue != null && 
+                    storeFileValue != null && storePasswordValue != null) {
+                    keyAlias = keyAliasValue
+                    keyPassword = keyPasswordValue
+                    storeFile = file(storeFileValue)
+                    storePassword = storePasswordValue
+                }
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = if (keystorePropertiesFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            
+            // OPTIMIZATION TEMPORARILY DISABLED FOR DEBUGGING
+            // Re-enable after build succeeds
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation("androidx.multidex:multidex:2.0.1")
+}
+

@@ -1,0 +1,18 @@
+# Key Properties Template
+# 
+# INSTRUCTIONS:
+# 1. Copy this file to android/key.properties (DO NOT commit key.properties to git!)
+# 2. Fill in the values below with your actual keystore information
+# 3. Add key.properties to .gitignore if not already there
+#
+# Example:
+# storePassword=YourStorePassword123
+# keyPassword=YourKeyPassword123
+# keyAlias=upload
+# storeFile=../upload-keystore.jks
+
+storePassword=YOUR_STORE_PASSWORD_HERE
+keyPassword=YOUR_KEY_PASSWORD_HERE
+keyAlias=upload
+storeFile=../upload-keystore.jks
+

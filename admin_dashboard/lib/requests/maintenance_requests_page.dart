@@ -1,55 +1,338 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:data_table_2/data_table_2.dart';
+import 'package:intl/intl.dart';
 import '../services/firestore_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/status_chip.dart';
 import '../utils/date_formatter.dart';
 import '../widgets/request_detail_dialog.dart';
+import '../widgets/skeleton_loader.dart';
+import '../widgets/advanced_filters_panel.dart';
+import '../widgets/enhanced_data_table.dart';
+import '../widgets/export_bar.dart';
+import '../widgets/technician_assignment_modal.dart';
 
-class MaintenanceRequestsPage extends StatelessWidget {
+class MaintenanceRequestsPage extends StatefulWidget {
   const MaintenanceRequestsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final firestoreService = AdminFirestoreService();
+  State<MaintenanceRequestsPage> createState() => _MaintenanceRequestsPageState();
+}
 
+class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
+  final _firestoreService = AdminFirestoreService();
+  
+  String? _statusFilter;
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String? _regionFilter;
+  String _searchQuery = '';
+  List<String> _selectedIds = [];
+
+  List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> data) {
+    var filtered = List<Map<String, dynamic>>.from(data);
+    
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = filtered.where((item) {
+        return item.values.any((value) =>
+            value.toString().toLowerCase().contains(query));
+      }).toList();
+    }
+    
+    if (_statusFilter != null) {
+      filtered = filtered.where((item) {
+        return item['status']?.toString() == _statusFilter;
+      }).toList();
+    }
+    
+    if (_startDate != null || _endDate != null) {
+      filtered = filtered.where((item) {
+        final createdAt = item['createdAt'];
+        if (createdAt == null) return false;
+        DateTime? date;
+        if (createdAt is Timestamp) {
+          date = createdAt.toDate();
+        } else if (createdAt is DateTime) {
+          date = createdAt;
+        }
+        if (date == null) return false;
+        if (_startDate != null && date.isBefore(_startDate!)) return false;
+        if (_endDate != null && date.isAfter(_endDate!.add(const Duration(days: 1)))) return false;
+        return true;
+      }).toList();
+    }
+    
+    if (_regionFilter != null) {
+      filtered = filtered.where((item) {
+        return item['city']?.toString() == _regionFilter;
+      }).toList();
+    }
+    
+    return filtered;
+  }
+
+  Future<void> _handleBulkAction(String action) async {
+    if (_selectedIds.isEmpty) return;
+    try {
+      if (action == 'approve') {
+        await _firestoreService.bulkUpdateStatus(
+          collection: 'maintenance_requests',
+          requestIds: _selectedIds,
+          status: 'approved',
+        );
+      } else if (action == 'reject') {
+        await _firestoreService.bulkUpdateStatus(
+          collection: 'maintenance_requests',
+          requestIds: _selectedIds,
+          status: 'rejected',
+        );
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${_selectedIds.length} demande(s) mise(s) à jour'),
+            backgroundColor: AppTheme.successColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        setState(() => _selectedIds.clear());
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Demandes de Maintenance',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Demandes de Maintenance',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                      letterSpacing: -0.5,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: _firestoreService.streamMaintenanceRequests(),
+                    builder: (context, snapshot) {
+                      final count = snapshot.data?.docs.length ?? 0;
+                      return Text(
+                        '$count demande${count > 1 ? 's' : ''} au total',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
           const SizedBox(height: 24),
+          StreamBuilder<QuerySnapshot>(
+            stream: _firestoreService.streamMaintenanceRequests(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox();
+              return AdvancedFiltersPanel(
+                onStatusFilterChanged: (status) => setState(() => _statusFilter = status),
+                onDateRangeChanged: (start, end) => setState(() {
+                  _startDate = start;
+                  _endDate = end;
+                }),
+                onRegionFilterChanged: (region) => setState(() => _regionFilter = region),
+                onSearchChanged: (query) => setState(() => _searchQuery = query),
+                initialStatus: _statusFilter,
+                initialStartDate: _startDate,
+                initialEndDate: _endDate,
+                initialRegion: _regionFilter,
+                initialSearch: _searchQuery,
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          StreamBuilder<QuerySnapshot>(
+            stream: _firestoreService.streamMaintenanceRequests(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox();
+              final allData = snapshot.data!.docs.map((doc) {
+                final docData = doc.data() as Map<String, dynamic>;
+                return <String, dynamic>{...docData, 'id': doc.id};
+              }).toList();
+              final filteredData = _applyFilters(allData);
+              return ExportBar(
+                data: filteredData,
+                columns: const ['Date', 'Nom', 'Téléphone', 'Ville', 'Urgence', 'Statut'],
+                title: 'Demandes de Maintenance',
+                fileName: 'maintenance_requests',
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          if (_selectedIds.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    '${_selectedIds.length} sélectionné(s)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => _handleBulkAction('approve'),
+                    icon: const Icon(Icons.check_circle, size: 18),
+                    label: const Text('Approuver'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.successColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: () => _handleBulkAction('reject'),
+                    icon: const Icon(Icons.cancel, size: 18),
+                    label: const Text('Rejeter'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.errorColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => setState(() => _selectedIds.clear()),
+                    child: const Text('Désélectionner'),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: firestoreService.streamMaintenanceRequests(),
+              stream: _firestoreService.streamMaintenanceRequests(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const TableSkeletonLoader(rows: 10, columns: 8);
                 }
-
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Erreur: ${snapshot.error}'),
-                  );
+                  return Center(child: Text('Erreur: ${snapshot.error}'));
                 }
-
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('Aucune demande de maintenance'),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.build_outlined, size: 64, color: Colors.grey.shade400),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Aucune demande de maintenance',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 }
-
-                return _RequestsTable(
-                  documents: snapshot.data!.docs,
-                  collection: 'maintenance_requests',
+                final allData = snapshot.data!.docs.map((doc) {
+                  final docData = doc.data() as Map<String, dynamic>;
+                  return <String, dynamic>{...docData, 'id': doc.id};
+                }).toList();
+                final filteredData = _applyFilters(allData);
+                return EnhancedDataTable(
+                  data: filteredData,
+                  onBulkAction: (ids) => setState(() => _selectedIds = ids),
+                  rowsPerPage: 15,
+                  columns: const [
+                    DataColumn2(label: Text('Date'), size: ColumnSize.S),
+                    DataColumn2(label: Text('Nom'), size: ColumnSize.M),
+                    DataColumn2(label: Text('Téléphone'), size: ColumnSize.M),
+                    DataColumn2(label: Text('Ville'), size: ColumnSize.S),
+                    DataColumn2(label: Text('Urgence'), size: ColumnSize.S),
+                    DataColumn2(label: Text('Statut'), size: ColumnSize.S),
+                    DataColumn2(label: Text('Actions'), size: ColumnSize.M),
+                  ],
+                  buildRow: (item, isSelected) {
+                    final urgency = item['urgency']?.toString() ?? 'normal';
+                    Color urgencyColor = AppTheme.textSecondary;
+                    if (urgency.toLowerCase() == 'high' || urgency.toLowerCase() == 'haute') {
+                      urgencyColor = AppTheme.errorColor;
+                    } else if (urgency.toLowerCase() == 'medium' || urgency.toLowerCase() == 'moyenne') {
+                      urgencyColor = AppTheme.warningColor;
+                    }
+                    return DataRow2(
+                      selected: isSelected,
+                      cells: [
+                        DataCell(Text(
+                          DateFormatter.formatTimestamp(item['createdAt']),
+                          style: const TextStyle(fontSize: 13),
+                        )),
+                        DataCell(Text(
+                          item['name']?.toString() ?? 'N/A',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        )),
+                        DataCell(Text(item['phone']?.toString() ?? 'N/A')),
+                        DataCell(Text(item['city']?.toString() ?? 'N/A')),
+                        DataCell(Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: urgencyColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: urgencyColor.withValues(alpha: 0.3)),
+                          ),
+                          child: Text(
+                            urgency.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: urgencyColor,
+                            ),
+                          ),
+                        )),
+                        DataCell(StatusChip(status: item['status']?.toString() ?? 'pending')),
+                        DataCell(_ActionButtons(
+                          data: item,
+                          collection: 'maintenance_requests',
+                          requestId: item['id']?.toString() ?? '',
+                          firestoreService: _firestoreService,
+                        )),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -60,96 +343,155 @@ class MaintenanceRequestsPage extends StatelessWidget {
   }
 }
 
-class _RequestsTable extends StatelessWidget {
-  final List<QueryDocumentSnapshot> documents;
+class _ActionButtons extends StatelessWidget {
+  final Map<String, dynamic> data;
   final String collection;
+  final String requestId;
+  final AdminFirestoreService firestoreService;
 
-  const _RequestsTable({
-    required this.documents,
+  const _ActionButtons({
+    required this.data,
     required this.collection,
+    required this.requestId,
+    required this.firestoreService,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Nom')),
-            DataColumn(label: Text('Téléphone')),
-            DataColumn(label: Text('Ville')),
-            DataColumn(label: Text('Urgence')),
-            DataColumn(label: Text('Statut')),
-            DataColumn(label: Text('Actions')),
-          ],
-          rows: documents.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return DataRow(
-              cells: [
-                DataCell(Text(
-                  DateFormatter.formatTimestamp(data['createdAt']),
-                )),
-                DataCell(Text(data['name']?.toString() ?? 'N/A')),
-                DataCell(Text(data['phone']?.toString() ?? 'N/A')),
-                DataCell(Text(data['city']?.toString() ?? 'N/A')),
-                DataCell(Text(data['urgency']?.toString() ?? 'normal')),
-                DataCell(StatusChip(status: data['status']?.toString() ?? 'pending')),
-                DataCell(
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.visibility, size: 20),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => RequestDetailDialog(
-                              data: data,
-                              collection: collection,
-                              requestId: doc.id,
-                            ),
-                          );
-                        },
-                      ),
-                      PopupMenuButton<String>(
-                        onSelected: (value) async {
-                          final firestoreService = AdminFirestoreService();
-                          await firestoreService.updateRequestStatus(
-                            collection: collection,
-                            requestId: doc.id,
-                            status: value,
-                          );
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'pending',
-                            child: Text('En attente'),
-                          ),
-                          const PopupMenuItem(
-                            value: 'approved',
-                            child: Text('Approuvé'),
-                          ),
-                          const PopupMenuItem(
-                            value: 'rejected',
-                            child: Text('Rejeté'),
-                          ),
-                          const PopupMenuItem(
-                            value: 'assigned',
-                            child: Text('Assigné'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        ),
+  Future<void> _assignTechnician(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (_) => TechnicianAssignmentModal(
+        requestId: requestId,
+        collection: collection,
+        onAssign: (technician) async {
+          await firestoreService.assignTechnician(
+            collection: collection,
+            requestId: requestId,
+            technician: technician,
+          );
+        },
       ),
     );
   }
-}
 
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: 'Voir les détails',
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => RequestDetailDialog(
+                    data: data,
+                    collection: collection,
+                    requestId: requestId,
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.infoColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.visibility_rounded, size: 18, color: AppTheme.infoColor),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        PopupMenuButton<String>(
+          offset: const Offset(0, 40),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.more_vert_rounded, size: 18, color: AppTheme.primaryColor),
+          ),
+          onSelected: (value) async {
+            if (value == 'assign') {
+              await _assignTechnician(context);
+            } else {
+              await firestoreService.updateRequestStatus(
+                collection: collection,
+                requestId: requestId,
+                status: value,
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Statut mis à jour: $value'),
+                    backgroundColor: AppTheme.successColor,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                );
+              }
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'approved',
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, size: 18, color: AppTheme.successColor),
+                  SizedBox(width: 12),
+                  Text('Approuver'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'rejected',
+              child: Row(
+                children: [
+                  Icon(Icons.cancel, size: 18, color: AppTheme.errorColor),
+                  SizedBox(width: 12),
+                  Text('Rejeter'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'assign',
+              child: Row(
+                children: [
+                  Icon(Icons.person_add, size: 18, color: AppTheme.infoColor),
+                  SizedBox(width: 12),
+                  Text('Assigner technicien'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'completed',
+              child: Row(
+                children: [
+                  Icon(Icons.done_all, size: 18, color: AppTheme.successColor),
+                  SizedBox(width: 12),
+                  Text('Marquer terminé'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'pending',
+              child: Row(
+                children: [
+                  Icon(Icons.pending_actions, size: 18, color: AppTheme.warningColor),
+                  SizedBox(width: 12),
+                  Text('En attente'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
