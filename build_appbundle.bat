@@ -31,3 +31,6 @@ if exist "build\app\outputs\bundle\release\app-release.aab" (
     exit /b 1
 )
 
+
+
+

@@ -4,6 +4,7 @@ import 'package:noor_energy/features/calculator/services/calculator_service.dart
 import 'package:noor_energy/features/calculator/services/region_service.dart';
 import 'package:noor_energy/features/calculator/screens/calculator_result_screen.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
+import 'package:noor_energy/routes/app_routes.dart';
 
 class CalculatorInputScreen extends StatefulWidget {
   const CalculatorInputScreen({super.key});
@@ -17,6 +18,9 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
   final _factureDHController = TextEditingController();
   final _regionService = RegionService.instance;
   final _calculatorService = SolarCalculatorService();
+
+  // Calculator type selector
+  String _selectedCalculatorType = 'electricity'; // Default: Installation solaire
 
   String? _selectedSystemType;
   String? _selectedRegionCode; // Store regionCode internally
@@ -60,6 +64,27 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
           ),
         );
       }
+    }
+  }
+
+  void _handleCalculatorTypeChange(String? type) {
+    if (type == null) return;
+    
+    setState(() {
+      _selectedCalculatorType = type;
+    });
+
+    // Navigate to pumping calculator if selected
+    if (type == 'pumping') {
+      Navigator.pushNamed(context, AppRoutes.pumpingCalculator);
+      // Reset to electricity after navigation (for when user comes back)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            _selectedCalculatorType = 'electricity';
+          });
+        }
+      });
     }
   }
 
@@ -167,7 +192,45 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              // A) Facture DH TextField
+              
+              // Calculator Type Selector
+              Text(
+                'Type de calcul',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _CalculatorTypeCard(
+                      title: 'Installation solaire',
+                      subtitle: '(électricité)',
+                      icon: Icons.bolt,
+                      isSelected: _selectedCalculatorType == 'electricity',
+                      onTap: () => _handleCalculatorTypeChange('electricity'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _CalculatorTypeCard(
+                      title: 'Pompage solaire',
+                      subtitle: '',
+                      icon: Icons.water_drop,
+                      isSelected: _selectedCalculatorType == 'pumping',
+                      onTap: () => _handleCalculatorTypeChange('pumping'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              
+              // Only show electricity form fields when electricity is selected
+              if (_selectedCalculatorType == 'electricity') ...[
+                // A) Facture DH TextField
               Text(
                 AppLocalizations.of(context)!.monthlyBillAmount,
                 style: TextStyle(
@@ -425,8 +488,87 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                 ),
               ),
               const SizedBox(height: 40),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Calculator Type Card Widget
+class _CalculatorTypeCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CalculatorTypeCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 32,
+              color: isSelected
+                  ? AppColors.primary
+                  : AppColors.textSecondary,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isSelected
+                    ? FontWeight.w600
+                    : FontWeight.normal,
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (subtitle.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.8)
+                      : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
         ),
       ),
     );

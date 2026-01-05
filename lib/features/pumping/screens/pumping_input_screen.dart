@@ -257,7 +257,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.3),
+                      color: Colors.blue.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -268,7 +268,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(
@@ -282,21 +282,25 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Calculez votre système de pompage solaire avec précision.',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'Résultats estimatifs basés sur votre région et vos besoins réels.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
@@ -327,12 +331,16 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Étape 1 — Choisir la méthode de calcul',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Expanded(
+                    child: Text(
+                      'Étape 1 — Choisir la méthode de calcul',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -398,12 +406,16 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Étape 2 — Renseigner les informations',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        'Étape 2 — Renseigner les informations',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -531,12 +543,16 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Étape 3 — Calcul des résultats',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        'Étape 3 — Calcul des résultats',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -951,7 +967,7 @@ class _ModeCard extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       elevation: isSelected ? 4 : 1,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -960,25 +976,25 @@ class _ModeCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.grey.shade300,
-              width: isSelected ? 3 : 1.5,
-            ),
-            color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.white,
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            width: isSelected ? 3 : 1.5,
+          ),
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.08) : Colors.white,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -987,7 +1003,7 @@ class _ModeCard extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary.withOpacity(0.15)
+                      ? AppColors.primary.withValues(alpha: 0.15)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -1009,6 +1025,8 @@ class _ModeCard extends StatelessWidget {
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -1018,6 +1036,8 @@ class _ModeCard extends StatelessWidget {
                         color: Colors.grey.shade600,
                         height: 1.4,
                       ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
