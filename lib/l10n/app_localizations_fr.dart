@@ -64,7 +64,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Estimez votre installation et vos économies en quelques clics.';
 
   @override
-  String get maintenanceRepair => 'Maintenance &\nRÉparation';
+  String get maintenanceRepair => 'maintenance &\nRéparation';
 
   @override
   String get maintenanceRepairDescription =>
@@ -97,7 +97,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chatComingSoon => 'Chat sera bientôt disponible';
 
   @override
-  String get shopComingSoon => 'Boutique sera bientôt disponible';
+  String get shopComingSoon => 'Boutique ouvrira bientôt';
 
   @override
   String get login => 'Connexion';
@@ -740,4 +740,443 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get registerButton => 'Register';
+
+  @override
+  String get pumpingSolar => 'Pompage Solaire';
+
+  @override
+  String get pumpingSolarDescription =>
+      'Calculez votre système de pompage solaire avec précision.';
+
+  @override
+  String get pumpingSolarSubtitle =>
+      'Résultats estimatifs basés sur votre région et vos besoins réels.';
+
+  @override
+  String get step1ChooseMethod => 'Étape 1 — Choisir la méthode de calcul';
+
+  @override
+  String get step2EnterInfo => 'Étape 2 — Renseigner les informations';
+
+  @override
+  String get step3Calculate => 'Étape 3 — Calcul des résultats';
+
+  @override
+  String get modeFlowTitle => 'J\'ai déjà le débit (Q)';
+
+  @override
+  String get modeFlowDescription =>
+      'Utilisez ce mode si vous connaissez déjà le débit de votre pompe.';
+
+  @override
+  String get modeAreaTitle =>
+      'Je ne connais pas le débit (superficie agricole)';
+
+  @override
+  String get modeAreaDescription =>
+      'Idéal pour les agriculteurs qui connaissent la surface et le type de culture.';
+
+  @override
+  String get modeTankTitle => 'J\'ai un réservoir';
+
+  @override
+  String get modeTankDescription =>
+      'Utilisez ce mode si vous remplissez un château d\'eau ou une citerne.';
+
+  @override
+  String get currentEnergySource => 'Source d\'énergie actuelle';
+
+  @override
+  String get selectCurrentEnergySource =>
+      'Sélectionnez votre source d\'énergie actuelle';
+
+  @override
+  String get selectSource => 'Sélectionnez une source';
+
+  @override
+  String get electricity => 'Électricité';
+
+  @override
+  String get diesel => 'Diesel';
+
+  @override
+  String get unknown => 'Je ne sais pas';
+
+  @override
+  String get selectCalculationMethod =>
+      'Veuillez sélectionner une méthode de calcul';
+
+  @override
+  String get selectYourRegion => 'Veuillez sélectionner votre région';
+
+  @override
+  String get selectYourEnergySource =>
+      'Veuillez sélectionner votre source d\'énergie actuelle';
+
+  @override
+  String get calculationError =>
+      'Une erreur s\'est produite lors du calcul. Veuillez vérifier vos données et réessayer.';
+
+  @override
+  String get flow => 'Débit';
+
+  @override
+  String get enterFlow => 'Veuillez saisir le débit';
+
+  @override
+  String get flowMustBeGreater => 'Le débit doit être supérieur à 0';
+
+  @override
+  String get unit => 'Unité';
+
+  @override
+  String get flowUnitM3h => 'm³/h';
+
+  @override
+  String get flowUnitLmin => 'L/min';
+
+  @override
+  String get headMeters => 'Hauteur manométrique (m)';
+
+  @override
+  String get operatingHoursPerDay => 'Heures de fonctionnement par jour';
+
+  @override
+  String get surface => 'Surface';
+
+  @override
+  String get enterSurface => 'Veuillez saisir la surface';
+
+  @override
+  String get surfaceMustBeGreater => 'La surface doit être supérieure à 0';
+
+  @override
+  String get areaUnitM2 => 'm²';
+
+  @override
+  String get areaUnitHa => 'ha';
+
+  @override
+  String get cropType => 'Type de culture';
+
+  @override
+  String get selectCropType => 'Sélectionnez une culture';
+
+  @override
+  String get irrigationType => 'Type d\'irrigation';
+
+  @override
+  String get selectIrrigationType => 'Sélectionnez un type';
+
+  @override
+  String get tankVolume => 'Volume du réservoir (m³)';
+
+  @override
+  String get fillTime => 'Temps de remplissage (heures)';
+
+  @override
+  String get wellDepth => 'Profondeur du puits (m)';
+
+  @override
+  String get tankHeight => 'Hauteur du réservoir (m)';
+
+  @override
+  String get fieldRequired => 'Ce champ est obligatoire';
+
+  @override
+  String get valueMustBeGreater => 'La valeur doit être supérieure à 0';
+
+  @override
+  String get invalidValues => 'Valeurs invalides';
+
+  @override
+  String get systemTypeRequired => 'Type de système *';
+
+  @override
+  String get selectSystemTypeHint => 'Sélectionnez un type de système';
+
+  @override
+  String get pumpingSolarSystem => 'POMPAGE SOLAIRE';
+
+  @override
+  String get billAmountLabel => 'Montant facture (DH) *';
+
+  @override
+  String get billAmountExample => 'Ex: 500';
+
+  @override
+  String get amountMustBeGreaterThanZero =>
+      'Le montant doit être supérieur à 0';
+
+  @override
+  String get usageTypeLabel => 'Type d\'utilisation';
+
+  @override
+  String get selectUsageTypeHint => 'Sélectionnez un type';
+
+  @override
+  String get batteryCapacity => 'Capacité batterie (kWh)';
+
+  @override
+  String get batteryCapacityRequired => 'Capacité batterie (kWh) *';
+
+  @override
+  String get selectBatteryCapacity => 'Sélectionnez une capacité';
+
+  @override
+  String get consumptionPerDay => 'Consommation (kWh/jour) *';
+
+  @override
+  String get consumptionExample => 'Ex: 10';
+
+  @override
+  String get consumptionMustBeGreater =>
+      'La consommation doit être supérieure à 0';
+
+  @override
+  String get autonomyDays => 'Jours d\'autonomie *';
+
+  @override
+  String get selectAutonomy => 'Sélectionnez';
+
+  @override
+  String get day => 'jour';
+
+  @override
+  String get days => 'jours';
+
+  @override
+  String get flowLabel => 'Débit *';
+
+  @override
+  String get flowExample => 'Ex: 10';
+
+  @override
+  String get flowMustBeGreaterThanZero => 'Le débit doit être supérieur à 0';
+
+  @override
+  String get unitLabel => 'Unité *';
+
+  @override
+  String get unitHint => 'Unité';
+
+  @override
+  String get headMetersLabel => 'Hauteur manométrique (m) *';
+
+  @override
+  String get headExample => 'Ex: 50';
+
+  @override
+  String get headMustBeGreater => 'La hauteur doit être supérieure à 0';
+
+  @override
+  String get operatingHoursLabel => 'Heures de fonctionnement par jour *';
+
+  @override
+  String get hoursExample => 'Ex: 8';
+
+  @override
+  String get hoursMustBeGreater => 'Les heures doivent être supérieures à 0';
+
+  @override
+  String get pumpTypeLabel => 'Type de pompe *';
+
+  @override
+  String get selectPumpTypeHint => 'Sélectionnez un type';
+
+  @override
+  String get selectSystemTypeError =>
+      'Veuillez sélectionner un type de système';
+
+  @override
+  String get selectRegionError => 'Veuillez sélectionner une région';
+
+  @override
+  String get fillAllRequiredFields =>
+      'Veuillez remplir tous les champs obligatoires';
+
+  @override
+  String get invalidAmount => 'Montant invalide';
+
+  @override
+  String get invalidConsumption => 'Consommation invalide';
+
+  @override
+  String get batteryAndAutonomyRequired => 'Batterie et autonomie requis';
+
+  @override
+  String get invalidSystemType => 'Type de système invalide';
+
+  @override
+  String get errorPrefix => 'Erreur';
+
+  @override
+  String get resultOnGrid => 'Résultat ON-GRID';
+
+  @override
+  String get resultHybrid => 'Résultat HYBRID';
+
+  @override
+  String get resultOffGrid => 'Résultat OFF-GRID';
+
+  @override
+  String get resultPumping => 'Résultat Pompage Solaire';
+
+  @override
+  String get calculationResultsTitle => 'Résultats du Calcul';
+
+  @override
+  String get estimatedConsumptionLabel => 'Consommation estimée';
+
+  @override
+  String get recommendedSystemPowerLabel => 'Puissance système recommandée';
+
+  @override
+  String get numberOfPanelsLabel => 'Nombre de panneaux';
+
+  @override
+  String get savingRateLabel => 'Taux d\'économie';
+
+  @override
+  String get savingsTitle => 'Économies';
+
+  @override
+  String get monthlyLabel => 'Mensuelle';
+
+  @override
+  String get yearlyLabel => 'Annuelle';
+
+  @override
+  String get tenYearsLabel => '10 ans';
+
+  @override
+  String get twentyYearsLabel => '20 ans';
+
+  @override
+  String basedOnSunHoursInfo(String hours, String region) {
+    return 'Basé sur ${hours}h de soleil par jour - $region';
+  }
+
+  @override
+  String get dailyConsumption => 'Consommation quotidienne';
+
+  @override
+  String get batteryCapacityLabel => 'Capacité batterie';
+
+  @override
+  String get autonomyLabel => 'Autonomie';
+
+  @override
+  String get batteryCoverage => 'Couverture batterie';
+
+  @override
+  String get hours => 'heures';
+
+  @override
+  String get flowValue => 'Débit';
+
+  @override
+  String get headMetersValue => 'Hauteur manométrique';
+
+  @override
+  String get pumpPowerLabel => 'Puissance pompe';
+
+  @override
+  String get pvPowerLabel => 'Puissance PV';
+
+  @override
+  String get pumpTypeValue => 'Type de pompe';
+
+  @override
+  String get requestPumpingQuote => 'Demander devis pompage';
+
+  @override
+  String get selectHint => 'Sélectionnez';
+
+  @override
+  String get environmentalImpact => '🌱 Impact environnemental';
+
+  @override
+  String co2Avoided(String co2) {
+    return 'CO₂ évité : $co2 tonne / an';
+  }
+
+  @override
+  String equivalentTrees(int trees) {
+    return 'Équivalent : $trees arbres / an';
+  }
+
+  @override
+  String get environmentalEstimationNote =>
+      'Ces valeurs sont des estimations basées sur la consommation et l\'ensoleillement.';
+
+  @override
+  String get searchCompaniesOrTechnicians =>
+      'Rechercher des entreprises ou des techniciens';
+
+  @override
+  String get searchCompaniesOrTechniciansDescription =>
+      'Trouvez des professionnels certifiés près de chez vous.';
+
+  @override
+  String get whatAreYouLookingFor => 'Que recherchez-vous ?';
+
+  @override
+  String get searchCertifiedCompanies =>
+      'Rechercher des entreprises certifiées';
+
+  @override
+  String get searchCertifiedTechnicians =>
+      'Rechercher des techniciens certifiés';
+
+  @override
+  String get companiesSubtitle => 'Entreprises partenaires et certifiées';
+
+  @override
+  String get techniciansSubtitle => 'Techniciens qualifiés et certifiés';
+
+  @override
+  String get contact => 'Contacter';
+
+  @override
+  String get noCompaniesFound => 'Aucune entreprise trouvée';
+
+  @override
+  String get noTechniciansFound => 'Aucun technicien trouvé';
+
+  @override
+  String get serviceType => 'Type de service';
+
+  @override
+  String get all => 'Tous';
+
+  @override
+  String get speciality => 'Spécialité';
+
+  @override
+  String get ice => 'ICE';
+
+  @override
+  String get ifCode => 'IF';
+
+  @override
+  String get rc => 'RC';
+
+  @override
+  String get patente => 'Patente';
+
+  @override
+  String get address => 'Adresse';
+
+  @override
+  String get firstName => 'Prénom';
+
+  @override
+  String get lastName => 'Nom';
+
+  @override
+  String get companyDocuments => 'Documents de l\'entreprise';
+
+  @override
+  String get certificates => 'Certificats';
 }

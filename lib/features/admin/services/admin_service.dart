@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:noor_energy/core/services/notification_service.dart';
 
 /// AdminService handles all admin-related Firestore operations
@@ -126,18 +127,56 @@ class AdminService {
   /// Get active technicians only
   Future<List<Map<String, dynamic>>> getActiveTechnicians({String? city}) async {
     try {
-      Query query = _technicians.where('active', isEqualTo: true);
-      if (city != null && city.isNotEmpty && city != 'Tous') {
-        query = query.where('city', isEqualTo: city);
-      }
-      final snapshot = await query.orderBy('createdAt', descending: true).get();
+      // First, get ALL technicians to see what we have
+      debugPrint('Fetching all technicians from collection...');
+      QuerySnapshot allSnapshot;
       
-      return snapshot.docs.map((doc) {
+      try {
+        // Try with orderBy first
+        allSnapshot = await _technicians.orderBy('createdAt', descending: true).get();
+      } catch (e) {
+        // If ordering fails, get without ordering
+        debugPrint('Warning: Could not order by createdAt, trying without order: $e');
+        allSnapshot = await _technicians.get();
+      }
+      
+      debugPrint('Total technicians in collection: ${allSnapshot.docs.length}');
+      
+      // Map all documents
+      final allTechnicians = allSnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
+        debugPrint('Technician ${doc.id}: active=${data['active']}, name=${data['name']}, city=${data['city']}');
         return data;
       }).toList();
-    } catch (e) {
+      
+      // Filter for active technicians (include if active is true OR null/not set)
+      final activeTechnicians = allTechnicians.where((tech) {
+        final active = tech['active'];
+        // Include if active is true, null, or not set (default to active)
+        final isActive = active == true || active == null;
+        if (!isActive) {
+          debugPrint('Excluding technician ${tech['id']}: active=$active');
+        }
+        return isActive;
+      }).toList();
+      
+      debugPrint('Active technicians after filtering: ${activeTechnicians.length}');
+      
+      // Apply city filter if specified
+      if (city != null && city.isNotEmpty && city != 'Tous') {
+        final cityFiltered = activeTechnicians.where((tech) {
+          final techCity = tech['city']?.toString() ?? '';
+          return techCity == city;
+        }).toList();
+        debugPrint('After city filter ($city): ${cityFiltered.length} technicians');
+        return cityFiltered;
+      }
+      
+      return activeTechnicians;
+    } catch (e, stackTrace) {
+      debugPrint('Error getting active technicians: $e');
+      debugPrint('Stack trace: $stackTrace');
       return [];
     }
   }

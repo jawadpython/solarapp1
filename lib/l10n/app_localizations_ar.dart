@@ -94,7 +94,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatComingSoon => 'الدردشة ستكون متاحة قريباً';
 
   @override
-  String get shopComingSoon => 'المتجر سيكون متاحاً قريباً';
+  String get shopComingSoon => 'المتجر سيفتح قريباً';
 
   @override
   String get login => 'تسجيل الدخول';
@@ -731,4 +731,431 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get registerButton => 'التسجيل';
+
+  @override
+  String get pumpingSolar => 'الضخ الشمسي';
+
+  @override
+  String get pumpingSolarDescription => 'احسب نظام الضخ الشمسي الخاص بك بدقة.';
+
+  @override
+  String get pumpingSolarSubtitle =>
+      'نتائج تقديرية بناءً على منطقتك واحتياجاتك الفعلية.';
+
+  @override
+  String get step1ChooseMethod => 'الخطوة 1 — اختر طريقة الحساب';
+
+  @override
+  String get step2EnterInfo => 'الخطوة 2 — أدخل المعلومات';
+
+  @override
+  String get step3Calculate => 'الخطوة 3 — حساب النتائج';
+
+  @override
+  String get modeFlowTitle => 'لدي التدفق بالفعل (Q)';
+
+  @override
+  String get modeFlowDescription =>
+      'استخدم هذا الوضع إذا كنت تعرف بالفعل تدفق المضخة الخاصة بك.';
+
+  @override
+  String get modeAreaTitle => 'لا أعرف التدفق (مساحة زراعية)';
+
+  @override
+  String get modeAreaDescription =>
+      'مثالي للمزارعين الذين يعرفون المساحة ونوع المحصول.';
+
+  @override
+  String get modeTankTitle => 'لدي خزان';
+
+  @override
+  String get modeTankDescription =>
+      'استخدم هذا الوضع إذا كنت تملأ برج مياه أو خزان.';
+
+  @override
+  String get currentEnergySource => 'مصدر الطاقة الحالي';
+
+  @override
+  String get selectCurrentEnergySource => 'يرجى اختيار مصدر الطاقة الحالي';
+
+  @override
+  String get selectSource => 'اختر مصدراً';
+
+  @override
+  String get electricity => 'الكهرباء';
+
+  @override
+  String get diesel => 'الديزل';
+
+  @override
+  String get unknown => 'لا أعرف';
+
+  @override
+  String get selectCalculationMethod => 'يرجى اختيار طريقة الحساب';
+
+  @override
+  String get selectYourRegion => 'يرجى اختيار منطقتك';
+
+  @override
+  String get selectYourEnergySource => 'يرجى اختيار مصدر الطاقة الحالي';
+
+  @override
+  String get calculationError =>
+      'حدث خطأ أثناء الحساب. يرجى التحقق من بياناتك والمحاولة مرة أخرى.';
+
+  @override
+  String get flow => 'التدفق';
+
+  @override
+  String get enterFlow => 'يرجى إدخال التدفق';
+
+  @override
+  String get flowMustBeGreater => 'يجب أن يكون التدفق أكبر من 0';
+
+  @override
+  String get unit => 'الوحدة';
+
+  @override
+  String get flowUnitM3h => 'م³/ساعة';
+
+  @override
+  String get flowUnitLmin => 'لتر/دقيقة';
+
+  @override
+  String get headMeters => 'الارتفاع المانومتري (م)';
+
+  @override
+  String get operatingHoursPerDay => 'ساعات التشغيل في اليوم';
+
+  @override
+  String get surface => 'المساحة';
+
+  @override
+  String get enterSurface => 'يرجى إدخال المساحة';
+
+  @override
+  String get surfaceMustBeGreater => 'يجب أن تكون المساحة أكبر من 0';
+
+  @override
+  String get areaUnitM2 => 'م²';
+
+  @override
+  String get areaUnitHa => 'هكتار';
+
+  @override
+  String get cropType => 'نوع المحصول';
+
+  @override
+  String get selectCropType => 'اختر محصولاً';
+
+  @override
+  String get irrigationType => 'نوع الري';
+
+  @override
+  String get selectIrrigationType => 'اختر نوعاً';
+
+  @override
+  String get tankVolume => 'حجم الخزان (م³)';
+
+  @override
+  String get fillTime => 'وقت التعبئة (ساعات)';
+
+  @override
+  String get wellDepth => 'عمق البئر (م)';
+
+  @override
+  String get tankHeight => 'ارتفاع الخزان (م)';
+
+  @override
+  String get fieldRequired => 'هذا الحقل إلزامي';
+
+  @override
+  String get valueMustBeGreater => 'يجب أن تكون القيمة أكبر من 0';
+
+  @override
+  String get invalidValues => 'قيم غير صالحة';
+
+  @override
+  String get systemTypeRequired => 'نوع النظام *';
+
+  @override
+  String get selectSystemTypeHint => 'اختر نوع النظام';
+
+  @override
+  String get pumpingSolarSystem => 'POMPAGE SOLAIRE';
+
+  @override
+  String get billAmountLabel => 'مبلغ الفاتورة (درهم) *';
+
+  @override
+  String get billAmountExample => 'مثال: 500';
+
+  @override
+  String get amountMustBeGreaterThanZero => 'يجب أن يكون المبلغ أكبر من 0';
+
+  @override
+  String get usageTypeLabel => 'نوع الاستخدام';
+
+  @override
+  String get selectUsageTypeHint => 'اختر نوعاً';
+
+  @override
+  String get batteryCapacity => 'سعة البطارية (كيلوواط ساعة)';
+
+  @override
+  String get batteryCapacityRequired => 'سعة البطارية (كيلوواط ساعة) *';
+
+  @override
+  String get selectBatteryCapacity => 'اختر السعة';
+
+  @override
+  String get consumptionPerDay => 'الاستهلاك (كيلوواط ساعة/يوم) *';
+
+  @override
+  String get consumptionExample => 'مثال: 10';
+
+  @override
+  String get consumptionMustBeGreater => 'يجب أن يكون الاستهلاك أكبر من 0';
+
+  @override
+  String get autonomyDays => 'أيام الاستقلالية *';
+
+  @override
+  String get selectAutonomy => 'اختر';
+
+  @override
+  String get day => 'يوم';
+
+  @override
+  String get days => 'أيام';
+
+  @override
+  String get flowLabel => 'التدفق *';
+
+  @override
+  String get flowExample => 'مثال: 10';
+
+  @override
+  String get flowMustBeGreaterThanZero => 'يجب أن يكون التدفق أكبر من 0';
+
+  @override
+  String get unitLabel => 'الوحدة *';
+
+  @override
+  String get unitHint => 'الوحدة';
+
+  @override
+  String get headMetersLabel => 'الارتفاع المانومتري (م) *';
+
+  @override
+  String get headExample => 'مثال: 50';
+
+  @override
+  String get headMustBeGreater => 'يجب أن يكون الارتفاع أكبر من 0';
+
+  @override
+  String get operatingHoursLabel => 'ساعات التشغيل في اليوم *';
+
+  @override
+  String get hoursExample => 'مثال: 8';
+
+  @override
+  String get hoursMustBeGreater => 'يجب أن تكون الساعات أكبر من 0';
+
+  @override
+  String get pumpTypeLabel => 'نوع المضخة *';
+
+  @override
+  String get selectPumpTypeHint => 'اختر نوعاً';
+
+  @override
+  String get selectSystemTypeError => 'يرجى اختيار نوع النظام';
+
+  @override
+  String get selectRegionError => 'يرجى اختيار المنطقة';
+
+  @override
+  String get fillAllRequiredFields => 'يرجى ملء جميع الحقول الإلزامية';
+
+  @override
+  String get invalidAmount => 'مبلغ غير صالح';
+
+  @override
+  String get invalidConsumption => 'استهلاك غير صالح';
+
+  @override
+  String get batteryAndAutonomyRequired => 'البطارية والاستقلالية مطلوبة';
+
+  @override
+  String get invalidSystemType => 'نوع نظام غير صالح';
+
+  @override
+  String get errorPrefix => 'خطأ';
+
+  @override
+  String get resultOnGrid => 'نتيجة ON-GRID';
+
+  @override
+  String get resultHybrid => 'نتيجة HYBRID';
+
+  @override
+  String get resultOffGrid => 'نتيجة OFF-GRID';
+
+  @override
+  String get resultPumping => 'نتيجة الضخ الشمسي';
+
+  @override
+  String get calculationResultsTitle => 'نتائج الحساب';
+
+  @override
+  String get estimatedConsumptionLabel => 'الاستهلاك المقدر';
+
+  @override
+  String get recommendedSystemPowerLabel => 'قوة النظام الموصى بها';
+
+  @override
+  String get numberOfPanelsLabel => 'عدد الألواح';
+
+  @override
+  String get savingRateLabel => 'معدل التوفير';
+
+  @override
+  String get savingsTitle => 'التوفير';
+
+  @override
+  String get monthlyLabel => 'شهري';
+
+  @override
+  String get yearlyLabel => 'سنوي';
+
+  @override
+  String get tenYearsLabel => '10 سنوات';
+
+  @override
+  String get twentyYearsLabel => '20 سنة';
+
+  @override
+  String basedOnSunHoursInfo(String hours, String region) {
+    return 'بناءً على $hours ساعة من الشمس يومياً - $region';
+  }
+
+  @override
+  String get dailyConsumption => 'الاستهلاك اليومي';
+
+  @override
+  String get batteryCapacityLabel => 'سعة البطارية';
+
+  @override
+  String get autonomyLabel => 'الاستقلالية';
+
+  @override
+  String get batteryCoverage => 'تغطية البطارية';
+
+  @override
+  String get hours => 'ساعات';
+
+  @override
+  String get flowValue => 'التدفق';
+
+  @override
+  String get headMetersValue => 'الارتفاع المانومتري';
+
+  @override
+  String get pumpPowerLabel => 'قوة المضخة';
+
+  @override
+  String get pvPowerLabel => 'قوة الطاقة الشمسية';
+
+  @override
+  String get pumpTypeValue => 'نوع المضخة';
+
+  @override
+  String get requestPumpingQuote => 'طلب تقدير الضخ';
+
+  @override
+  String get selectHint => 'اختر';
+
+  @override
+  String get environmentalImpact => '🌱 التأثير البيئي';
+
+  @override
+  String co2Avoided(String co2) {
+    return 'ثاني أكسيد الكربون المتجنب: $co2 طن / سنة';
+  }
+
+  @override
+  String equivalentTrees(int trees) {
+    return 'المعادل: $trees شجرة / سنة';
+  }
+
+  @override
+  String get environmentalEstimationNote =>
+      'هذه القيم تقديرات بناءً على الاستهلاك وأشعة الشمس.';
+
+  @override
+  String get searchCompaniesOrTechnicians => 'بحث عن شركات\nأو تقنيين';
+
+  @override
+  String get searchCompaniesOrTechniciansDescription =>
+      'ابحث عن محترفين معتمدين بالقرب منك.';
+
+  @override
+  String get whatAreYouLookingFor => 'ماذا تبحث عنه؟';
+
+  @override
+  String get searchCertifiedCompanies => 'بحث عن شركات معتمدة';
+
+  @override
+  String get searchCertifiedTechnicians => 'بحث عن تقنيين معتمدين';
+
+  @override
+  String get companiesSubtitle => 'شركات شريكة ومعتمدة';
+
+  @override
+  String get techniciansSubtitle => 'تقنيين مؤهلين ومعتمدين';
+
+  @override
+  String get contact => 'اتصل';
+
+  @override
+  String get noCompaniesFound => 'لم يتم العثور على شركات';
+
+  @override
+  String get noTechniciansFound => 'لم يتم العثور على تقنيين';
+
+  @override
+  String get serviceType => 'نوع الخدمة';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get speciality => 'التخصص';
+
+  @override
+  String get ice => 'ICE';
+
+  @override
+  String get ifCode => 'IF';
+
+  @override
+  String get rc => 'RC';
+
+  @override
+  String get patente => 'الرخصة';
+
+  @override
+  String get address => 'العنوان';
+
+  @override
+  String get firstName => 'الاسم';
+
+  @override
+  String get lastName => 'اللقب';
+
+  @override
+  String get companyDocuments => 'وثائق الشركة';
+
+  @override
+  String get certificates => 'الشهادات';
 }

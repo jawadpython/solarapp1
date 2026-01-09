@@ -27,6 +27,9 @@ import 'package:noor_energy/features/calculator/views/calculator_input_screen.da
 import 'package:noor_energy/features/pumping/screens/pumping_input_screen.dart';
 import 'package:noor_energy/features/pumping/screens/pumping_devis_form_screen.dart';
 import 'package:noor_energy/core/utils/admin_access_helper.dart';
+import 'package:noor_energy/features/search/presentation/pages/search_choice_screen.dart';
+import 'package:noor_energy/features/search/presentation/pages/companies_search_screen.dart';
+import 'package:noor_energy/features/search/presentation/pages/technicians_search_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -59,6 +62,9 @@ class AppRoutes {
   static const String pumpingCalculator = '/pumping-calculator';
   static const String pumpingDevisForm = '/pumping-devis-form';
   static const String adminDashboard = '/admin-dashboard';
+  static const String searchChoice = '/search-choice';
+  static const String companiesSearch = '/companies-search';
+  static const String techniciansSearch = '/technicians-search';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -152,6 +158,12 @@ class AppRoutes {
             );
           },
         );
+      case searchChoice:
+        return MaterialPageRoute(builder: (_) => const SearchChoiceScreen());
+      case companiesSearch:
+        return MaterialPageRoute(builder: (_) => const CompaniesSearchScreen());
+      case techniciansSearch:
+        return MaterialPageRoute(builder: (_) => const TechniciansSearchScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

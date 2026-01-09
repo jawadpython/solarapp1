@@ -40,7 +40,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
         _locationController.text.isNotEmpty &&
         // File upload temporarily disabled - removed from validation
         // Form is valid if: method is 'Entrer kWh' with filled consumption, OR method is 'Télécharger facture' (file optional now)
-        (_consumptionMethod == 'Entrer kWh' 
+        (_consumptionMethod == AppLocalizations.of(context)!.enterKwh 
             ? _consumptionController.text.isNotEmpty
             : true); // 'Télécharger facture' method allowed but file upload disabled
   }
@@ -61,7 +61,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
 
       // Parse consumption value
       double consumption = 0.0;
-      bool isKwh = _consumptionMethod == 'Entrer kWh';
+      bool isKwh = _consumptionMethod == AppLocalizations.of(context)!.enterKwh;
       
       if (isKwh) {
         consumption = double.tryParse(_consumptionController.text.trim()) ?? 0.0;
@@ -186,10 +186,10 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               child: const Icon(Icons.check, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Demande envoyée',
-                style: TextStyle(
+                AppLocalizations.of(context)!.requestSent,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -197,8 +197,8 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
             ),
           ],
         ),
-        content: const Text(
-          'Votre demande de devis a été envoyée avec succès. Nous vous contacterons bientôt.',
+        content: Text(
+          AppLocalizations.of(context)!.devisRequestSentSuccess,
         ),
         actions: [
           TextButton(
@@ -206,7 +206,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -255,7 +255,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                   children: [
                     // Radio buttons for consumption method
                     _RadioOption(
-                      value: 'Entrer kWh',
+                      value: AppLocalizations.of(context)!.enterKwh,
                       groupValue: _consumptionMethod,
                       onChanged: (value) {
                         setState(() {
@@ -265,7 +265,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                       },
                     ),
                     _RadioOption(
-                      value: 'Télécharger facture',
+                      value: AppLocalizations.of(context)!.uploadBill,
                       groupValue: _consumptionMethod,
                       onChanged: (value) {
                         setState(() {
@@ -276,13 +276,13 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                     ),
                     const SizedBox(height: 16),
                     // Conditional field for kWh input
-                    if (_consumptionMethod == 'Entrer kWh')
+                    if (_consumptionMethod == AppLocalizations.of(context)!.enterKwh)
                       TextFormField(
                         controller: _consumptionController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          labelText: 'Consommation (kWh)',
-                          hintText: 'Ex: 500',
+                          labelText: AppLocalizations.of(context)!.consumptionKwh,
+                          hintText: AppLocalizations.of(context)!.consumptionExample,
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -297,15 +297,15 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                           prefixIcon: const Icon(Icons.bolt),
                         ),
                         validator: (value) {
-                          if (_consumptionMethod == 'Entrer kWh' &&
+                          if (_consumptionMethod == AppLocalizations.of(context)!.enterKwh &&
                               (value == null || value.isEmpty)) {
-                            return 'Veuillez entrer la consommation';
+                            return AppLocalizations.of(context)!.enterConsumption;
                           }
                           return null;
                         },
                       ),
                     // File upload section
-                    if (_consumptionMethod == 'Télécharger facture') ...[
+                    if (_consumptionMethod == AppLocalizations.of(context)!.uploadBill) ...[
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -322,7 +322,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              _selectedFile ?? 'Aucun fichier sélectionné',
+                              _selectedFile ?? AppLocalizations.of(context)!.noFileSelected,
                               style: TextStyle(
                                 color: _selectedFile != null ? Colors.black87 : Colors.grey.shade600,
                               ),
@@ -378,39 +378,14 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     prefixIcon: const Icon(Icons.location_city),
-                    helperText: 'Entrez votre adresse ou coordonnées GPS manuellement',
+                    helperText: AppLocalizations.of(context)!.gpsCoordinates,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Veuillez saisir votre adresse ou localisation';
+                      return AppLocalizations.of(context)!.enterCityOrAddress;
                     }
                     return null;
                   },
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 4: Financing Option
-              _SectionCard(
-                title: AppLocalizations.of(context)!.financingOption,
-                isRequired: false,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.financingForm);
-                    },
-                    icon: const Icon(Icons.account_balance),
-                    label: Text(AppLocalizations.of(context)!.accessFinancingForm),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary, width: 2),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(height: 32),

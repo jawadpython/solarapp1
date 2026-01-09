@@ -49,5 +49,9 @@
 	<string>Cette application a besoin de votre localisation pour remplir automatiquement les champs GPS dans les formulaires de demande.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Cette application a besoin de votre localisation pour remplir automatiquement les champs GPS dans les formulaires de demande.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Cette application a besoin de votre localisation pour remplir automatiquement les champs GPS dans les formulaires de demande.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

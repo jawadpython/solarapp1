@@ -14,27 +14,32 @@ class PartnerRegistrationScreen extends StatefulWidget {
 
 class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _nomEntrepriseController = TextEditingController();
+  final _iceController = TextEditingController();
+  final _ifController = TextEditingController();
+  final _rcController = TextEditingController();
+  final _patenteController = TextEditingController();
+  final _adresseController = TextEditingController();
+  final _villeController = TextEditingController();
+  final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _specialityController = TextEditingController();
-  final _noteController = TextEditingController();
-  final _gpsController = TextEditingController();
+  final _documentsController = TextEditingController();
   final _firestoreService = FirestoreService();
   bool _isSubmitting = false;
-
-  String? _selectedDocument;
 
   @override
   void initState() {
     super.initState();
     // Add listeners to update form state when fields change
-    _nameController.addListener(_onFieldChanged);
-    _cityController.addListener(_onFieldChanged);
-    _phoneController.addListener(_onFieldChanged);
+    _nomEntrepriseController.addListener(_onFieldChanged);
+    _iceController.addListener(_onFieldChanged);
+    _ifController.addListener(_onFieldChanged);
+    _rcController.addListener(_onFieldChanged);
+    _patenteController.addListener(_onFieldChanged);
+    _adresseController.addListener(_onFieldChanged);
+    _villeController.addListener(_onFieldChanged);
+    _telephoneController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
-    _specialityController.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -43,28 +48,39 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
 
   @override
   void dispose() {
-    _nameController.removeListener(_onFieldChanged);
-    _cityController.removeListener(_onFieldChanged);
-    _phoneController.removeListener(_onFieldChanged);
+    _nomEntrepriseController.removeListener(_onFieldChanged);
+    _iceController.removeListener(_onFieldChanged);
+    _ifController.removeListener(_onFieldChanged);
+    _rcController.removeListener(_onFieldChanged);
+    _patenteController.removeListener(_onFieldChanged);
+    _adresseController.removeListener(_onFieldChanged);
+    _villeController.removeListener(_onFieldChanged);
+    _telephoneController.removeListener(_onFieldChanged);
     _emailController.removeListener(_onFieldChanged);
-    _specialityController.removeListener(_onFieldChanged);
-    _nameController.dispose();
-    _cityController.dispose();
-    _phoneController.dispose();
+    _nomEntrepriseController.dispose();
+    _iceController.dispose();
+    _ifController.dispose();
+    _rcController.dispose();
+    _patenteController.dispose();
+    _adresseController.dispose();
+    _villeController.dispose();
+    _telephoneController.dispose();
     _emailController.dispose();
-    _specialityController.dispose();
-    _noteController.dispose();
-    _gpsController.dispose();
+    _documentsController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
-    return _nameController.text.trim().isNotEmpty &&
-        _cityController.text.trim().isNotEmpty &&
-        _phoneController.text.trim().isNotEmpty &&
-        _emailController.text.trim().isNotEmpty &&
-        _specialityController.text.trim().isNotEmpty;
-    // Note, GPS, and Document upload are optional
+    return _nomEntrepriseController.text.trim().isNotEmpty &&
+        _iceController.text.trim().isNotEmpty &&
+        _ifController.text.trim().isNotEmpty &&
+        _rcController.text.trim().isNotEmpty &&
+        _patenteController.text.trim().isNotEmpty &&
+        _adresseController.text.trim().isNotEmpty &&
+        _villeController.text.trim().isNotEmpty &&
+        _telephoneController.text.trim().isNotEmpty &&
+        _emailController.text.trim().isNotEmpty;
+    // documentsEntreprise is optional for now
   }
 
   Future<void> _submitForm() async {
@@ -101,14 +117,19 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
       }
 
       await _firestoreService.savePartnerApplication(
-        companyName: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
-        city: _cityController.text.trim(),
+        nomEntreprise: _nomEntrepriseController.text.trim(),
+        ice: _iceController.text.trim(),
+        ifCode: _ifController.text.trim(),
+        rc: _rcController.text.trim(),
+        patente: _patenteController.text.trim(),
+        adresse: _adresseController.text.trim(),
+        ville: _villeController.text.trim(),
+        telephone: _telephoneController.text.trim(),
         email: _emailController.text.trim(),
-        speciality: _specialityController.text.trim(),
         userId: userId,
-        note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
-        gps: _gpsController.text.trim().isNotEmpty ? _gpsController.text.trim() : null,
+        documentsEntreprise: _documentsController.text.trim().isNotEmpty 
+            ? _documentsController.text.trim() 
+            : null,
       );
 
       if (mounted) {
@@ -151,7 +172,7 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
             Expanded(
               child: Text(
                 AppLocalizations.of(context)!.requestSent,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -176,18 +197,20 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
   }
 
   void _clearForm() {
-    _nameController.clear();
-    _cityController.clear();
-    _phoneController.clear();
+    _nomEntrepriseController.clear();
+    _iceController.clear();
+    _ifController.clear();
+    _rcController.clear();
+    _patenteController.clear();
+    _adresseController.clear();
+    _villeController.clear();
+    _telephoneController.clear();
     _emailController.clear();
-    _specialityController.clear();
-    _noteController.clear();
-    _gpsController.clear();
-    _selectedDocument = null;
+    _documentsController.clear();
     _formKey.currentState?.reset();
   }
 
-  void _uploadDocument() {
+  void _uploadDocuments() {
     // Firebase Storage temporarily disabled - billing not enabled
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -199,10 +222,12 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.becomePartner),
+        title: Text(localizations.becomePartner),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -214,15 +239,15 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section 1: Name
+              // Nom Entreprise
               _SectionCard(
-                title: AppLocalizations.of(context)!.companyName,
+                title: localizations.companyName,
                 isRequired: true,
                 child: TextFormField(
-                  controller: _nameController,
+                  controller: _nomEntrepriseController,
                   decoration: InputDecoration(
-                    labelText: 'Nom de l\'entreprise *',
-                    hintText: AppLocalizations.of(context)!.companyNameHint,
+                    labelText: '${localizations.companyName} *',
+                    hintText: localizations.enterCompanyName,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -246,15 +271,176 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 2: City
+              // ICE
               _SectionCard(
-                title: AppLocalizations.of(context)!.city,
+                title: localizations.ice,
                 isRequired: true,
                 child: TextFormField(
-                  controller: _cityController,
+                  controller: _iceController,
                   decoration: InputDecoration(
-                    labelText: 'Ville *',
-                    hintText: AppLocalizations.of(context)!.cityHintPartner,
+                    labelText: '${localizations.ice} *',
+                    hintText: 'Ex: 123456789012345',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.badge),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer l\'ICE';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // IF
+              _SectionCard(
+                title: localizations.ifCode,
+                isRequired: true,
+                child: TextFormField(
+                  controller: _ifController,
+                  decoration: InputDecoration(
+                    labelText: '${localizations.ifCode} *',
+                    hintText: 'Ex: 12345678',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.numbers),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer l\'IF';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // RC
+              _SectionCard(
+                title: localizations.rc,
+                isRequired: true,
+                child: TextFormField(
+                  controller: _rcController,
+                  decoration: InputDecoration(
+                    labelText: '${localizations.rc} *',
+                    hintText: 'Ex: 12345',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.description),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le RC';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Patente
+              _SectionCard(
+                title: localizations.patente,
+                isRequired: true,
+                child: TextFormField(
+                  controller: _patenteController,
+                  decoration: InputDecoration(
+                    labelText: '${localizations.patente} *',
+                    hintText: 'Ex: 123456',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.verified),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer la Patente';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Adresse
+              _SectionCard(
+                title: localizations.address,
+                isRequired: true,
+                child: TextFormField(
+                  controller: _adresseController,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    labelText: '${localizations.address} *',
+                    hintText: 'Ex: 123 Rue Example, Quartier...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.location_on),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer l\'adresse';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Ville
+              _SectionCard(
+                title: localizations.city,
+                isRequired: true,
+                child: TextFormField(
+                  controller: _villeController,
+                  decoration: InputDecoration(
+                    labelText: '${localizations.city} *',
+                    hintText: localizations.cityHintPartner,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -278,16 +464,16 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 3: Phone
+              // Téléphone
               _SectionCard(
-                title: AppLocalizations.of(context)!.phone,
+                title: localizations.phone,
                 isRequired: true,
                 child: TextFormField(
-                  controller: _phoneController,
+                  controller: _telephoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: 'Téléphone *',
-                    hintText: AppLocalizations.of(context)!.phoneHintPartner,
+                    labelText: '${localizations.phone} *',
+                    hintText: localizations.phoneHintPartner,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -311,16 +497,16 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Email
+              // Email
               _SectionCard(
-                title: AppLocalizations.of(context)!.email,
+                title: localizations.email,
                 isRequired: true,
                 child: TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email *',
-                    hintText: AppLocalizations.of(context)!.emailHint,
+                    labelText: '${localizations.email} *',
+                    hintText: localizations.emailHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -347,157 +533,35 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 5: Speciality
+              // Documents Entreprise (Optional for now)
               _SectionCard(
-                title: AppLocalizations.of(context)!.specialty,
-                isRequired: true,
-                child: TextFormField(
-                  controller: _specialityController,
-                  decoration: InputDecoration(
-                    labelText: 'Spécialité *',
-                    hintText: AppLocalizations.of(context)!.specialtyHint,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    prefixIcon: const Icon(Icons.build),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre spécialité';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 5.5: GPS (Optional)
-              _SectionCard(
-                title: AppLocalizations.of(context)!.gpsLocation,
+                title: localizations.companyDocuments,
                 isRequired: false,
-                child: TextFormField(
-                  controller: _gpsController,
-                  decoration: InputDecoration(
-                    labelText: 'GPS (optionnel)',
-                    hintText: AppLocalizations.of(context)!.gpsCoordinates,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    prefixIcon: const Icon(Icons.location_on),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 5.6: Note (Optional)
-              _SectionCard(
-                title: AppLocalizations.of(context)!.note,
-                isRequired: false,
-                child: TextFormField(
-                  controller: _noteController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: 'Note (optionnel)',
-                    hintText: AppLocalizations.of(context)!.addAdditionalInfo,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    prefixIcon: const Icon(Icons.note),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 6: Upload Documents
-              _SectionCard(
-                title: AppLocalizations.of(context)!.documents,
-                isRequired: false, // Temporarily optional - Firebase Storage disabled
                 child: Column(
                   children: [
-                    if (_selectedDocument == null)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                    TextFormField(
+                      controller: _documentsController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: '${localizations.companyDocuments} (optionnel)',
+                        hintText: 'URLs des documents (sera activé plus tard)',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.description_outlined,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Aucun document sélectionné',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.green),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.description, color: Colors.green),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _selectedDocument!,
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.red),
-                              onPressed: () {
-                                setState(() {
-                                  _selectedDocument = null;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.description),
                       ),
+                    ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
-                      onPressed: _uploadDocument,
+                      onPressed: _uploadDocuments,
                       icon: const Icon(Icons.upload_file),
                       label: const Text('Téléverser des documents'),
                       style: OutlinedButton.styleFrom(
@@ -539,8 +603,8 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
                           ),
                         )
                       : Text(
-                          AppLocalizations.of(context)!.submit,
-                          style: TextStyle(
+                          localizations.submit,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
@@ -615,4 +679,3 @@ class _SectionCard extends StatelessWidget {
     );
   }
 }
-

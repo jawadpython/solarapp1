@@ -4,6 +4,7 @@ import 'package:noor_energy/features/calculator/services/region_service.dart';
 import 'package:noor_energy/features/pumping/models/pumping_input.dart';
 import 'package:noor_energy/features/pumping/screens/pumping_result_screen.dart';
 import 'package:noor_energy/features/pumping/services/pumping_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class PumpingInputScreen extends StatefulWidget {
   const PumpingInputScreen({super.key});
@@ -88,10 +89,10 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
   Future<void> _calculate() async {
     if (_selectedMode == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner une méthode de calcul'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.selectCalculationMethod),
           backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -99,10 +100,10 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
     
     if (_selectedRegionCode == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner votre région'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.selectYourRegion),
           backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -110,10 +111,10 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
     
     if (_selectedCurrentSource == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner votre source d\'énergie actuelle'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.selectYourEnergySource),
           backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -137,7 +138,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           final hoursPerDay = double.tryParse(_hoursPerDayFlowController.text);
           
           if (flowValue == null || headMeters == null || hoursPerDay == null || _selectedFlowUnit == null) {
-            throw Exception('Valeurs invalides');
+            throw Exception(AppLocalizations.of(context)!.invalidValues);
           }
 
           input = PumpingInput.flow(
@@ -157,7 +158,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           
           if (areaValue == null || headMeters == null || hoursPerDay == null ||
               _selectedAreaUnit == null || _selectedCropType == null || _selectedIrrigationType == null) {
-            throw Exception('Valeurs invalides');
+            throw Exception(AppLocalizations.of(context)!.invalidValues);
           }
 
           input = PumpingInput.area(
@@ -179,7 +180,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           final tankHeight = double.tryParse(_tankHeightController.text);
           
           if (tankVolume == null || fillHours == null || wellDepth == null || tankHeight == null) {
-            throw Exception('Valeurs invalides');
+            throw Exception(AppLocalizations.of(context)!.invalidValues);
           }
 
           input = PumpingInput.tank(
@@ -207,11 +208,11 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Une erreur s\'est produite lors du calcul. Veuillez vérifier vos données et réessayer.'),
+            content: Text(AppLocalizations.of(context)!.calculationError),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
-              label: 'OK',
+              label: AppLocalizations.of(context)!.ok,
               textColor: Colors.white,
               onPressed: () {},
             ),
@@ -232,7 +233,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Pompage Solaire'),
+        title: Text(AppLocalizations.of(context)!.pumpingSolar),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -283,7 +284,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Calculez votre système de pompage solaire avec précision.',
+                            AppLocalizations.of(context)!.pumpingSolarDescription,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -294,7 +295,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Résultats estimatifs basés sur votre région et vos besoins réels.',
+                            AppLocalizations.of(context)!.pumpingSolarSubtitle,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.white.withValues(alpha: 0.9),
@@ -333,7 +334,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Étape 1 — Choisir la méthode de calcul',
+                      AppLocalizations.of(context)!.step1ChooseMethod,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -347,8 +348,8 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               ),
               const SizedBox(height: 20),
               _ModeCard(
-                title: 'J\'ai déjà le débit (Q)',
-                description: 'Utilisez ce mode si vous connaissez déjà le débit de votre pompe.',
+                title: AppLocalizations.of(context)!.modeFlowTitle,
+                description: AppLocalizations.of(context)!.modeFlowDescription,
                 icon: Icons.water_drop,
                 isSelected: _selectedMode == PumpingMode.flow,
                 onTap: () {
@@ -359,8 +360,8 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               ),
               const SizedBox(height: 16),
               _ModeCard(
-                title: 'Je ne connais pas le débit (superficie agricole)',
-                description: 'Idéal pour les agriculteurs qui connaissent la surface et le type de culture.',
+                title: AppLocalizations.of(context)!.modeAreaTitle,
+                description: AppLocalizations.of(context)!.modeAreaDescription,
                 icon: Icons.agriculture,
                 isSelected: _selectedMode == PumpingMode.area,
                 onTap: () {
@@ -371,8 +372,8 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               ),
               const SizedBox(height: 16),
               _ModeCard(
-                title: 'J\'ai un réservoir',
-                description: 'Utilisez ce mode si vous remplissez un château d\'eau ou une citerne.',
+                title: AppLocalizations.of(context)!.modeTankTitle,
+                description: AppLocalizations.of(context)!.modeTankDescription,
                 icon: Icons.water,
                 isSelected: _selectedMode == PumpingMode.tank,
                 onTap: () {
@@ -408,7 +409,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Étape 2 — Renseigner les informations',
+                        AppLocalizations.of(context)!.step2EnterInfo,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -430,9 +431,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               
               // Region selection (always shown)
               const SizedBox(height: 24),
-              const Text(
-                'Région *',
-                style: TextStyle(
+              Text(
+                '${AppLocalizations.of(context)!.region} *',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -456,7 +457,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                           value: _selectedRegionCode,
                           isExpanded: true,
                           icon: const Icon(Icons.keyboard_arrow_down),
-                          hint: const Text('Sélectionnez une région'),
+                          hint: Text(AppLocalizations.of(context)!.selectRegionHint),
                           items: _regions.map((region) {
                             return DropdownMenuItem(
                               value: region.regionCode,
@@ -474,9 +475,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               const SizedBox(height: 24),
               
               // Current source selection
-              const Text(
-                'Source d\'énergie actuelle *',
-                style: TextStyle(
+              Text(
+                '${AppLocalizations.of(context)!.currentEnergySource} *',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -495,19 +496,19 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                     value: _selectedCurrentSource,
                     isExpanded: true,
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    hint: const Text('Sélectionnez une source'),
-                    items: const [
+                    hint: Text(AppLocalizations.of(context)!.selectSource),
+                    items: [
                       DropdownMenuItem(
                         value: CurrentSource.electricity,
-                        child: Text('Électricité'),
+                        child: Text(AppLocalizations.of(context)!.electricity),
                       ),
                       DropdownMenuItem(
                         value: CurrentSource.diesel,
-                        child: Text('Diesel'),
+                        child: Text(AppLocalizations.of(context)!.diesel),
                       ),
                       DropdownMenuItem(
                         value: CurrentSource.unknown,
-                        child: Text('Je ne sais pas'),
+                        child: Text(AppLocalizations.of(context)!.unknown),
                       ),
                     ],
                     onChanged: (value) {
@@ -545,7 +546,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Étape 3 — Calcul des résultats',
+                        AppLocalizations.of(context)!.step3Calculate,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -583,9 +584,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Calculer',
-                          style: TextStyle(
+                      : Text(
+                          AppLocalizations.of(context)!.calculate,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
@@ -604,9 +605,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Débit *',
-          style: TextStyle(
+        Text(
+          '${AppLocalizations.of(context)!.flow} *',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -662,10 +663,10 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   child: DropdownButton<FlowUnit>(
                     value: _selectedFlowUnit,
                     isExpanded: true,
-                    hint: const Text('Unité'),
-                    items: const [
-                      DropdownMenuItem(value: FlowUnit.m3h, child: Text('m³/h')),
-                      DropdownMenuItem(value: FlowUnit.lmin, child: Text('L/min')),
+                    hint: Text(AppLocalizations.of(context)!.unit),
+                    items: [
+                      DropdownMenuItem(value: FlowUnit.m3h, child: Text(AppLocalizations.of(context)!.flowUnitM3h)),
+                      DropdownMenuItem(value: FlowUnit.lmin, child: Text(AppLocalizations.of(context)!.flowUnitLmin)),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -681,13 +682,13 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
         const SizedBox(height: 20),
         _buildTextField(
           controller: _headMetersController,
-          label: 'Hauteur manométrique (m) *',
+          label: '${AppLocalizations.of(context)!.headMeters} *',
           hint: 'Ex: 50',
         ),
         const SizedBox(height: 20),
         _buildTextField(
           controller: _hoursPerDayFlowController,
-          label: 'Heures de fonctionnement par jour *',
+          label: '${AppLocalizations.of(context)!.operatingHoursPerDay} *',
           hint: 'Ex: 8',
         ),
       ],
@@ -698,9 +699,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Surface *',
-          style: TextStyle(
+        Text(
+          '${AppLocalizations.of(context)!.surface} *',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -756,10 +757,10 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
                   child: DropdownButton<AreaUnit>(
                     value: _selectedAreaUnit,
                     isExpanded: true,
-                    hint: const Text('Unité'),
-                    items: const [
-                      DropdownMenuItem(value: AreaUnit.m2, child: Text('m²')),
-                      DropdownMenuItem(value: AreaUnit.ha, child: Text('ha')),
+                    hint: Text(AppLocalizations.of(context)!.unit),
+                    items: [
+                      DropdownMenuItem(value: AreaUnit.m2, child: Text(AppLocalizations.of(context)!.areaUnitM2)),
+                      DropdownMenuItem(value: AreaUnit.ha, child: Text(AppLocalizations.of(context)!.areaUnitHa)),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -773,9 +774,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           ],
         ),
         const SizedBox(height: 20),
-        const Text(
-          'Type de culture *',
-          style: TextStyle(
+        Text(
+          '${AppLocalizations.of(context)!.cropType} *',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -794,7 +795,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               value: _selectedCropType,
               isExpanded: true,
               icon: const Icon(Icons.keyboard_arrow_down),
-              hint: const Text('Sélectionnez une culture'),
+              hint: Text(AppLocalizations.of(context)!.selectCropType),
               items: PumpingService.getCropTypes().map((crop) {
                 return DropdownMenuItem(
                   value: crop,
@@ -810,9 +811,9 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
-          'Type d\'irrigation *',
-          style: TextStyle(
+        Text(
+          '${AppLocalizations.of(context)!.irrigationType} *',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -831,7 +832,7 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
               value: _selectedIrrigationType,
               isExpanded: true,
               icon: const Icon(Icons.keyboard_arrow_down),
-              hint: const Text('Sélectionnez un type'),
+              hint: Text(AppLocalizations.of(context)!.selectIrrigationType),
               items: PumpingService.getIrrigationTypes().map((type) {
                 return DropdownMenuItem(
                   value: type,
@@ -849,13 +850,13 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
         const SizedBox(height: 20),
         _buildTextField(
           controller: _hoursPerDayAreaController,
-          label: 'Heures de fonctionnement par jour *',
+          label: '${AppLocalizations.of(context)!.operatingHoursPerDay} *',
           hint: 'Ex: 8',
         ),
         const SizedBox(height: 20),
         _buildTextField(
           controller: _headMetersAreaController,
-          label: 'Hauteur manométrique (m) *',
+          label: '${AppLocalizations.of(context)!.headMeters} *',
           hint: 'Ex: 50',
         ),
       ],
@@ -868,25 +869,25 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
       children: [
         _buildTextField(
           controller: _tankVolumeController,
-          label: 'Volume du réservoir (m³) *',
+          label: '${AppLocalizations.of(context)!.tankVolume} *',
           hint: 'Ex: 50',
         ),
         const SizedBox(height: 20),
         _buildTextField(
           controller: _fillHoursController,
-          label: 'Temps de remplissage (heures) *',
+          label: '${AppLocalizations.of(context)!.fillTime} *',
           hint: 'Ex: 4',
         ),
         const SizedBox(height: 20),
         _buildTextField(
           controller: _wellDepthController,
-          label: 'Profondeur du puits (m) *',
+          label: '${AppLocalizations.of(context)!.wellDepth} *',
           hint: 'Ex: 30',
         ),
         const SizedBox(height: 20),
         _buildTextField(
           controller: _tankHeightController,
-          label: 'Hauteur du réservoir (m) *',
+          label: '${AppLocalizations.of(context)!.tankHeight} *',
           hint: 'Ex: 5',
         ),
       ],
@@ -915,14 +916,14 @@ class _PumpingInputScreenState extends State<PumpingInputScreen> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Ce champ est obligatoire';
+              return AppLocalizations.of(context)!.fieldRequired;
             }
             final numValue = double.tryParse(value);
             if (numValue == null) {
-              return 'Veuillez saisir un nombre valide';
+              return AppLocalizations.of(context)!.enterValidNumber;
             }
             if (numValue <= 0) {
-              return 'La valeur doit être supérieure à 0';
+              return AppLocalizations.of(context)!.valueMustBeGreater;
             }
             return null;
           },

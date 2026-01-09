@@ -386,14 +386,13 @@ class FirestoreService {
   /// 
   /// Returns the auto-generated document ID.
   Future<String> saveTechnicianApplication({
-    required String name,
-    required String phone,
-    required String city,
-    required String speciality,
+    required String nom,
+    required String prenom,
+    required String ville,
+    required String telephone,
+    required String specialite,
     String? userId,
-    String? email,
-    String? note,
-    String? gps,
+    String? certificates,
   }) async {
     if (Firebase.apps.isEmpty) {
       throw Exception('Firebase is not initialized. Please configure Firebase first.');
@@ -401,25 +400,20 @@ class FirestoreService {
     
     final Map<String, dynamic> data = {
       'userId': userId,
-      'name': name,
-      'phone': phone,
-      'city': city,
-      'speciality': speciality,
+      'nom': nom,
+      'prenom': prenom,
+      'name': '$prenom $nom', // Keep for backward compatibility
+      'ville': ville,
+      'city': ville, // Keep for backward compatibility
+      'telephone': telephone,
+      'phone': telephone, // Keep for backward compatibility
+      'specialite': specialite,
+      'speciality': specialite, // Keep for backward compatibility
+      'certificates': certificates,
       'status': 'pending',
       'source': 'mobile_app',
       'createdAt': FieldValue.serverTimestamp(),
     };
-    
-    // Add optional fields only if provided
-    if (email != null && email.isNotEmpty) {
-      data['email'] = email;
-    }
-    if (note != null && note.isNotEmpty) {
-      data['note'] = note;
-    }
-    if (gps != null && gps.isNotEmpty) {
-      data['gps'] = gps;
-    }
     
     final DocumentReference docRef = await _db.collection('technician_applications').add(data);
     
@@ -428,7 +422,7 @@ class FirestoreService {
       await NotificationService().createAdminNotification(
         type: NotificationType.technicianApplication,
         title: 'Nouvelle candidature technicien',
-        message: '$name ($city) - $speciality',
+        message: '$prenom $nom ($ville) - $specialite',
         requestId: docRef.id,
         requestCollection: 'technician_applications',
       );
@@ -443,14 +437,17 @@ class FirestoreService {
   /// 
   /// Returns the auto-generated document ID.
   Future<String> savePartnerApplication({
-    required String companyName,
-    required String phone,
-    required String city,
+    required String nomEntreprise,
+    required String ice,
+    required String ifCode,
+    required String rc,
+    required String patente,
+    required String adresse,
+    required String ville,
+    required String telephone,
     required String email,
-    required String speciality,
     String? userId,
-    String? note,
-    String? gps,
+    String? documentsEntreprise,
   }) async {
     if (Firebase.apps.isEmpty) {
       throw Exception('Firebase is not initialized. Please configure Firebase first.');
@@ -458,24 +455,24 @@ class FirestoreService {
     
     final Map<String, dynamic> data = {
       'userId': userId,
-      'companyName': companyName,
-      'name': companyName, // Keep for backward compatibility
-      'phone': phone,
-      'city': city,
+      'nomEntreprise': nomEntreprise,
+      'companyName': nomEntreprise, // Keep for backward compatibility
+      'name': nomEntreprise, // Keep for backward compatibility
+      'ICE': ice,
+      'IF': ifCode,
+      'RC': rc,
+      'Patente': patente,
+      'adresse': adresse,
+      'ville': ville,
+      'city': ville, // Keep for backward compatibility
+      'telephone': telephone,
+      'phone': telephone, // Keep for backward compatibility
       'email': email,
-      'speciality': speciality,
+      'documentsEntreprise': documentsEntreprise,
       'status': 'pending',
       'source': 'mobile_app',
       'createdAt': FieldValue.serverTimestamp(),
     };
-    
-    // Add optional fields only if provided
-    if (note != null && note.isNotEmpty) {
-      data['note'] = note;
-    }
-    if (gps != null && gps.isNotEmpty) {
-      data['gps'] = gps;
-    }
     
     final DocumentReference docRef = await _db.collection('partner_applications').add(data);
     
@@ -484,7 +481,7 @@ class FirestoreService {
       await NotificationService().createAdminNotification(
         type: NotificationType.partnerApplication,
         title: 'Nouvelle candidature partenaire',
-        message: '$companyName ($city) - $speciality',
+        message: '$nomEntreprise ($ville)',
         requestId: docRef.id,
         requestCollection: 'partner_applications',
       );

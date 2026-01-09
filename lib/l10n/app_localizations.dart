@@ -1521,6 +1521,834 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Register'**
   String get registerButton;
+
+  /// No description provided for @pumpingSolar.
+  ///
+  /// In en, this message translates to:
+  /// **'Solar Pumping'**
+  String get pumpingSolar;
+
+  /// No description provided for @pumpingSolarDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate your solar pumping system with precision.'**
+  String get pumpingSolarDescription;
+
+  /// No description provided for @pumpingSolarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated results based on your region and actual needs.'**
+  String get pumpingSolarSubtitle;
+
+  /// No description provided for @step1ChooseMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 — Choose calculation method'**
+  String get step1ChooseMethod;
+
+  /// No description provided for @step2EnterInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2 — Enter information'**
+  String get step2EnterInfo;
+
+  /// No description provided for @step3Calculate.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 3 — Calculate results'**
+  String get step3Calculate;
+
+  /// No description provided for @modeFlowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have the flow (Q)'**
+  String get modeFlowTitle;
+
+  /// No description provided for @modeFlowDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this mode if you already know your pump\'s flow rate.'**
+  String get modeFlowDescription;
+
+  /// No description provided for @modeAreaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t know the flow (agricultural area)'**
+  String get modeAreaTitle;
+
+  /// No description provided for @modeAreaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ideal for farmers who know the area and crop type.'**
+  String get modeAreaDescription;
+
+  /// No description provided for @modeTankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a tank'**
+  String get modeTankTitle;
+
+  /// No description provided for @modeTankDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this mode if you fill a water tower or cistern.'**
+  String get modeTankDescription;
+
+  /// No description provided for @currentEnergySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Current energy source'**
+  String get currentEnergySource;
+
+  /// No description provided for @selectCurrentEnergySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your current energy source'**
+  String get selectCurrentEnergySource;
+
+  /// No description provided for @selectSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a source'**
+  String get selectSource;
+
+  /// No description provided for @electricity.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity'**
+  String get electricity;
+
+  /// No description provided for @diesel.
+  ///
+  /// In en, this message translates to:
+  /// **'Diesel'**
+  String get diesel;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t know'**
+  String get unknown;
+
+  /// No description provided for @selectCalculationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a calculation method'**
+  String get selectCalculationMethod;
+
+  /// No description provided for @selectYourRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your region'**
+  String get selectYourRegion;
+
+  /// No description provided for @selectYourEnergySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your current energy source'**
+  String get selectYourEnergySource;
+
+  /// No description provided for @calculationError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred during calculation. Please check your data and try again.'**
+  String get calculationError;
+
+  /// No description provided for @flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow'**
+  String get flow;
+
+  /// No description provided for @enterFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the flow'**
+  String get enterFlow;
+
+  /// No description provided for @flowMustBeGreater.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow must be greater than 0'**
+  String get flowMustBeGreater;
+
+  /// No description provided for @unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unit;
+
+  /// No description provided for @flowUnitM3h.
+  ///
+  /// In en, this message translates to:
+  /// **'m³/h'**
+  String get flowUnitM3h;
+
+  /// No description provided for @flowUnitLmin.
+  ///
+  /// In en, this message translates to:
+  /// **'L/min'**
+  String get flowUnitLmin;
+
+  /// No description provided for @headMeters.
+  ///
+  /// In en, this message translates to:
+  /// **'Head (m)'**
+  String get headMeters;
+
+  /// No description provided for @operatingHoursPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating hours per day'**
+  String get operatingHoursPerDay;
+
+  /// No description provided for @surface.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface'**
+  String get surface;
+
+  /// No description provided for @enterSurface.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the surface'**
+  String get enterSurface;
+
+  /// No description provided for @surfaceMustBeGreater.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface must be greater than 0'**
+  String get surfaceMustBeGreater;
+
+  /// No description provided for @areaUnitM2.
+  ///
+  /// In en, this message translates to:
+  /// **'m²'**
+  String get areaUnitM2;
+
+  /// No description provided for @areaUnitHa.
+  ///
+  /// In en, this message translates to:
+  /// **'ha'**
+  String get areaUnitHa;
+
+  /// No description provided for @cropType.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop type'**
+  String get cropType;
+
+  /// No description provided for @selectCropType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a crop'**
+  String get selectCropType;
+
+  /// No description provided for @irrigationType.
+  ///
+  /// In en, this message translates to:
+  /// **'Irrigation type'**
+  String get irrigationType;
+
+  /// No description provided for @selectIrrigationType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a type'**
+  String get selectIrrigationType;
+
+  /// No description provided for @tankVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Tank volume (m³)'**
+  String get tankVolume;
+
+  /// No description provided for @fillTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill time (hours)'**
+  String get fillTime;
+
+  /// No description provided for @wellDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Well depth (m)'**
+  String get wellDepth;
+
+  /// No description provided for @tankHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Tank height (m)'**
+  String get tankHeight;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @valueMustBeGreater.
+  ///
+  /// In en, this message translates to:
+  /// **'Value must be greater than 0'**
+  String get valueMustBeGreater;
+
+  /// No description provided for @invalidValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid values'**
+  String get invalidValues;
+
+  /// No description provided for @systemTypeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'System Type *'**
+  String get systemTypeRequired;
+
+  /// No description provided for @selectSystemTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a system type'**
+  String get selectSystemTypeHint;
+
+  /// No description provided for @pumpingSolarSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'POMPAGE SOLAIRE'**
+  String get pumpingSolarSystem;
+
+  /// No description provided for @billAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill amount (DH) *'**
+  String get billAmountLabel;
+
+  /// No description provided for @billAmountExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 500'**
+  String get billAmountExample;
+
+  /// No description provided for @amountMustBeGreaterThanZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than 0'**
+  String get amountMustBeGreaterThanZero;
+
+  /// No description provided for @usageTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Type'**
+  String get usageTypeLabel;
+
+  /// No description provided for @selectUsageTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a type'**
+  String get selectUsageTypeHint;
+
+  /// No description provided for @batteryCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery capacity (kWh)'**
+  String get batteryCapacity;
+
+  /// No description provided for @batteryCapacityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery capacity (kWh) *'**
+  String get batteryCapacityRequired;
+
+  /// No description provided for @selectBatteryCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a capacity'**
+  String get selectBatteryCapacity;
+
+  /// No description provided for @consumptionPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumption (kWh/day) *'**
+  String get consumptionPerDay;
+
+  /// No description provided for @consumptionExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 10'**
+  String get consumptionExample;
+
+  /// No description provided for @consumptionMustBeGreater.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumption must be greater than 0'**
+  String get consumptionMustBeGreater;
+
+  /// No description provided for @autonomyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Autonomy days *'**
+  String get autonomyDays;
+
+  /// No description provided for @selectAutonomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectAutonomy;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get day;
+
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get days;
+
+  /// No description provided for @flowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow *'**
+  String get flowLabel;
+
+  /// No description provided for @flowExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 10'**
+  String get flowExample;
+
+  /// No description provided for @flowMustBeGreaterThanZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow must be greater than 0'**
+  String get flowMustBeGreaterThanZero;
+
+  /// No description provided for @unitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit *'**
+  String get unitLabel;
+
+  /// No description provided for @unitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unitHint;
+
+  /// No description provided for @headMetersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Head (m) *'**
+  String get headMetersLabel;
+
+  /// No description provided for @headExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 50'**
+  String get headExample;
+
+  /// No description provided for @headMustBeGreater.
+  ///
+  /// In en, this message translates to:
+  /// **'Head must be greater than 0'**
+  String get headMustBeGreater;
+
+  /// No description provided for @operatingHoursLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating hours per day *'**
+  String get operatingHoursLabel;
+
+  /// No description provided for @hoursExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 8'**
+  String get hoursExample;
+
+  /// No description provided for @hoursMustBeGreater.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours must be greater than 0'**
+  String get hoursMustBeGreater;
+
+  /// No description provided for @pumpTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump type *'**
+  String get pumpTypeLabel;
+
+  /// No description provided for @selectPumpTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a type'**
+  String get selectPumpTypeHint;
+
+  /// No description provided for @selectSystemTypeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a system type'**
+  String get selectSystemTypeError;
+
+  /// No description provided for @selectRegionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a region'**
+  String get selectRegionError;
+
+  /// No description provided for @fillAllRequiredFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields'**
+  String get fillAllRequiredFields;
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount'**
+  String get invalidAmount;
+
+  /// No description provided for @invalidConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid consumption'**
+  String get invalidConsumption;
+
+  /// No description provided for @batteryAndAutonomyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery and autonomy required'**
+  String get batteryAndAutonomyRequired;
+
+  /// No description provided for @invalidSystemType.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid system type'**
+  String get invalidSystemType;
+
+  /// No description provided for @errorPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorPrefix;
+
+  /// No description provided for @resultOnGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'ON-GRID Result'**
+  String get resultOnGrid;
+
+  /// No description provided for @resultHybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'HYBRID Result'**
+  String get resultHybrid;
+
+  /// No description provided for @resultOffGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF-GRID Result'**
+  String get resultOffGrid;
+
+  /// No description provided for @resultPumping.
+  ///
+  /// In en, this message translates to:
+  /// **'Solar Pumping Result'**
+  String get resultPumping;
+
+  /// No description provided for @calculationResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation Results'**
+  String get calculationResultsTitle;
+
+  /// No description provided for @estimatedConsumptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated consumption'**
+  String get estimatedConsumptionLabel;
+
+  /// No description provided for @recommendedSystemPowerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended system power'**
+  String get recommendedSystemPowerLabel;
+
+  /// No description provided for @numberOfPanelsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of panels'**
+  String get numberOfPanelsLabel;
+
+  /// No description provided for @savingRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving rate'**
+  String get savingRateLabel;
+
+  /// No description provided for @savingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get savingsTitle;
+
+  /// No description provided for @monthlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthlyLabel;
+
+  /// No description provided for @yearlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get yearlyLabel;
+
+  /// No description provided for @tenYearsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'10 years'**
+  String get tenYearsLabel;
+
+  /// No description provided for @twentyYearsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'20 years'**
+  String get twentyYearsLabel;
+
+  /// No description provided for @basedOnSunHoursInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on {hours}h of sun per day - {region}'**
+  String basedOnSunHoursInfo(String hours, String region);
+
+  /// No description provided for @dailyConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily consumption'**
+  String get dailyConsumption;
+
+  /// No description provided for @batteryCapacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery capacity'**
+  String get batteryCapacityLabel;
+
+  /// No description provided for @autonomyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Autonomy'**
+  String get autonomyLabel;
+
+  /// No description provided for @batteryCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery coverage'**
+  String get batteryCoverage;
+
+  /// No description provided for @hours.
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get hours;
+
+  /// No description provided for @flowValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow'**
+  String get flowValue;
+
+  /// No description provided for @headMetersValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Head'**
+  String get headMetersValue;
+
+  /// No description provided for @pumpPowerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump power'**
+  String get pumpPowerLabel;
+
+  /// No description provided for @pvPowerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PV power'**
+  String get pvPowerLabel;
+
+  /// No description provided for @pumpTypeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump type'**
+  String get pumpTypeValue;
+
+  /// No description provided for @requestPumpingQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Request pumping quote'**
+  String get requestPumpingQuote;
+
+  /// No description provided for @selectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectHint;
+
+  /// No description provided for @environmentalImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'🌱 Environmental Impact'**
+  String get environmentalImpact;
+
+  /// No description provided for @co2Avoided.
+  ///
+  /// In en, this message translates to:
+  /// **'CO₂ avoided: {co2} ton / year'**
+  String co2Avoided(String co2);
+
+  /// No description provided for @equivalentTrees.
+  ///
+  /// In en, this message translates to:
+  /// **'Equivalent: {trees} trees / year'**
+  String equivalentTrees(int trees);
+
+  /// No description provided for @environmentalEstimationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These values are estimates based on consumption and sunlight.'**
+  String get environmentalEstimationNote;
+
+  /// No description provided for @searchCompaniesOrTechnicians.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for companies or technicians'**
+  String get searchCompaniesOrTechnicians;
+
+  /// No description provided for @searchCompaniesOrTechniciansDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find certified professionals near you.'**
+  String get searchCompaniesOrTechniciansDescription;
+
+  /// No description provided for @whatAreYouLookingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you looking for?'**
+  String get whatAreYouLookingFor;
+
+  /// No description provided for @searchCertifiedCompanies.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for certified companies'**
+  String get searchCertifiedCompanies;
+
+  /// No description provided for @searchCertifiedTechnicians.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for certified technicians'**
+  String get searchCertifiedTechnicians;
+
+  /// No description provided for @companiesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner and certified companies'**
+  String get companiesSubtitle;
+
+  /// No description provided for @techniciansSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualified and certified technicians'**
+  String get techniciansSubtitle;
+
+  /// No description provided for @contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// No description provided for @noCompaniesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No companies found'**
+  String get noCompaniesFound;
+
+  /// No description provided for @noTechniciansFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No technicians found'**
+  String get noTechniciansFound;
+
+  /// No description provided for @serviceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Service type'**
+  String get serviceType;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @speciality.
+  ///
+  /// In en, this message translates to:
+  /// **'Speciality'**
+  String get speciality;
+
+  /// No description provided for @ice.
+  ///
+  /// In en, this message translates to:
+  /// **'ICE'**
+  String get ice;
+
+  /// No description provided for @ifCode.
+  ///
+  /// In en, this message translates to:
+  /// **'IF'**
+  String get ifCode;
+
+  /// No description provided for @rc.
+  ///
+  /// In en, this message translates to:
+  /// **'RC'**
+  String get rc;
+
+  /// No description provided for @patente.
+  ///
+  /// In en, this message translates to:
+  /// **'Patente'**
+  String get patente;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get lastName;
+
+  /// No description provided for @companyDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Company documents'**
+  String get companyDocuments;
+
+  /// No description provided for @certificates.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates'**
+  String get certificates;
 }
 
 class _AppLocalizationsDelegate

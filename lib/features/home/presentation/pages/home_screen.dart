@@ -381,11 +381,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _TechnicianCard(
-                          title: AppLocalizations.of(context)!.certifiedTechnicians,
-                          description: AppLocalizations.of(context)!.certifiedTechniciansDescription,
+                        child: _FeatureCard(
+                          icon: Icons.search,
+                          title: AppLocalizations.of(context)!.searchCompaniesOrTechnicians,
+                          description: AppLocalizations.of(context)!.searchCompaniesOrTechniciansDescription,
+                          color: const Color(0xFF9C27B0),
                           onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.techniciansList);
+                            Navigator.pushNamed(context, AppRoutes.searchChoice);
                           },
                         ),
                       ),
@@ -551,57 +553,60 @@ class _FeatureCard extends StatelessWidget {
         onTap: onTap, // Call the onTap function when tapped
         borderRadius: BorderRadius.circular(20), // Ripple effect shape
         child: Container(
-          padding: const EdgeInsets.all(16), // Space inside card (all sides)
+          height: 170, // Increased height to accommodate text better
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14), // Adjusted padding
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20), // Match Material border radius
             border: Border.all(color: Colors.grey.shade100), // Light grey border
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
-            mainAxisSize: MainAxisSize.min, // Take minimum space needed
+            mainAxisSize: MainAxisSize.max, // Use maximum space available
             children: [
               // Icon container with colored background
               Container(
-                padding: const EdgeInsets.all(12), // Space around icon
+                padding: const EdgeInsets.all(10), // Slightly reduced padding
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1), // Light version of card color (10% opacity)
                   borderRadius: BorderRadius.circular(16), // Rounded icon background
                 ),
-                child: Icon(icon, size: 28, color: color), // Icon with size and color
+                child: Icon(icon, size: 26, color: color), // Slightly smaller icon
               ),
-              const SizedBox(height: 10), // Space between icon and title
+              const SizedBox(height: 8), // Space between icon and title
               // Title text
               Flexible(
-                // Flexible: Allows text to shrink if needed
+                // Flexible: Allows text to shrink if needed but can expand
                 child: Text(
                   title,
                   textAlign: TextAlign.center, // Center the text
                   maxLines: 2, // Maximum 2 lines
                   overflow: TextOverflow.ellipsis, // Show "..." if text too long
                   style: const TextStyle(
-                    fontSize: 14, // Text size
+                    fontSize: 13, // Slightly smaller to fit better
                     fontWeight: FontWeight.w600, // Semi-bold
                     color: AppColors.textPrimary, // Dark text color
-                    height: 1.2, // Line height multiplier
+                    height: 1.3, // Increased line height for better readability
                   ),
                 ),
               ),
-              const SizedBox(height: 6), // Space between title and description
-              // Description text
-              Flexible(
-                child: Text(
-                  description,
-                  textAlign: TextAlign.center,
-                  maxLines: 2, // Maximum 2 lines
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11, // Smaller than title
-                    fontWeight: FontWeight.w400, // Normal weight
-                    color: Colors.grey.shade600, // Grey color
-                    height: 1.3, // Slightly more line spacing
+              // Description text (only show if not empty)
+              if (description.isNotEmpty) ...[
+                const SizedBox(height: 5), // Space between title and description
+                Flexible(
+                  child: Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    maxLines: 2, // Maximum 2 lines
+                    overflow: TextOverflow.ellipsis, // Show "..." if text too long
+                    style: TextStyle(
+                      fontSize: 11, // Smaller than title
+                      fontWeight: FontWeight.w400, // Normal weight
+                      color: Colors.grey.shade600, // Grey color
+                      height: 1.4, // Increased line spacing for better readability
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -826,7 +831,7 @@ class _PrimaryCalculatorCard extends StatelessWidget {
               Expanded(
                 // Expanded: Takes remaining space
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Align text to left
+                  crossAxisAlignment: CrossAxisAlignment.start, // Align text to start (RTL-aware)
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Title text
@@ -853,9 +858,11 @@ class _PrimaryCalculatorCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Arrow icon indicating this is clickable
+              // Arrow icon indicating this is clickable (RTL-aware)
               Icon(
-                Icons.arrow_forward_ios,
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.arrow_back_ios
+                    : Icons.arrow_forward_ios,
                 color: Colors.white,
                 size: 22,
               ),

@@ -27,7 +27,7 @@
   "chat": "الدردشة",
   "shop": "المتجر",
   "chatComingSoon": "الدردشة ستكون متاحة قريباً",
-  "shopComingSoon": "المتجر سيكون متاحاً قريباً",
+  "shopComingSoon": "المتجر سيفتح قريباً",
   "login": "تسجيل الدخول",
   "connectToAccount": "تسجيل الدخول إلى حسابك",
   "email": "البريد الإلكتروني",
@@ -253,5 +253,173 @@
   "enterYourEmail": "أدخل بريدك الإلكتروني",
   "enterYourPassword": "أدخل كلمة المرور",
   "dontHaveAccount": "ليس لديك حساب؟",
-  "registerButton": "التسجيل"
+  "registerButton": "التسجيل",
+  "pumpingSolar": "الضخ الشمسي",
+  "pumpingSolarDescription": "احسب نظام الضخ الشمسي الخاص بك بدقة.",
+  "pumpingSolarSubtitle": "نتائج تقديرية بناءً على منطقتك واحتياجاتك الفعلية.",
+  "step1ChooseMethod": "الخطوة 1 — اختر طريقة الحساب",
+  "step2EnterInfo": "الخطوة 2 — أدخل المعلومات",
+  "step3Calculate": "الخطوة 3 — حساب النتائج",
+  "modeFlowTitle": "لدي التدفق بالفعل (Q)",
+  "modeFlowDescription": "استخدم هذا الوضع إذا كنت تعرف بالفعل تدفق المضخة الخاصة بك.",
+  "modeAreaTitle": "لا أعرف التدفق (مساحة زراعية)",
+  "modeAreaDescription": "مثالي للمزارعين الذين يعرفون المساحة ونوع المحصول.",
+  "modeTankTitle": "لدي خزان",
+  "modeTankDescription": "استخدم هذا الوضع إذا كنت تملأ برج مياه أو خزان.",
+  "currentEnergySource": "مصدر الطاقة الحالي",
+  "selectCurrentEnergySource": "يرجى اختيار مصدر الطاقة الحالي",
+  "selectSource": "اختر مصدراً",
+  "electricity": "الكهرباء",
+  "diesel": "الديزل",
+  "unknown": "لا أعرف",
+  "selectCalculationMethod": "يرجى اختيار طريقة الحساب",
+  "selectYourRegion": "يرجى اختيار منطقتك",
+  "selectYourEnergySource": "يرجى اختيار مصدر الطاقة الحالي",
+  "calculationError": "حدث خطأ أثناء الحساب. يرجى التحقق من بياناتك والمحاولة مرة أخرى.",
+  "flow": "التدفق",
+  "enterFlow": "يرجى إدخال التدفق",
+  "flowMustBeGreater": "يجب أن يكون التدفق أكبر من 0",
+  "unit": "الوحدة",
+  "flowUnitM3h": "م³/ساعة",
+  "flowUnitLmin": "لتر/دقيقة",
+  "headMeters": "الارتفاع المانومتري (م)",
+  "operatingHoursPerDay": "ساعات التشغيل في اليوم",
+  "surface": "المساحة",
+  "enterSurface": "يرجى إدخال المساحة",
+  "surfaceMustBeGreater": "يجب أن تكون المساحة أكبر من 0",
+  "areaUnitM2": "م²",
+  "areaUnitHa": "هكتار",
+  "cropType": "نوع المحصول",
+  "selectCropType": "اختر محصولاً",
+  "irrigationType": "نوع الري",
+  "selectIrrigationType": "اختر نوعاً",
+  "tankVolume": "حجم الخزان (م³)",
+  "fillTime": "وقت التعبئة (ساعات)",
+  "wellDepth": "عمق البئر (م)",
+  "tankHeight": "ارتفاع الخزان (م)",
+  "fieldRequired": "هذا الحقل إلزامي",
+  "valueMustBeGreater": "يجب أن تكون القيمة أكبر من 0",
+  "invalidValues": "قيم غير صالحة",
+  "systemTypeRequired": "نوع النظام *",
+  "selectSystemTypeHint": "اختر نوع النظام",
+  "onGrid": "ON-GRID",
+  "hybrid": "HYBRID",
+  "offGrid": "OFF-GRID",
+  "pumpingSolarSystem": "POMPAGE SOLAIRE",
+  "billAmountLabel": "مبلغ الفاتورة (درهم) *",
+  "billAmountExample": "مثال: 500",
+  "enterValidNumber": "يرجى إدخال رقم صالح",
+  "amountMustBeGreaterThanZero": "يجب أن يكون المبلغ أكبر من 0",
+  "usageTypeLabel": "نوع الاستخدام",
+  "selectUsageTypeHint": "اختر نوعاً",
+  "house": "منزل",
+  "commerce": "تجاري",
+  "batteryCapacity": "سعة البطارية (كيلوواط ساعة)",
+  "batteryCapacityRequired": "سعة البطارية (كيلوواط ساعة) *",
+  "selectBatteryCapacity": "اختر السعة",
+  "consumptionPerDay": "الاستهلاك (كيلوواط ساعة/يوم) *",
+  "consumptionExample": "مثال: 10",
+  "consumptionMustBeGreater": "يجب أن يكون الاستهلاك أكبر من 0",
+  "autonomyDays": "أيام الاستقلالية *",
+  "selectAutonomy": "اختر",
+  "day": "يوم",
+  "days": "أيام",
+  "flowLabel": "التدفق *",
+  "flowExample": "مثال: 10",
+  "flowMustBeGreaterThanZero": "يجب أن يكون التدفق أكبر من 0",
+  "unitLabel": "الوحدة *",
+  "unitHint": "الوحدة",
+  "headMetersLabel": "الارتفاع المانومتري (م) *",
+  "headExample": "مثال: 50",
+  "headMustBeGreater": "يجب أن يكون الارتفاع أكبر من 0",
+  "operatingHoursLabel": "ساعات التشغيل في اليوم *",
+  "hoursExample": "مثال: 8",
+  "hoursMustBeGreater": "يجب أن تكون الساعات أكبر من 0",
+  "pumpTypeLabel": "نوع المضخة *",
+  "selectPumpTypeHint": "اختر نوعاً",
+  "selectSystemTypeError": "يرجى اختيار نوع النظام",
+  "selectRegionError": "يرجى اختيار المنطقة",
+  "fillAllRequiredFields": "يرجى ملء جميع الحقول الإلزامية",
+  "invalidAmount": "مبلغ غير صالح",
+  "invalidConsumption": "استهلاك غير صالح",
+  "batteryAndAutonomyRequired": "البطارية والاستقلالية مطلوبة",
+  "invalidSystemType": "نوع نظام غير صالح",
+  "errorPrefix": "خطأ",
+  "resultOnGrid": "نتيجة ON-GRID",
+  "resultHybrid": "نتيجة HYBRID",
+  "resultOffGrid": "نتيجة OFF-GRID",
+  "resultPumping": "نتيجة الضخ الشمسي",
+  "calculationResultsTitle": "نتائج الحساب",
+  "estimatedConsumptionLabel": "الاستهلاك المقدر",
+  "recommendedSystemPowerLabel": "قوة النظام الموصى بها",
+  "numberOfPanelsLabel": "عدد الألواح",
+  "savingRateLabel": "معدل التوفير",
+  "savingsTitle": "التوفير",
+  "monthlyLabel": "شهري",
+  "yearlyLabel": "سنوي",
+  "tenYearsLabel": "10 سنوات",
+  "twentyYearsLabel": "20 سنة",
+  "basedOnSunHoursInfo": "بناءً على {hours} ساعة من الشمس يومياً - {region}",
+  "@basedOnSunHoursInfo": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "dailyConsumption": "الاستهلاك اليومي",
+  "batteryCapacityLabel": "سعة البطارية",
+  "autonomyLabel": "الاستقلالية",
+  "batteryCoverage": "تغطية البطارية",
+  "hours": "ساعات",
+  "flowValue": "التدفق",
+  "headMetersValue": "الارتفاع المانومتري",
+  "pumpPowerLabel": "قوة المضخة",
+  "pvPowerLabel": "قوة الطاقة الشمسية",
+  "pumpTypeValue": "نوع المضخة",
+  "requestPumpingQuote": "طلب تقدير الضخ",
+  "selectHint": "اختر",
+  "environmentalImpact": "🌱 التأثير البيئي",
+  "co2Avoided": "ثاني أكسيد الكربون المتجنب: {co2} طن / سنة",
+  "@co2Avoided": {
+    "placeholders": {
+      "co2": {
+        "type": "String"
+      }
+    }
+  },
+  "equivalentTrees": "المعادل: {trees} شجرة / سنة",
+  "@equivalentTrees": {
+    "placeholders": {
+      "trees": {
+        "type": "int"
+      }
+    }
+  },
+  "environmentalEstimationNote": "هذه القيم تقديرات بناءً على الاستهلاك وأشعة الشمس.",
+  "searchCompaniesOrTechnicians": "بحث عن شركات\nأو تقنيين",
+  "searchCompaniesOrTechniciansDescription": "ابحث عن محترفين معتمدين بالقرب منك.",
+  "whatAreYouLookingFor": "ماذا تبحث عنه؟",
+  "searchCertifiedCompanies": "بحث عن شركات معتمدة",
+  "searchCertifiedTechnicians": "بحث عن تقنيين معتمدين",
+  "companiesSubtitle": "شركات شريكة ومعتمدة",
+  "techniciansSubtitle": "تقنيين مؤهلين ومعتمدين",
+  "contact": "اتصل",
+  "noCompaniesFound": "لم يتم العثور على شركات",
+  "noTechniciansFound": "لم يتم العثور على تقنيين",
+  "serviceType": "نوع الخدمة",
+  "all": "الكل",
+  "speciality": "التخصص",
+  "ice": "ICE",
+  "ifCode": "IF",
+  "rc": "RC",
+  "patente": "الرخصة",
+  "address": "العنوان",
+  "firstName": "الاسم",
+  "lastName": "اللقب",
+  "companyDocuments": "وثائق الشركة",
+  "certificates": "الشهادات"
 }
