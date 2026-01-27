@@ -121,15 +121,19 @@ class _InstallationRequestsPageState extends State<InstallationRequestsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Page Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // CRITICAL: Use LayoutBuilder for proper constraints on Flutter Web
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max, // CRITICAL: Fill available space
             children: [
+              // Page Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -158,13 +162,13 @@ class _InstallationRequestsPageState extends State<InstallationRequestsPage> {
                       );
                     },
                   ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Advanced Filters Panel
-          StreamBuilder<QuerySnapshot>(
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Advanced Filters Panel
+            StreamBuilder<QuerySnapshot>(
             stream: _firestoreService.streamInstallationRequests(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox();
@@ -184,10 +188,10 @@ class _InstallationRequestsPageState extends State<InstallationRequestsPage> {
                 initialSearch: _searchQuery,
               );
             },
-          ),
-          const SizedBox(height: 20),
-          // Export Bar
-          StreamBuilder<QuerySnapshot>(
+            ),
+            const SizedBox(height: 20),
+            // Export Bar
+            StreamBuilder<QuerySnapshot>(
             stream: _firestoreService.streamInstallationRequests(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox();
@@ -209,11 +213,11 @@ class _InstallationRequestsPageState extends State<InstallationRequestsPage> {
                 fileName: 'installation_requests',
               );
             },
-          ),
-          const SizedBox(height: 20),
-          // Bulk Actions Bar
-          if (_selectedIds.isNotEmpty)
-            Container(
+            ),
+            const SizedBox(height: 20),
+            // Bulk Actions Bar
+            if (_selectedIds.isNotEmpty)
+              Container(
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -258,8 +262,8 @@ class _InstallationRequestsPageState extends State<InstallationRequestsPage> {
                 ],
               ),
             ),
-          // Data Table
-          Expanded(
+            // Data Table
+            Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestoreService.streamInstallationRequests(),
               builder: (context, snapshot) {
@@ -375,9 +379,11 @@ class _InstallationRequestsPageState extends State<InstallationRequestsPage> {
                 );
               },
             ),
+            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

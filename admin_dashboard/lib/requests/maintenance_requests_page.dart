@@ -113,17 +113,22 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // CRITICAL: Use LayoutBuilder to get available constraints
+    // This ensures proper height constraints on Flutter Web
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max, // CRITICAL: Fill available space
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   const Text(
                     'Demandes de Maintenance',
                     style: TextStyle(
@@ -148,14 +153,14 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
                         ),
                       );
                     },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          StreamBuilder<QuerySnapshot>(
-            stream: _firestoreService.streamMaintenanceRequests(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestoreService.streamMaintenanceRequests(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox();
               return AdvancedFiltersPanel(
@@ -173,10 +178,10 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
                 initialSearch: _searchQuery,
               );
             },
-          ),
-          const SizedBox(height: 20),
-          StreamBuilder<QuerySnapshot>(
-            stream: _firestoreService.streamMaintenanceRequests(),
+            ),
+            const SizedBox(height: 20),
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestoreService.streamMaintenanceRequests(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox();
               final allData = snapshot.data!.docs.map((doc) {
@@ -191,11 +196,11 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
                 fileName: 'maintenance_requests',
               );
             },
-          ),
-          const SizedBox(height: 20),
-          if (_selectedIds.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(bottom: 20),
+            ),
+            const SizedBox(height: 20),
+            if (_selectedIds.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppTheme.primaryColor.withValues(alpha: 0.05),
@@ -239,9 +244,9 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
                 ],
               ),
             ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _firestoreService.streamMaintenanceRequests(),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestoreService.streamMaintenanceRequests(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const TableSkeletonLoader(rows: 10, columns: 8);
@@ -273,6 +278,10 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
                   return <String, dynamic>{...docData, 'id': doc.id};
                 }).toList();
                 final filteredData = _applyFilters(allData);
+                
+                // Debug: Print data counts
+                debugPrint('Maintenance Requests - Total: ${allData.length}, Filtered: ${filteredData.length}');
+                
                 return EnhancedDataTable(
                   data: filteredData,
                   onBulkAction: (ids) => setState(() => _selectedIds = ids),
@@ -336,9 +345,11 @@ class _MaintenanceRequestsPageState extends State<MaintenanceRequestsPage> {
                 );
               },
             ),
+            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

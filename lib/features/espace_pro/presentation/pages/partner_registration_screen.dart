@@ -213,8 +213,8 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
   void _uploadDocuments() {
     // Firebase Storage temporarily disabled - billing not enabled
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.uploadDisabled),
         duration: Duration(seconds: 3),
       ),
     );

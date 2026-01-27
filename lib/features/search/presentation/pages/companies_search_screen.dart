@@ -71,7 +71,7 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.error}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -105,7 +105,7 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Impossible d\'appeler: $phone'),
+            content: Text(AppLocalizations.of(context)!.cannotCall(phone)),
             backgroundColor: Colors.red,
           ),
         );

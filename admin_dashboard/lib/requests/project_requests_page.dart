@@ -16,15 +16,19 @@ class ProjectRequestsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final firestoreService = AdminFirestoreService();
 
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Page Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // CRITICAL: Use LayoutBuilder for proper constraints on Flutter Web
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max, // CRITICAL: Fill available space
             children: [
+              // Page Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -52,14 +56,14 @@ class ProjectRequestsPage extends StatelessWidget {
                       );
                     },
                   ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          // Data Table
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            // Data Table
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
               stream: firestoreService.streamProjectRequests(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,9 +114,11 @@ class ProjectRequestsPage extends StatelessWidget {
                 );
               },
             ),
+            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -349,4 +355,3 @@ class _ActionButtons extends StatelessWidget {
     );
   }
 }
-

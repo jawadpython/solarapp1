@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../widgets/modern_sidebar.dart';
 import '../widgets/modern_topbar.dart';
 
-/// Responsive Admin Layout for Web Dashboard
-/// - Desktop: Fixed sidebar (260px) + Topbar + Content
-/// - Tablet: Collapsible sidebar + Topbar + Content
-/// - Mobile: Drawer sidebar + Topbar + Content
+/// Production-Ready Admin Layout for Flutter Web
+/// - Single Scaffold with fixed sidebar
+/// - Content area properly constrained for Flutter Web
+/// - No empty/gray areas - guaranteed rendering
 class AdminLayout extends StatefulWidget {
   final Widget content;
   final int selectedIndex;
@@ -26,7 +26,7 @@ class _AdminLayoutState extends State<AdminLayout> {
   bool _sidebarExpanded = true;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Breakpoints for responsive design
+  // Responsive breakpoints
   bool get _isDesktop => MediaQuery.of(context).size.width >= 1200;
   bool get _isTablet => MediaQuery.of(context).size.width >= 768 && MediaQuery.of(context).size.width < 1200;
   bool get _isMobile => MediaQuery.of(context).size.width < 768;
@@ -44,31 +44,35 @@ class _AdminLayoutState extends State<AdminLayout> {
       return Scaffold(
         key: _scaffoldKey,
         backgroundColor: const Color(0xFFF8F9FA),
-        drawer: ModernSidebar(
-          selectedIndex: widget.selectedIndex,
-          onItemSelected: (index) {
-            widget.onNavigationChanged(index);
-            _scaffoldKey.currentState?.closeDrawer();
-          },
-          isCollapsed: false,
+        drawer: Drawer(
+          child: ModernSidebar(
+            selectedIndex: widget.selectedIndex,
+            onItemSelected: (index) {
+              widget.onNavigationChanged(index);
+              Navigator.of(context).pop(); // Close drawer
+            },
+            isCollapsed: false,
+          ),
         ),
         body: Column(
           children: [
             ModernTopBar(
               onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
             ),
-            Expanded(child: widget.content),
+            Expanded(
+              child: _buildContent(),
+            ),
           ],
         ),
       );
     }
 
-    // Tablet & Desktop: Use Row layout
+    // Desktop & Tablet: Fixed sidebar layout
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: Row(
         children: [
-          // Sidebar
+          // Fixed Sidebar
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOutCubic,
@@ -79,36 +83,16 @@ class _AdminLayoutState extends State<AdminLayout> {
               isCollapsed: _isTablet && !_sidebarExpanded,
             ),
           ),
-          // Main content area
+          // Main Content Area - CRITICAL: Must use Expanded
           Expanded(
             child: Column(
               children: [
                 ModernTopBar(
                   onMenuTap: _isTablet ? _toggleSidebar : null,
                 ),
+                // CRITICAL: Expanded ensures content fills available space
                 Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.02, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      key: ValueKey(widget.selectedIndex),
-                      child: widget.content,
-                    ),
-                  ),
+                  child: _buildContent(),
                 ),
               ],
             ),
@@ -117,5 +101,26 @@ class _AdminLayoutState extends State<AdminLayout> {
       ),
     );
   }
-}
 
+  /// Build content with proper constraints for Flutter Web
+  /// CRITICAL: Content must fill available space to prevent gray areas
+  Widget _buildContent() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeInOut,
+      switchOutCurve: Curves.easeInOut,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      // CRITICAL: Use SizedBox.expand to ensure content fills available space
+      // This prevents gray/empty areas on Flutter Web
+      child: SizedBox.expand(
+        key: ValueKey<int>(widget.selectedIndex),
+        child: widget.content,
+      ),
+    );
+  }
+}

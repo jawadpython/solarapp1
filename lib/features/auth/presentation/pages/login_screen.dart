@@ -82,12 +82,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  AppLocalizations.of(context)!.appTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'TAWFIR ',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                       ),
+                      TextSpan(
+                        text: 'ENERGY',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(

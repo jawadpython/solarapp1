@@ -3,6 +3,7 @@ import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/firestore_service.dart';
 import 'package:noor_energy/features/pumping/models/pumping_devis_request.dart';
 import 'package:noor_energy/features/pumping/models/pumping_result.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class PumpingDevisFormScreen extends StatefulWidget {
   final PumpingResult result;
@@ -115,8 +116,8 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
       if (mounted) {
         _clearForm();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Demande de devis envoyée avec succès'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.quoteRequestSentSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -126,7 +127,7 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.error}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

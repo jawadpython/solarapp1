@@ -241,8 +241,8 @@
   "consumptionKwh": "الاستهلاك (كيلوواط ساعة)",
   "noFileSelected": "لم يتم اختيار ملف",
   "gpsPositionCaptured": "تم التقاط موقع GPS",
-  "onGridSystem": "On-grid",
-  "offGridSystem": "Off-grid",
+  "onGridSystem": "متصل بالشبكة",
+  "offGridSystem": "منفصل عن الشبكة",
   "hybridSystem": "هجين",
   "pumpSystem": "مضخة",
   "homeLocation": "منزل",
@@ -305,7 +305,7 @@
   "onGrid": "ON-GRID",
   "hybrid": "HYBRID",
   "offGrid": "OFF-GRID",
-  "pumpingSolarSystem": "POMPAGE SOLAIRE",
+  "pumpingSolarSystem": "الضخ الشمسي",
   "billAmountLabel": "مبلغ الفاتورة (درهم) *",
   "billAmountExample": "مثال: 500",
   "enterValidNumber": "يرجى إدخال رقم صالح",
@@ -421,5 +421,146 @@
   "firstName": "الاسم",
   "lastName": "اللقب",
   "companyDocuments": "وثائق الشركة",
-  "certificates": "الشهادات"
+  "certificates": "الشهادات",
+  "chooseSystemType": "اختر نوع النظام",
+  "onGridDescription": "تقليل فاتورتك (بدون بطارية)",
+  "hybridDescription": "فاتورة + بطاريات (استقلالية جزئية)",
+  "offGridDescription": "منزل معزول (استقلالية كاملة)",
+  "pumpingSolarDescription": "الري والضخ بالطاقة الشمسية",
+  "pleaseSelectSystemType": "* يرجى اختيار نوع النظام",
+  "monthlyBillAmountDH": "مبلغ الفاتورة الشهرية (درهم)",
+  "monthlyBillDH": "الفاتورة الشهرية (درهم)",
+  "consumptionProfileDayNight": "ملف الاستهلاك (نهار/ليل) *",
+  "selectProfile": "اختر ملفاً",
+  "houseProfile60Day40Night": "منزل (60% نهار / 40% ليل)",
+  "commerceProfile80Day20Night": "تجاري (80% نهار / 20% ليل)",
+  "industryProfile90Day10Night": "صناعي (90% نهار / 10% ليل)",
+  "houseNightProfile40Day60Night": "منزل ليلي (40% نهار / 60% ليل)",
+  "usageProfile": "ملف الاستخدام *",
+  "smallHouseRural": "منزل صغير (ريفي)",
+  "mediumHouse": "منزل متوسط",
+  "largeHouseRuralVilla": "منزل كبير / فيلا ريفية",
+  "workshopSmallBusiness": "ورشة / تجارة صغيرة",
+  "network": "الشبكة *",
+  "internalNetworkOptional": "شبكة داخلية (اختياري لكن موصى به)",
+  "select220VOr380V": "اختر 220V أو 380V",
+  "voltage220VSinglePhase": "220V (أحادي الطور)",
+  "voltage380VThreePhase": "380V (ثلاثي الطور)",
+  "autonomy": "الاستقلالية *",
+  "selectAutonomy2DaysDefault": "اختر الاستقلالية (يومان افتراضي)",
+  "dayDefault": " (افتراضي)",
+  "panelPowerOptional600W": "قوة اللوحة (اختياري، افتراضي 600W)",
+  "coverage": "التغطية",
+  "voltage": "الجهد",
+  "voltageWarning": "للقوة > 10 كيلوواط، يُوصى بـ 380V (ثلاثي الطور).",
+  "recommended": "موصى به: {voltage}",
+  "@recommended": {
+    "placeholders": {
+      "voltage": {
+        "type": "String"
+      }
+    }
+  },
+  "networkChosen": "الشبكة المختارة",
+  "selectedProfile": "الملف المختار",
+  "monthlyConsumptionLabel": "الاستهلاك الشهري",
+  "dailyConsumptionLabel": "الاستهلاك اليومي",
+  "coveredEnergyLabel": "الطاقة المغطاة",
+  "requiredPvPowerLabel": "قوة الطاقة الشمسية المطلوبة",
+  "installedPvCapacityLabel": "القدرة الشمسية المثبتة (كيلوواط ذروة)",
+  "recommendedInverterLabel": "المحول الموصى به",
+  "coverageLabel": "التغطية",
+  "voltageLabel": "الشبكة",
+  "newMonthlyBillLabel": "الفاتورة الشهرية الجديدة",
+  "targetEnergyCoveredLabel": "الطاقة المستهدفة المغطاة",
+  "consumptionProfileLabel": "ملف الاستهلاك",
+  "dayLabel": "نهار",
+  "nightLabel": "ليل",
+  "dayPartEnergyLabel": "طاقة الجزء النهاري",
+  "nightEnergyLabel": "طاقة الليل",
+  "usableBatteryCapacityLabel": "سعة البطارية القابلة للاستخدام",
+  "nightEnergyCoveredLabel": "طاقة الليل المغطاة",
+  "gridNightEnergyLabel": "طاقة الشبكة ليلاً",
+  "nightCoveragePercentageLabel": "تغطية الليل",
+  "monthlySavingsLabel": "التوفير الشهري",
+  "billAfterLabel": "الفاتورة بعد",
+  "yearlySavingsLabel": "التوفير السنوي",
+  "tenYearsSavingsLabel": "التوفير على 10 سنوات",
+  "twentyYearsSavingsLabel": "التوفير على 20 سنة",
+  "co2AvoidedTonPerYear": "ثاني أكسيد الكربون المتجنب (طن/سنة): {co2}",
+  "@co2AvoidedTonPerYear": {
+    "placeholders": {
+      "co2": {
+        "type": "String"
+      }
+    }
+  },
+  "equivalentTreesPerYear": "معادل الأشجار/سنة: {trees}",
+  "@equivalentTreesPerYear": {
+    "placeholders": {
+      "trees": {
+        "type": "int"
+      }
+    }
+  },
+  "emonth": "الاستهلاك الشهري",
+  "eday": "الاستهلاك اليومي",
+  "ecovered": "الطاقة المغطاة",
+  "pvpowerkw": "قوة الطاقة الشمسية (كيلوواط)",
+  "numpanels": "عدد الألواح",
+  "pvkwc": "الطاقة الشمسية (كيلوواط ذروة)",
+  "inverterkw": "المحول (كيلوواط)",
+  "savingMonth": "التوفير الشهري",
+  "billAfter": "الفاتورة بعد",
+  "consumptionKwhMonth": "الاستهلاك (كيلوواط ساعة/شهر)",
+  "pvRequiredKw": "الطاقة الشمسية المطلوبة (كيلوواط)",
+  "numberOfPanelsN": "عدد الألواح (N)",
+  "batteryCapacityKwh": "سعة البطارية (كيلوواط ساعة)",
+  "inverterRecommendedKw": "المحول الموصى به (كيلوواط)",
+  "profileOptional": "الملف (اختياري)",
+  "selectProfileDefaultHouse45": "حدد ملفاً (افتراضي: منزل - 45% استهلاك ذاتي)",
+  "houseResidential45SelfConsumption": "منزل (سكني) - 45% استهلاك ذاتي",
+  "commerceCommercial65SelfConsumption": "تجاري (تجاري) - 65% استهلاك ذاتي",
+  "desiredCoveragePercent": "التغطية المرغوبة (%) *",
+  "pleaseSelectNetworkType": "يرجى اختيار نوع الشبكة (220V أو 380V)",
+  "pleaseFillAllRequiredFieldsNetworkCoverageProfile": "يرجى ملء جميع الحقول المطلوبة (الشبكة، التغطية، الملف)",
+  "coverageMustBeBetween30And90ForHybrid": "يجب أن تكون التغطية بين 30% و 90% لـ HYBRID",
+  "batteryCapacityRequiredForHybridSystem": "سعة البطارية مطلوبة لنظام HYBRID",
+  "pleaseSelectUsageProfileAndAutonomy": "يرجى اختيار ملف الاستخدام والاستقلالية",
+  "consumptionKwhMonth": "الاستهلاك (كيلوواط ساعة/شهر)",
+  "selectedProfileDayNight": "الملف المختار (نهار/ليل)",
+  "panelsN": "ألواح (N)",
+  "batteryUsable": "سعة البطارية القابلة للاستخدام",
+  "nightCoveragePercent": "تغطية الليل (%)",
+  "gridNightKwh": "شبكة الليل (كيلوواط ساعة)",
+  "inverterRecommendedKw": "المحول الموصى به (كيلوواط)",
+  "enterAddressOrGpsManually": "أدخل عنوانك أو إحداثيات GPS يدوياً",
+  "uploadBillOptional": "تحميل فاتورة (اختياري)",
+  "sendRequest": "إرسال الطلب",
+  "errorCannotOpenCalculator": "خطأ: لا يمكن فتح الحاسبة. {error}",
+  "@errorCannotOpenCalculator": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteRequestSentSuccessfully": "تم إرسال طلب التقدير بنجاح",
+  "error": "خطأ",
+  "errorLoading": "خطأ أثناء التحميل: {error}",
+  "@errorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotCall": "لا يمكن الاتصال: {phone}",
+  "@cannotCall": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  }
 }

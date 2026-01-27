@@ -12,11 +12,15 @@ class NotificationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final firestoreService = AdminFirestoreService();
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    // CRITICAL: Use LayoutBuilder for proper constraints on Flutter Web
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max, // CRITICAL: Fill available space
+            children: [
           const Text(
             'Notifications',
             style: TextStyle(
@@ -107,8 +111,10 @@ class NotificationsPage extends StatelessWidget {
               },
             ),
           ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

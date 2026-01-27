@@ -109,7 +109,7 @@
   "gpsDetectedSuccess": "Position GPS détectée avec succès",
   "gpsDetectionFailed": "Impossible de détecter votre position. Veuillez vérifier que les services de localisation sont activés et que vous avez accordé les permissions nécessaires.",
   "gpsError": "Erreur lors de la détection de la position",
-  "uploadDisabled": "Upload temporarily disabled. Feature will be activated soon 👍",
+  "uploadDisabled": "Téléchargement temporairement désactivé. La fonctionnalité sera activée bientôt 👍",
   "chooseBill": "Choisir une facture",
   "financingOption": "Option Financement",
   "accessFinancingForm": "Accéder au formulaire de financement",
@@ -249,11 +249,11 @@
   "businessLocation": "Entreprise",
   "farmLocation": "Ferme",
   "otherLocation": "Autre",
-  "welcomeBack": "Welcome back!",
-  "enterYourEmail": "Enter your email",
-  "enterYourPassword": "Enter your password",
-  "dontHaveAccount": "Don't have an account?",
-  "registerButton": "Register",
+  "welcomeBack": "Bon retour !",
+  "enterYourEmail": "Entrez votre adresse e-mail",
+  "enterYourPassword": "Entrez votre mot de passe",
+  "dontHaveAccount": "Vous n'avez pas de compte ?",
+  "registerButton": "S'inscrire",
   "pumpingSolar": "Pompage Solaire",
   "pumpingSolarDescription": "Calculez votre système de pompage solaire avec précision.",
   "pumpingSolarSubtitle": "Résultats estimatifs basés sur votre région et vos besoins réels.",
@@ -421,5 +421,148 @@
   "firstName": "Prénom",
   "lastName": "Nom",
   "companyDocuments": "Documents de l'entreprise",
-  "certificates": "Certificats"
+  "certificates": "Certificats",
+  "chooseSystemType": "Choisir le type de système",
+  "onGridDescription": "Réduire votre facture (sans batterie)",
+  "hybridDescription": "Facture + batteries (autonomie partielle)",
+  "offGridDescription": "Maison isolée (autonomie totale)",
+  "pumpingSolarDescription": "Irrigation et pompage par énergie solaire",
+  "pleaseSelectSystemType": "* Veuillez sélectionner un type de système",
+  "monthlyBillAmountDH": "Montant facture mensuelle (DH)",
+  "monthlyBillDH": "Facture mensuelle (DH)",
+  "consumptionProfileDayNight": "Profil de consommation (Jour/Nuit) *",
+  "selectProfile": "Sélectionnez un profil",
+  "houseProfile60Day40Night": "Maison (60% Jour / 40% Nuit)",
+  "commerceProfile80Day20Night": "Commerce (80% Jour / 20% Nuit)",
+  "industryProfile90Day10Night": "Industrie (90% Jour / 10% Nuit)",
+  "houseNightProfile40Day60Night": "Maison Nuit (40% Jour / 60% Nuit)",
+  "usageProfile": "Profil d'utilisation *",
+  "smallHouseRural": "Petite maison (rurale)",
+  "mediumHouse": "Maison moyenne",
+  "largeHouseRuralVilla": "Grande maison / Villa rurale",
+  "workshopSmallBusiness": "Atelier / Petite entreprise",
+  "network": "Réseau *",
+  "internalNetworkOptional": "Réseau interne (Optionnel mais recommandé)",
+  "select220VOr380V": "Sélectionnez 220V ou 380V",
+  "voltage220VSinglePhase": "220V (Monophasé)",
+  "voltage380VThreePhase": "380V (Triphasé)",
+  "autonomy": "Autonomie *",
+  "selectAutonomy2DaysDefault": "Sélectionnez l'autonomie (2 jours par défaut)",
+  "dayDefault": " (par défaut)",
+  "panelPowerOptional600W": "Puissance panneau (Optionnel, défaut 600W)",
+  "coverage": "Couverture",
+  "voltage": "Tension",
+  "voltageWarning": "Pour une puissance > 10 kW, 380V (Triphasé) est recommandé.",
+  "recommended": "Recommandé : {voltage}",
+  "@recommended": {
+    "placeholders": {
+      "voltage": {
+        "type": "String"
+      }
+    }
+  },
+  "networkChosen": "Réseau choisi",
+  "selectedProfile": "Profil sélectionné",
+  "monthlyConsumptionLabel": "Consommation mensuelle",
+  "dailyConsumptionLabel": "Consommation quotidienne",
+  "coveredEnergyLabel": "Énergie couverte",
+  "requiredPvPowerLabel": "Puissance PV requise",
+  "installedPvCapacityLabel": "Capacité PV installée (kWc)",
+  "recommendedInverterLabel": "Onduleur recommandé",
+  "coverageLabel": "Couverture",
+  "voltageLabel": "Réseau",
+  "newMonthlyBillLabel": "Nouvelle facture mensuelle",
+  "targetEnergyCoveredLabel": "Énergie cible couverte",
+  "consumptionProfileLabel": "Profil de consommation",
+  "dayLabel": "Jour",
+  "nightLabel": "Nuit",
+  "dayPartEnergyLabel": "Énergie partie jour",
+  "nightEnergyLabel": "Énergie nuit",
+  "usableBatteryCapacityLabel": "Capacité batterie utilisable",
+  "nightEnergyCoveredLabel": "Énergie nuit couverte",
+  "gridNightEnergyLabel": "Énergie réseau nuit",
+  "nightCoveragePercentageLabel": "Couverture nuit",
+  "monthlySavingsLabel": "Économies mensuelles",
+  "billAfterLabel": "Facture après",
+  "yearlySavingsLabel": "Économies annuelles",
+  "tenYearsSavingsLabel": "Économies 10 ans",
+  "twentyYearsSavingsLabel": "Économies 20 ans",
+  "co2AvoidedTonPerYear": "CO₂ évité (tonne/an) : {co2}",
+  "@co2AvoidedTonPerYear": {
+    "placeholders": {
+      "co2": {
+        "type": "String"
+      }
+    }
+  },
+  "equivalentTreesPerYear": "Arbres équivalents/an : {trees}",
+  "@equivalentTreesPerYear": {
+    "placeholders": {
+      "trees": {
+        "type": "int"
+      }
+    }
+  },
+  "emonth": "E_mois",
+  "eday": "E_jour",
+  "ecovered": "E_couvert",
+  "pvpowerkw": "Puissance PV (kW)",
+  "numpanels": "Nombre de panneaux",
+  "pvkwc": "PV (kWc)",
+  "inverterkw": "Onduleur (kW)",
+  "savingMonth": "Économies mensuelles",
+  "billAfter": "Facture après",
+  "pvRequiredKw": "PV requis (kW)",
+  "numberOfPanelsN": "Nombre de panneaux (N)",
+  "batteryCapacityKwh": "Capacité batterie (kWh)",
+  "inverterRecommendedKw": "Onduleur recommandé (kW)",
+  "profileOptional": "Profil (optionnel)",
+  "selectProfileDefaultHouse45": "Sélectionnez un profil (défaut: Maison - 45% autoconsommation)",
+  "houseResidential45SelfConsumption": "Maison (Résidentiel) - 45% autoconsommation",
+  "commerceCommercial65SelfConsumption": "Commerce (Commercial) - 65% autoconsommation",
+  "desiredCoveragePercent": "Couverture souhaitée (%) *",
+  "pleaseSelectNetworkType": "Veuillez sélectionner le type de réseau (220V ou 380V)",
+  "pleaseFillAllRequiredFieldsNetworkCoverageProfile": "Veuillez remplir tous les champs requis (Réseau, Couverture, Profil)",
+  "coverageMustBeBetween30And90ForHybrid": "La couverture doit être entre 30% et 90% pour HYBRID",
+  "batteryCapacityRequiredForHybridSystem": "La capacité de batterie est requise pour le système HYBRID",
+  "pleaseSelectUsageProfileAndAutonomy": "Veuillez sélectionner le profil d'usage et l'autonomie",
+  "consumptionKwhMonth": "Consommation (kWh/mois)",
+  "selectedProfileDayNight": "Profil choisi (Jour/Nuit)",
+  "panelsN": "panneaux (N)",
+  "batteryUsable": "Batterie utilisable",
+  "nightCoveragePercent": "Couverture nuit (%)",
+  "gridNightKwh": "Réseau nuit (kWh)",
+  "inverterRecommendedKw": "Onduleur recommandé (kW)",
+  "enterAddressOrGpsManually": "Entrez votre adresse ou coordonnées GPS manuellement",
+  "uploadBillOptional": "Télécharger une facture (optionnel)",
+  "sendRequest": "Envoyer la demande",
+  "errorCannotOpenCalculator": "Erreur: Impossible d'ouvrir le calculateur. {error}",
+  "@errorCannotOpenCalculator": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteRequestSentSuccessfully": "Demande de devis envoyée avec succès",
+  "error": "Erreur",
+  "errorLoading": "Erreur lors du chargement: {error}",
+  "@errorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotCall": "Impossible d'appeler: {phone}",
+  "@cannotCall": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "yearlySavingsLabel": "Économie annuelle",
+  "tenYearsSavingsLabel": "Économie 10 ans",
+  "twentyYearsSavingsLabel": "Économie 20 ans"
 }

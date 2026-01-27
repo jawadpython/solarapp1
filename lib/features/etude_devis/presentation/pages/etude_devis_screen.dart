@@ -66,7 +66,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
       if (isKwh) {
         consumption = double.tryParse(_consumptionController.text.trim()) ?? 0.0;
         if (consumption <= 0) {
-          throw Exception('Consommation invalide');
+          throw Exception(AppLocalizations.of(context)!.invalidConsumption);
         }
       }
 

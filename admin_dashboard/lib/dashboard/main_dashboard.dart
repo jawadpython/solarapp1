@@ -39,32 +39,40 @@ class _MainDashboardState extends State<MainDashboard> {
     });
   }
 
+  /// Get current page widget based on selected index
+  /// Each page is wrapped with a key to ensure proper state management
   Widget _getPage() {
     switch (_selectedIndex) {
       case 0:
-        return _DashboardHome(statistics: _statistics);
+        return _DashboardHome(
+          key: const ValueKey('dashboard_home'),
+          statistics: _statistics,
+        );
       case 1:
-        return const DevisRequestsPage();
+        return const DevisRequestsPage(key: ValueKey('devis_requests'));
       case 2:
-        return const InstallationRequestsPage();
+        return const InstallationRequestsPage(key: ValueKey('installation_requests'));
       case 3:
-        return const MaintenanceRequestsPage();
+        return const MaintenanceRequestsPage(key: ValueKey('maintenance_requests'));
       case 4:
-        return const PumpingRequestsPage();
+        return const PumpingRequestsPage(key: ValueKey('pumping_requests'));
       case 5:
-        return const ProjectRequestsPage();
+        return const ProjectRequestsPage(key: ValueKey('project_requests'));
       case 6:
-        return const TechnicianApplicationsPage();
+        return const TechnicianApplicationsPage(key: ValueKey('technician_applications'));
       case 7:
-        return const PartnerApplicationsPage();
+        return const PartnerApplicationsPage(key: ValueKey('partner_applications'));
       case 8:
-        return const TechniciansPage();
+        return const TechniciansPage(key: ValueKey('technicians'));
       case 9:
-        return const PartnersPage();
+        return const PartnersPage(key: ValueKey('partners'));
       case 10:
-        return const NotificationsPage();
+        return const NotificationsPage(key: ValueKey('notifications'));
       default:
-        return _DashboardHome(statistics: _statistics);
+        return _DashboardHome(
+          key: const ValueKey('dashboard_home_default'),
+          statistics: _statistics,
+        );
     }
   }
 
@@ -73,12 +81,14 @@ class _MainDashboardState extends State<MainDashboard> {
     return AdminLayout(
       selectedIndex: _selectedIndex,
       onNavigationChanged: (index) {
-        setState(() {
-          _selectedIndex = index;
-          if (index == 0) {
-            _loadStatistics();
-          }
-        });
+        if (mounted) {
+          setState(() {
+            _selectedIndex = index;
+            if (index == 0) {
+              _loadStatistics();
+            }
+          });
+        }
       },
       content: _getPage(),
     );
@@ -88,7 +98,10 @@ class _MainDashboardState extends State<MainDashboard> {
 class _DashboardHome extends StatelessWidget {
   final Map<String, int> statistics;
 
-  const _DashboardHome({required this.statistics});
+  const _DashboardHome({
+    super.key,
+    required this.statistics,
+  });
 
   @override
   Widget build(BuildContext context) {

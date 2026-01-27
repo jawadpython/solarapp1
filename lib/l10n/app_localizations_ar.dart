@@ -694,10 +694,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gpsPositionCaptured => 'تم التقاط موقع GPS';
 
   @override
-  String get onGridSystem => 'On-grid';
+  String get onGridSystem => 'متصل بالشبكة';
 
   @override
-  String get offGridSystem => 'Off-grid';
+  String get offGridSystem => 'منفصل عن الشبكة';
 
   @override
   String get hybridSystem => 'هجين';
@@ -736,7 +736,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pumpingSolar => 'الضخ الشمسي';
 
   @override
-  String get pumpingSolarDescription => 'احسب نظام الضخ الشمسي الخاص بك بدقة.';
+  String get pumpingSolarDescription => 'الري والضخ بالطاقة الشمسية';
 
   @override
   String get pumpingSolarSubtitle =>
@@ -882,7 +882,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectSystemTypeHint => 'اختر نوع النظام';
 
   @override
-  String get pumpingSolarSystem => 'POMPAGE SOLAIRE';
+  String get pumpingSolarSystem => 'الضخ الشمسي';
 
   @override
   String get billAmountLabel => 'مبلغ الفاتورة (درهم) *';
@@ -1158,4 +1158,304 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get certificates => 'الشهادات';
+
+  @override
+  String get chooseSystemType => 'اختر نوع النظام';
+
+  @override
+  String get onGridDescription => 'تقليل فاتورتك (بدون بطارية)';
+
+  @override
+  String get hybridDescription => 'فاتورة + بطاريات (استقلالية جزئية)';
+
+  @override
+  String get offGridDescription => 'منزل معزول (استقلالية كاملة)';
+
+  @override
+  String get pleaseSelectSystemType => '* يرجى اختيار نوع النظام';
+
+  @override
+  String get monthlyBillAmountDH => 'مبلغ الفاتورة الشهرية (درهم)';
+
+  @override
+  String get monthlyBillDH => 'الفاتورة الشهرية (درهم)';
+
+  @override
+  String get consumptionProfileDayNight => 'ملف الاستهلاك (نهار/ليل) *';
+
+  @override
+  String get selectProfile => 'اختر ملفاً';
+
+  @override
+  String get houseProfile60Day40Night => 'منزل (60% نهار / 40% ليل)';
+
+  @override
+  String get commerceProfile80Day20Night => 'تجاري (80% نهار / 20% ليل)';
+
+  @override
+  String get industryProfile90Day10Night => 'صناعي (90% نهار / 10% ليل)';
+
+  @override
+  String get houseNightProfile40Day60Night => 'منزل ليلي (40% نهار / 60% ليل)';
+
+  @override
+  String get usageProfile => 'ملف الاستخدام *';
+
+  @override
+  String get smallHouseRural => 'منزل صغير (ريفي)';
+
+  @override
+  String get mediumHouse => 'منزل متوسط';
+
+  @override
+  String get largeHouseRuralVilla => 'منزل كبير / فيلا ريفية';
+
+  @override
+  String get workshopSmallBusiness => 'ورشة / تجارة صغيرة';
+
+  @override
+  String get network => 'الشبكة *';
+
+  @override
+  String get internalNetworkOptional => 'شبكة داخلية (اختياري لكن موصى به)';
+
+  @override
+  String get select220VOr380V => 'اختر 220V أو 380V';
+
+  @override
+  String get voltage220VSinglePhase => '220V (أحادي الطور)';
+
+  @override
+  String get voltage380VThreePhase => '380V (ثلاثي الطور)';
+
+  @override
+  String get autonomy => 'الاستقلالية *';
+
+  @override
+  String get selectAutonomy2DaysDefault => 'اختر الاستقلالية (يومان افتراضي)';
+
+  @override
+  String get dayDefault => ' (افتراضي)';
+
+  @override
+  String get panelPowerOptional600W => 'قوة اللوحة (اختياري، افتراضي 600W)';
+
+  @override
+  String get coverage => 'التغطية';
+
+  @override
+  String get voltage => 'الجهد';
+
+  @override
+  String get voltageWarning =>
+      'للقوة > 10 كيلوواط، يُوصى بـ 380V (ثلاثي الطور).';
+
+  @override
+  String recommended(String voltage) {
+    return 'موصى به: $voltage';
+  }
+
+  @override
+  String get networkChosen => 'الشبكة المختارة';
+
+  @override
+  String get selectedProfile => 'الملف المختار';
+
+  @override
+  String get monthlyConsumptionLabel => 'الاستهلاك الشهري';
+
+  @override
+  String get dailyConsumptionLabel => 'الاستهلاك اليومي';
+
+  @override
+  String get coveredEnergyLabel => 'الطاقة المغطاة';
+
+  @override
+  String get requiredPvPowerLabel => 'قوة الطاقة الشمسية المطلوبة';
+
+  @override
+  String get installedPvCapacityLabel =>
+      'القدرة الشمسية المثبتة (كيلوواط ذروة)';
+
+  @override
+  String get recommendedInverterLabel => 'المحول الموصى به';
+
+  @override
+  String get coverageLabel => 'التغطية';
+
+  @override
+  String get voltageLabel => 'الشبكة';
+
+  @override
+  String get newMonthlyBillLabel => 'الفاتورة الشهرية الجديدة';
+
+  @override
+  String get targetEnergyCoveredLabel => 'الطاقة المستهدفة المغطاة';
+
+  @override
+  String get consumptionProfileLabel => 'ملف الاستهلاك';
+
+  @override
+  String get dayLabel => 'نهار';
+
+  @override
+  String get nightLabel => 'ليل';
+
+  @override
+  String get dayPartEnergyLabel => 'طاقة الجزء النهاري';
+
+  @override
+  String get nightEnergyLabel => 'طاقة الليل';
+
+  @override
+  String get usableBatteryCapacityLabel => 'سعة البطارية القابلة للاستخدام';
+
+  @override
+  String get nightEnergyCoveredLabel => 'طاقة الليل المغطاة';
+
+  @override
+  String get gridNightEnergyLabel => 'طاقة الشبكة ليلاً';
+
+  @override
+  String get nightCoveragePercentageLabel => 'تغطية الليل';
+
+  @override
+  String get monthlySavingsLabel => 'التوفير الشهري';
+
+  @override
+  String get billAfterLabel => 'الفاتورة بعد';
+
+  @override
+  String get yearlySavingsLabel => 'التوفير السنوي';
+
+  @override
+  String get tenYearsSavingsLabel => 'التوفير على 10 سنوات';
+
+  @override
+  String get twentyYearsSavingsLabel => 'التوفير على 20 سنة';
+
+  @override
+  String co2AvoidedTonPerYear(String co2) {
+    return 'ثاني أكسيد الكربون المتجنب (طن/سنة): $co2';
+  }
+
+  @override
+  String equivalentTreesPerYear(int trees) {
+    return 'معادل الأشجار/سنة: $trees';
+  }
+
+  @override
+  String get emonth => 'الاستهلاك الشهري';
+
+  @override
+  String get eday => 'الاستهلاك اليومي';
+
+  @override
+  String get ecovered => 'الطاقة المغطاة';
+
+  @override
+  String get pvpowerkw => 'قوة الطاقة الشمسية (كيلوواط)';
+
+  @override
+  String get numpanels => 'عدد الألواح';
+
+  @override
+  String get pvkwc => 'الطاقة الشمسية (كيلوواط ذروة)';
+
+  @override
+  String get inverterkw => 'المحول (كيلوواط)';
+
+  @override
+  String get savingMonth => 'التوفير الشهري';
+
+  @override
+  String get billAfter => 'الفاتورة بعد';
+
+  @override
+  String get pvRequiredKw => 'الطاقة الشمسية المطلوبة (كيلوواط)';
+
+  @override
+  String get numberOfPanelsN => 'عدد الألواح (N)';
+
+  @override
+  String get batteryCapacityKwh => 'سعة البطارية (كيلوواط ساعة)';
+
+  @override
+  String get inverterRecommendedKw => 'المحول الموصى به (كيلوواط)';
+
+  @override
+  String get profileOptional => 'الملف (اختياري)';
+
+  @override
+  String get selectProfileDefaultHouse45 =>
+      'حدد ملفاً (افتراضي: منزل - 45% استهلاك ذاتي)';
+
+  @override
+  String get houseResidential45SelfConsumption =>
+      'منزل (سكني) - 45% استهلاك ذاتي';
+
+  @override
+  String get commerceCommercial65SelfConsumption =>
+      'تجاري (تجاري) - 65% استهلاك ذاتي';
+
+  @override
+  String get desiredCoveragePercent => 'التغطية المرغوبة (%) *';
+
+  @override
+  String get pleaseSelectNetworkType => 'يرجى اختيار نوع الشبكة (220V أو 380V)';
+
+  @override
+  String get pleaseFillAllRequiredFieldsNetworkCoverageProfile =>
+      'يرجى ملء جميع الحقول المطلوبة (الشبكة، التغطية، الملف)';
+
+  @override
+  String get coverageMustBeBetween30And90ForHybrid =>
+      'يجب أن تكون التغطية بين 30% و 90% لـ HYBRID';
+
+  @override
+  String get batteryCapacityRequiredForHybridSystem =>
+      'سعة البطارية مطلوبة لنظام HYBRID';
+
+  @override
+  String get pleaseSelectUsageProfileAndAutonomy =>
+      'يرجى اختيار ملف الاستخدام والاستقلالية';
+
+  @override
+  String get selectedProfileDayNight => 'الملف المختار (نهار/ليل)';
+
+  @override
+  String get panelsN => 'ألواح (N)';
+
+  @override
+  String get batteryUsable => 'سعة البطارية القابلة للاستخدام';
+
+  @override
+  String get nightCoveragePercent => 'تغطية الليل (%)';
+
+  @override
+  String get gridNightKwh => 'شبكة الليل (كيلوواط ساعة)';
+
+  @override
+  String get enterAddressOrGpsManually => 'أدخل عنوانك أو إحداثيات GPS يدوياً';
+
+  @override
+  String get uploadBillOptional => 'تحميل فاتورة (اختياري)';
+
+  @override
+  String errorCannotOpenCalculator(String error) {
+    return 'خطأ: لا يمكن فتح الحاسبة. $error';
+  }
+
+  @override
+  String get quoteRequestSentSuccessfully => 'تم إرسال طلب التقدير بنجاح';
+
+  @override
+  String errorLoading(String error) {
+    return 'خطأ أثناء التحميل: $error';
+  }
+
+  @override
+  String cannotCall(String phone) {
+    return 'لا يمكن الاتصال: $phone';
+  }
 }

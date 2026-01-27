@@ -45,8 +45,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         
         // Version info from pubspec.yaml (version: 1.0.0+1)
-        // versionName = "1.0.0" (user-visible)
-        // versionCode = 1 (internal, must increment for each release)
+        // versionName = "1.0.6" (user-visible)
+        // versionCode = 6 (internal, must increment for each release)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         

@@ -33,53 +33,45 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
     }
   }
 
-  /// Calculate environmental impact
+  /// Calculate environmental impact with new constants
   Map<String, double> _calculateEnvironmentalImpact(
     double kWhMonth,
-    double tauxEconomie,
-    String systemType,
+    double coveragePct,
   ) {
-    // A) Solar coverage
-    // tauxEconomie is already a decimal (0.70 = 70%)
-    double couverture;
-    if (systemType == "ON-GRID" || systemType == "ON_GRID") {
-      couverture = tauxEconomie.clamp(0.0, 0.9);
-    } else if (systemType == "HYBRID") {
-      couverture = tauxEconomie.clamp(0.0, 0.95);
-    } else if (systemType == "OFF-GRID" || systemType == "OFF_GRID") {
-      couverture = 1.0;
-    } else {
-      couverture = tauxEconomie.clamp(0.0, 0.9);
-    }
+    // Step 11: kWh Saved
+    // Formula: kwh_saved_month = E_month × (coverage_pct / 100)
+    final kwhSavedMonth = kWhMonth * (coveragePct / 100);
+    // Formula: kwh_saved_year = kwh_saved_month × 12
+    final kwhSavedYear = kwhSavedMonth * 12;
 
-    // B) Energy saved per year
-    double kWhSavedYear = kWhMonth * 12 * couverture;
+    // Step 12: CO₂ avoided
+    // Formula: co2_kg/year = kwh_saved_year × co2_factor
+    const co2Factor = 0.6; // kg CO2 / kWh (updated from 0.7)
+    final co2Kg = kwhSavedYear * co2Factor;
+    // Formula: co2_ton/year = co2_kg/year / 1000
+    final co2Tonnes = co2Kg / 1000;
 
-    // C) CO₂ saved
-    const double EF = 0.7; // kg CO2 / kWh
-    double co2Kg = kWhSavedYear * EF;
-    double co2Tonnes = co2Kg / 1000;
-
-    // D) Trees equivalent (1 tree ≈ 20 kg CO2 / year)
-    double arbres = co2Kg / 20;
+    // Step 13: Trees equivalent
+    // Formula: trees/year = co2_kg/year / kg_per_tree
+    const kgPerTree = 22.0; // kg CO2 / tree / year (updated from 20)
+    final trees = co2Kg / kgPerTree;
 
     // Debug logs
-    debugPrint("ENV INPUTS -> kWhMonth: $kWhMonth, taux: $tauxEconomie, type: $systemType");
-    debugPrint("ENV OUTPUTS -> CO2(t): $co2Tonnes, arbres: $arbres");
+    debugPrint("ENV INPUTS -> kWhMonth: $kWhMonth, coverage: $coveragePct%");
+    debugPrint("ENV OUTPUTS -> kwh_saved_year: $kwhSavedYear, CO2(t): $co2Tonnes, trees: $trees");
 
     return {
       'co2Tonnes': co2Tonnes,
-      'arbres': arbres,
+      'arbres': trees,
     };
   }
 
   /// Build Environmental Impact Card
   Widget _buildEnvironmentalImpactCard(
     double kWhMonth,
-    double tauxEconomie,
-    String systemType,
+    double coveragePct,
   ) {
-    final impact = _calculateEnvironmentalImpact(kWhMonth, tauxEconomie, systemType);
+    final impact = _calculateEnvironmentalImpact(kWhMonth, coveragePct);
     final co2Tonnes = impact['co2Tonnes']!;
     final arbres = impact['arbres']!;
 
@@ -141,7 +133,7 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.co2Avoided(co2Tonnes.toStringAsFixed(1)),
+                  AppLocalizations.of(context)!.co2AvoidedTonPerYear(co2Tonnes.toStringAsFixed(0)),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -150,7 +142,7 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  AppLocalizations.of(context)!.equivalentTrees(arbres.round()),
+                  AppLocalizations.of(context)!.equivalentTreesPerYear(arbres.round()),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -177,7 +169,6 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
   @override
   Widget build(BuildContext context) {
     final result = widget.result;
-    final savingRatePercent = (result.savingRate * 100).toStringAsFixed(0);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -240,31 +231,117 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
                   const SizedBox(height: 24),
                   _ResultItem(
                     icon: Icons.bolt,
-                    label: AppLocalizations.of(context)!.estimatedConsumptionLabel,
-                    value: '${result.kwhMonth.toStringAsFixed(1)} kWh / ${AppLocalizations.of(context)!.monthlyLabel.toLowerCase()}',
+                    label: AppLocalizations.of(context)!.emonth,
+                    value: '${result.kwhMonth.toStringAsFixed(1)} kWh',
                     color: Colors.blue,
                   ),
                   const SizedBox(height: 16),
                   _ResultItem(
+                    icon: Icons.calendar_today,
+                    label: AppLocalizations.of(context)!.eday,
+                    value: '${result.kwhDay.toStringAsFixed(1)} kWh',
+                    color: Colors.cyan,
+                  ),
+                  const SizedBox(height: 16),
+                  _ResultItem(
+                    icon: Icons.solar_power,
+                    label: AppLocalizations.of(context)!.ecovered,
+                    value: '${result.kwhCovered.toStringAsFixed(1)} kWh',
+                    color: Colors.green,
+                  ),
+                  const SizedBox(height: 16),
+                  _ResultItem(
                     icon: Icons.power,
-                    label: AppLocalizations.of(context)!.recommendedSystemPowerLabel,
-                    value: '${result.powerKW.toStringAsFixed(2)} kW',
+                    label: AppLocalizations.of(context)!.pvpowerkw,
+                    value: '${result.pvPowerKW.toStringAsFixed(1)} kW',
                     color: AppColors.primary,
                   ),
                   const SizedBox(height: 16),
                   _ResultItem(
                     icon: Icons.grid_view,
-                    label: AppLocalizations.of(context)!.numberOfPanelsLabel,
+                    label: AppLocalizations.of(context)!.numpanels,
                     value: '${result.panels}',
                     color: Colors.orange,
                   ),
                   const SizedBox(height: 16),
                   _ResultItem(
+                    icon: Icons.battery_charging_full,
+                    label: AppLocalizations.of(context)!.pvkwc,
+                    value: '${result.pvKwc.toStringAsFixed(1)} kWc',
+                    color: Colors.purple,
+                  ),
+                  const SizedBox(height: 16),
+                  _ResultItem(
+                    icon: Icons.electric_bolt,
+                    label: AppLocalizations.of(context)!.inverterkw,
+                    value: '${result.inverterKW.toStringAsFixed(0)} kW',
+                    color: Colors.teal,
+                  ),
+                  const SizedBox(height: 16),
+                  _ResultItem(
                     icon: Icons.percent,
-                    label: AppLocalizations.of(context)!.savingRateLabel,
-                    value: '$savingRatePercent%',
+                    label: AppLocalizations.of(context)!.coverageLabel,
+                    value: '${result.coveragePct.toStringAsFixed(0)}%',
                     color: Colors.green,
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(Icons.power_input, color: Colors.indigo),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.voltageLabel,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              result.voltage,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (result.showVoltageWarning) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade300, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context)!.voltageWarning,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.orange.shade900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -315,23 +392,29 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
                   ),
                   const SizedBox(height: 20),
                   _SavingsRow(
-                    label: AppLocalizations.of(context)!.monthlyLabel,
-                    value: '${result.savingMonth.toStringAsFixed(2)} DH',
+                    label: AppLocalizations.of(context)!.savingMonth,
+                    value: '${result.savingMonth.toStringAsFixed(0)} DH',
                   ),
                   const SizedBox(height: 12),
                   _SavingsRow(
-                    label: AppLocalizations.of(context)!.yearlyLabel,
+                    label: AppLocalizations.of(context)!.billAfter,
+                    value: '${result.billAfter.toStringAsFixed(0)} DH',
+                    isHighlight: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _SavingsRow(
+                    label: AppLocalizations.of(context)!.yearlySavingsLabel,
                     value: '${result.savingYear.toStringAsFixed(2)} DH',
                   ),
                   const SizedBox(height: 12),
                   _SavingsRow(
-                    label: AppLocalizations.of(context)!.tenYearsLabel,
+                    label: AppLocalizations.of(context)!.tenYearsSavingsLabel,
                     value: '${result.saving10Y.toStringAsFixed(2)} DH',
                     isHighlight: true,
                   ),
                   const SizedBox(height: 12),
                   _SavingsRow(
-                    label: AppLocalizations.of(context)!.twentyYearsLabel,
+                    label: AppLocalizations.of(context)!.twentyYearsSavingsLabel,
                     value: '${result.saving20Y.toStringAsFixed(2)} DH',
                     isHighlight: true,
                   ),
@@ -340,7 +423,7 @@ class _ResultOnGridScreenState extends State<ResultOnGridScreen> {
             ),
             const SizedBox(height: 20),
             // Environmental Impact Card
-            _buildEnvironmentalImpactCard(result.kwhMonth, result.savingRate, result.systemType),
+            _buildEnvironmentalImpactCard(result.kwhMonth, result.coveragePct),
             const SizedBox(height: 20),
             // Info Card
             Container(

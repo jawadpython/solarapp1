@@ -421,5 +421,145 @@
   "firstName": "First name",
   "lastName": "Last name",
   "companyDocuments": "Company documents",
-  "certificates": "Certificates"
+  "certificates": "Certificates",
+  "chooseSystemType": "Choose the type of system",
+  "onGridDescription": "Reduce your bill (without Battery)",
+  "hybridDescription": "Bill + batteries (partial autonomy)",
+  "offGridDescription": "Isolated House (total autonomy)",
+  "pumpingSolarDescription": "Irrigation and Pumping By solar energy",
+  "pleaseSelectSystemType": "* Please select a system type",
+  "monthlyBillAmountDH": "Monthly bill amount (DH)",
+  "monthlyBillDH": "Monthly bill (DH)",
+  "consumptionProfileDayNight": "Consumption profile (Day/Night) *",
+  "selectProfile": "Select a profile",
+  "houseProfile60Day40Night": "House (60% Day / 40% Night)",
+  "commerceProfile80Day20Night": "Commerce (80% Day / 20% Night)",
+  "industryProfile90Day10Night": "Industry (90% Day / 10% Night)",
+  "houseNightProfile40Day60Night": "House Night (40% Day / 60% Night)",
+  "usageProfile": "Usage profile *",
+  "smallHouseRural": "Small house (rural)",
+  "mediumHouse": "Medium house",
+  "largeHouseRuralVilla": "Large house / Rural villa",
+  "workshopSmallBusiness": "Workshop / Small business",
+  "network": "Network *",
+  "internalNetworkOptional": "Internal network (Optional but recommended)",
+  "select220VOr380V": "Select 220V or 380V",
+  "voltage220VSinglePhase": "220V (Single-phase)",
+  "voltage380VThreePhase": "380V (Three-phase)",
+  "autonomy": "Autonomy *",
+  "selectAutonomy2DaysDefault": "Select autonomy (2 days default)",
+  "dayDefault": " (default)",
+  "panelPowerOptional600W": "Panel Power (Optional, default 600W)",
+  "coverage": "Coverage",
+  "voltage": "Voltage",
+  "voltageWarning": "For a power > 10 kW, 380V (Three-phase) is recommended.",
+  "recommended": "Recommended: {voltage}",
+  "@recommended": {
+    "placeholders": {
+      "voltage": {
+        "type": "String"
+      }
+    }
+  },
+  "networkChosen": "Network chosen",
+  "selectedProfile": "Selected profile",
+  "monthlyConsumptionLabel": "Monthly consumption",
+  "dailyConsumptionLabel": "Daily consumption",
+  "coveredEnergyLabel": "Covered energy",
+  "requiredPvPowerLabel": "Required PV power",
+  "installedPvCapacityLabel": "Installed PV capacity (kWc)",
+  "recommendedInverterLabel": "Recommended inverter",
+  "coverageLabel": "Coverage",
+  "voltageLabel": "Network",
+  "newMonthlyBillLabel": "New monthly bill",
+  "targetEnergyCoveredLabel": "Target energy covered",
+  "consumptionProfileLabel": "Consumption profile",
+  "dayLabel": "Day",
+  "nightLabel": "Night",
+  "dayPartEnergyLabel": "Day part energy",
+  "nightEnergyLabel": "Night energy",
+  "usableBatteryCapacityLabel": "Usable battery capacity",
+  "nightEnergyCoveredLabel": "Night energy covered",
+  "gridNightEnergyLabel": "Grid night energy",
+  "nightCoveragePercentageLabel": "Night coverage",
+  "monthlySavingsLabel": "Monthly savings",
+  "billAfterLabel": "Bill after",
+  "yearlySavingsLabel": "Yearly savings",
+  "tenYearsSavingsLabel": "10 years savings",
+  "twentyYearsSavingsLabel": "20 years savings",
+  "co2AvoidedTonPerYear": "CO₂ avoided (ton/year): {co2}",
+  "@co2AvoidedTonPerYear": {
+    "placeholders": {
+      "co2": {
+        "type": "String"
+      }
+    }
+  },
+  "equivalentTreesPerYear": "Equivalent trees/year: {trees}",
+  "@equivalentTreesPerYear": {
+    "placeholders": {
+      "trees": {
+        "type": "int"
+      }
+    }
+  },
+  "emonth": "E_month",
+  "eday": "E_day",
+  "ecovered": "E_covered",
+  "pvpowerkw": "PV power (kW)",
+  "numpanels": "Number of panels",
+  "pvkwc": "PV (kWc)",
+  "inverterkw": "Inverter (kW)",
+  "savingMonth": "Monthly savings",
+  "billAfter": "Bill after",
+  "consumptionKwhMonth": "Consumption (kWh/month)",
+  "pvRequiredKw": "PV required (kW)",
+  "numberOfPanelsN": "Number of panels (N)",
+  "batteryCapacityKwh": "Battery capacity (kWh)",
+  "inverterRecommendedKw": "Inverter recommended (kW)",
+  "profileOptional": "Profile (optional)",
+  "selectProfileDefaultHouse45": "Select a profile (default: House - 45% self-consumption)",
+  "houseResidential45SelfConsumption": "House (Residential) - 45% self-consumption",
+  "commerceCommercial65SelfConsumption": "Commerce (Commercial) - 65% self-consumption",
+  "desiredCoveragePercent": "Desired coverage (%) *",
+  "pleaseSelectNetworkType": "Please select the network type (220V or 380V)",
+  "pleaseFillAllRequiredFieldsNetworkCoverageProfile": "Please fill all required fields (Network, Coverage, Profile)",
+  "coverageMustBeBetween30And90ForHybrid": "Coverage must be between 30% and 90% for HYBRID",
+  "batteryCapacityRequiredForHybridSystem": "Battery capacity is required for HYBRID system",
+  "pleaseSelectUsageProfileAndAutonomy": "Please select usage profile and autonomy",
+  "selectedProfileDayNight": "Selected profile (Day/Night)",
+  "panelsN": "panels (N)",
+  "batteryUsable": "Battery usable",
+  "nightCoveragePercent": "Night coverage (%)",
+  "gridNightKwh": "Grid night (kWh)",
+  "inverterRecommendedKw": "Inverter recommended (kW)",
+  "enterAddressOrGpsManually": "Enter your address or GPS coordinates manually",
+  "uploadBillOptional": "Upload a bill (optional)",
+  "sendRequest": "Send request",
+  "errorCannotOpenCalculator": "Error: Cannot open calculator. {error}",
+  "@errorCannotOpenCalculator": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteRequestSentSuccessfully": "Quote request sent successfully",
+  "error": "Error",
+  "errorLoading": "Error loading: {error}",
+  "@errorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotCall": "Cannot call: {phone}",
+  "@cannotCall": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/theme/app_theme.dart';
@@ -16,21 +17,36 @@ void main() async {
   // Initialize language service
   await LanguageService.instance.initialize();
   
-  // Initialize Firebase with error handling
+  // Initialize Firebase with platform-specific configuration
   try {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyBIJ17OtVeS218IBjnmf1UoWsxsu3YY0-k",
-        authDomain: "tawfir-energy-prod-98053.firebaseapp.com",
-        projectId: "tawfir-energy-prod-98053",
-        storageBucket: "tawfir-energy-prod-98053.firebasestorage.app",
-        messagingSenderId: "751649516744",
-        appId: "1:751649516744:web:a43278ec8ae222cba449fd",
-      ),
-    );
-    debugPrint('✅ Firebase initialized successfully');
-  } catch (e) {
+    if (kIsWeb) {
+      // Web: Use explicit configuration
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "AIzaSyBIJ17OtVeS218IBjnmf1UoWsxsu3YY0-k",
+          authDomain: "tawfir-energy-prod-98053.firebaseapp.com",
+          projectId: "tawfir-energy-prod-98053",
+          storageBucket: "tawfir-energy-prod-98053.firebasestorage.app",
+          messagingSenderId: "751649516744",
+          appId: "1:751649516744:web:a43278ec8ae222cba449fd",
+        ),
+      );
+      debugPrint('✅ Firebase initialized successfully (Web)');
+    } else {
+      // iOS/Android: Auto-detect from GoogleService-Info.plist (iOS) or google-services.json (Android)
+      // Firebase will automatically read the configuration files
+      await Firebase.initializeApp();
+      
+      // Log platform info
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        debugPrint('✅ Firebase initialized successfully (iOS - using GoogleService-Info.plist)');
+      } else {
+        debugPrint('✅ Firebase initialized successfully (Android - using google-services.json)');
+      }
+    }
+  } catch (e, stackTrace) {
     debugPrint('❌ Firebase initialization failed: $e');
+    debugPrint('Stack trace: $stackTrace');
     debugPrint('⚠️ Firebase features will not work. Make sure Firebase configuration files are set up.');
     debugPrint('⚠️ For Android: Add google-services.json to android/app/');
     debugPrint('⚠️ For iOS: Add GoogleService-Info.plist to ios/Runner/');
@@ -41,6 +57,11 @@ void main() async {
   // Verify Firebase is initialized
   if (Firebase.apps.isEmpty) {
     debugPrint('⚠️ WARNING: No Firebase apps initialized. Firebase features will not work.');
+  } else {
+    debugPrint('✅ Firebase apps initialized: ${Firebase.apps.length}');
+    for (var app in Firebase.apps) {
+      debugPrint('  - ${app.name}: ${app.options.projectId}');
+    }
   }
   
   runApp(const NoorEnergyApp());

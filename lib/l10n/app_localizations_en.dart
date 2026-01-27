@@ -535,7 +535,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterCompanyName => 'Please enter company name';
 
   @override
-  String get sendRequest => 'Send Request';
+  String get sendRequest => 'Send request';
 
   @override
   String get createRequest => 'Create Request';
@@ -746,7 +746,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pumpingSolarDescription =>
-      'Calculate your solar pumping system with precision.';
+      'Irrigation and Pumping By solar energy';
 
   @override
   String get pumpingSolarSubtitle =>
@@ -1171,4 +1171,307 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get certificates => 'Certificates';
+
+  @override
+  String get chooseSystemType => 'Choose the type of system';
+
+  @override
+  String get onGridDescription => 'Reduce your bill (without Battery)';
+
+  @override
+  String get hybridDescription => 'Bill + batteries (partial autonomy)';
+
+  @override
+  String get offGridDescription => 'Isolated House (total autonomy)';
+
+  @override
+  String get pleaseSelectSystemType => '* Please select a system type';
+
+  @override
+  String get monthlyBillAmountDH => 'Monthly bill amount (DH)';
+
+  @override
+  String get monthlyBillDH => 'Monthly bill (DH)';
+
+  @override
+  String get consumptionProfileDayNight => 'Consumption profile (Day/Night) *';
+
+  @override
+  String get selectProfile => 'Select a profile';
+
+  @override
+  String get houseProfile60Day40Night => 'House (60% Day / 40% Night)';
+
+  @override
+  String get commerceProfile80Day20Night => 'Commerce (80% Day / 20% Night)';
+
+  @override
+  String get industryProfile90Day10Night => 'Industry (90% Day / 10% Night)';
+
+  @override
+  String get houseNightProfile40Day60Night =>
+      'House Night (40% Day / 60% Night)';
+
+  @override
+  String get usageProfile => 'Usage profile *';
+
+  @override
+  String get smallHouseRural => 'Small house (rural)';
+
+  @override
+  String get mediumHouse => 'Medium house';
+
+  @override
+  String get largeHouseRuralVilla => 'Large house / Rural villa';
+
+  @override
+  String get workshopSmallBusiness => 'Workshop / Small business';
+
+  @override
+  String get network => 'Network *';
+
+  @override
+  String get internalNetworkOptional =>
+      'Internal network (Optional but recommended)';
+
+  @override
+  String get select220VOr380V => 'Select 220V or 380V';
+
+  @override
+  String get voltage220VSinglePhase => '220V (Single-phase)';
+
+  @override
+  String get voltage380VThreePhase => '380V (Three-phase)';
+
+  @override
+  String get autonomy => 'Autonomy *';
+
+  @override
+  String get selectAutonomy2DaysDefault => 'Select autonomy (2 days default)';
+
+  @override
+  String get dayDefault => ' (default)';
+
+  @override
+  String get panelPowerOptional600W => 'Panel Power (Optional, default 600W)';
+
+  @override
+  String get coverage => 'Coverage';
+
+  @override
+  String get voltage => 'Voltage';
+
+  @override
+  String get voltageWarning =>
+      'For a power > 10 kW, 380V (Three-phase) is recommended.';
+
+  @override
+  String recommended(String voltage) {
+    return 'Recommended: $voltage';
+  }
+
+  @override
+  String get networkChosen => 'Network chosen';
+
+  @override
+  String get selectedProfile => 'Selected profile';
+
+  @override
+  String get monthlyConsumptionLabel => 'Monthly consumption';
+
+  @override
+  String get dailyConsumptionLabel => 'Daily consumption';
+
+  @override
+  String get coveredEnergyLabel => 'Covered energy';
+
+  @override
+  String get requiredPvPowerLabel => 'Required PV power';
+
+  @override
+  String get installedPvCapacityLabel => 'Installed PV capacity (kWc)';
+
+  @override
+  String get recommendedInverterLabel => 'Recommended inverter';
+
+  @override
+  String get coverageLabel => 'Coverage';
+
+  @override
+  String get voltageLabel => 'Network';
+
+  @override
+  String get newMonthlyBillLabel => 'New monthly bill';
+
+  @override
+  String get targetEnergyCoveredLabel => 'Target energy covered';
+
+  @override
+  String get consumptionProfileLabel => 'Consumption profile';
+
+  @override
+  String get dayLabel => 'Day';
+
+  @override
+  String get nightLabel => 'Night';
+
+  @override
+  String get dayPartEnergyLabel => 'Day part energy';
+
+  @override
+  String get nightEnergyLabel => 'Night energy';
+
+  @override
+  String get usableBatteryCapacityLabel => 'Usable battery capacity';
+
+  @override
+  String get nightEnergyCoveredLabel => 'Night energy covered';
+
+  @override
+  String get gridNightEnergyLabel => 'Grid night energy';
+
+  @override
+  String get nightCoveragePercentageLabel => 'Night coverage';
+
+  @override
+  String get monthlySavingsLabel => 'Monthly savings';
+
+  @override
+  String get billAfterLabel => 'Bill after';
+
+  @override
+  String get yearlySavingsLabel => 'Yearly savings';
+
+  @override
+  String get tenYearsSavingsLabel => '10 years savings';
+
+  @override
+  String get twentyYearsSavingsLabel => '20 years savings';
+
+  @override
+  String co2AvoidedTonPerYear(String co2) {
+    return 'CO₂ avoided (ton/year): $co2';
+  }
+
+  @override
+  String equivalentTreesPerYear(int trees) {
+    return 'Equivalent trees/year: $trees';
+  }
+
+  @override
+  String get emonth => 'E_month';
+
+  @override
+  String get eday => 'E_day';
+
+  @override
+  String get ecovered => 'E_covered';
+
+  @override
+  String get pvpowerkw => 'PV power (kW)';
+
+  @override
+  String get numpanels => 'Number of panels';
+
+  @override
+  String get pvkwc => 'PV (kWc)';
+
+  @override
+  String get inverterkw => 'Inverter (kW)';
+
+  @override
+  String get savingMonth => 'Monthly savings';
+
+  @override
+  String get billAfter => 'Bill after';
+
+  @override
+  String get pvRequiredKw => 'PV required (kW)';
+
+  @override
+  String get numberOfPanelsN => 'Number of panels (N)';
+
+  @override
+  String get batteryCapacityKwh => 'Battery capacity (kWh)';
+
+  @override
+  String get inverterRecommendedKw => 'Inverter recommended (kW)';
+
+  @override
+  String get profileOptional => 'Profile (optional)';
+
+  @override
+  String get selectProfileDefaultHouse45 =>
+      'Select a profile (default: House - 45% self-consumption)';
+
+  @override
+  String get houseResidential45SelfConsumption =>
+      'House (Residential) - 45% self-consumption';
+
+  @override
+  String get commerceCommercial65SelfConsumption =>
+      'Commerce (Commercial) - 65% self-consumption';
+
+  @override
+  String get desiredCoveragePercent => 'Desired coverage (%) *';
+
+  @override
+  String get pleaseSelectNetworkType =>
+      'Please select the network type (220V or 380V)';
+
+  @override
+  String get pleaseFillAllRequiredFieldsNetworkCoverageProfile =>
+      'Please fill all required fields (Network, Coverage, Profile)';
+
+  @override
+  String get coverageMustBeBetween30And90ForHybrid =>
+      'Coverage must be between 30% and 90% for HYBRID';
+
+  @override
+  String get batteryCapacityRequiredForHybridSystem =>
+      'Battery capacity is required for HYBRID system';
+
+  @override
+  String get pleaseSelectUsageProfileAndAutonomy =>
+      'Please select usage profile and autonomy';
+
+  @override
+  String get selectedProfileDayNight => 'Selected profile (Day/Night)';
+
+  @override
+  String get panelsN => 'panels (N)';
+
+  @override
+  String get batteryUsable => 'Battery usable';
+
+  @override
+  String get nightCoveragePercent => 'Night coverage (%)';
+
+  @override
+  String get gridNightKwh => 'Grid night (kWh)';
+
+  @override
+  String get enterAddressOrGpsManually =>
+      'Enter your address or GPS coordinates manually';
+
+  @override
+  String get uploadBillOptional => 'Upload a bill (optional)';
+
+  @override
+  String errorCannotOpenCalculator(String error) {
+    return 'Error: Cannot open calculator. $error';
+  }
+
+  @override
+  String get quoteRequestSentSuccessfully => 'Quote request sent successfully';
+
+  @override
+  String errorLoading(String error) {
+    return 'Error loading: $error';
+  }
+
+  @override
+  String cannotCall(String phone) {
+    return 'Cannot call: $phone';
+  }
 }

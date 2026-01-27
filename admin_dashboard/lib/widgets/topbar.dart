@@ -28,12 +28,26 @@ class TopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Text(
-            'Tawfir Energy',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+          RichText(
+            text: const TextSpan(
+              children: [
+                TextSpan(
+                  text: 'TAWFIR ',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                TextSpan(
+                  text: 'ENERGY',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+              ],
             ),
           ),
           const Spacer(),

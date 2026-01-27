@@ -97,15 +97,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.appTitle.toUpperCase(),
+                    RichText(
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: Colors.black,
-                        letterSpacing: 0.5,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'TAWFIR ',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              color: Colors.black,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'ENERGY',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              color: AppColors.primary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -177,9 +192,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(12), // Rounded corners (16px radius)
                     child: SizedBox(
                       width: double.infinity, // Full width of screen
-                      height: 160, // Height in pixels (change this to make banner taller/shorter)
+                      height: 200, // Height increased to better showcase the house image
                       child: Image.asset(
-                        'assets/images/banner_solar.png', // Image file path
+                        'assets/images/banner_solar_house.png', // New house image with solar panels
                         fit: BoxFit.cover, // How image fills the space (cover = fills entire area)
                       ),
                     ),
@@ -354,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Show error if navigation fails
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Erreur: Impossible d\'ouvrir le calculateur. $e'),
+                            content: Text(AppLocalizations.of(context)!.errorCannotOpenCalculator(e.toString())),
                             backgroundColor: Colors.red,
                             duration: const Duration(seconds: 3),
                           ),

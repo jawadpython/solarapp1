@@ -26,7 +26,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
   // Default sun hours for calculations
   static const double _defaultSunHours = 5.5;
 
-  final List<int> _panelPowers = [400, 450, 500, 550, 600, 650];
+  final List<int> _panelPowers = [400, 450, 500, 550, 600, 650, 700];
 
   @override
   void dispose() {

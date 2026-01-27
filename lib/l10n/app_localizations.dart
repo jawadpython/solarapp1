@@ -1129,7 +1129,7 @@ abstract class AppLocalizations {
   /// No description provided for @sendRequest.
   ///
   /// In en, this message translates to:
-  /// **'Send Request'**
+  /// **'Send request'**
   String get sendRequest;
 
   /// No description provided for @createRequest.
@@ -1531,7 +1531,7 @@ abstract class AppLocalizations {
   /// No description provided for @pumpingSolarDescription.
   ///
   /// In en, this message translates to:
-  /// **'Calculate your solar pumping system with precision.'**
+  /// **'Irrigation and Pumping By solar energy'**
   String get pumpingSolarDescription;
 
   /// No description provided for @pumpingSolarSubtitle.
@@ -2349,6 +2349,564 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Certificates'**
   String get certificates;
+
+  /// No description provided for @chooseSystemType.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the type of system'**
+  String get chooseSystemType;
+
+  /// No description provided for @onGridDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce your bill (without Battery)'**
+  String get onGridDescription;
+
+  /// No description provided for @hybridDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill + batteries (partial autonomy)'**
+  String get hybridDescription;
+
+  /// No description provided for @offGridDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Isolated House (total autonomy)'**
+  String get offGridDescription;
+
+  /// No description provided for @pleaseSelectSystemType.
+  ///
+  /// In en, this message translates to:
+  /// **'* Please select a system type'**
+  String get pleaseSelectSystemType;
+
+  /// No description provided for @monthlyBillAmountDH.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly bill amount (DH)'**
+  String get monthlyBillAmountDH;
+
+  /// No description provided for @monthlyBillDH.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly bill (DH)'**
+  String get monthlyBillDH;
+
+  /// No description provided for @consumptionProfileDayNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumption profile (Day/Night) *'**
+  String get consumptionProfileDayNight;
+
+  /// No description provided for @selectProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a profile'**
+  String get selectProfile;
+
+  /// No description provided for @houseProfile60Day40Night.
+  ///
+  /// In en, this message translates to:
+  /// **'House (60% Day / 40% Night)'**
+  String get houseProfile60Day40Night;
+
+  /// No description provided for @commerceProfile80Day20Night.
+  ///
+  /// In en, this message translates to:
+  /// **'Commerce (80% Day / 20% Night)'**
+  String get commerceProfile80Day20Night;
+
+  /// No description provided for @industryProfile90Day10Night.
+  ///
+  /// In en, this message translates to:
+  /// **'Industry (90% Day / 10% Night)'**
+  String get industryProfile90Day10Night;
+
+  /// No description provided for @houseNightProfile40Day60Night.
+  ///
+  /// In en, this message translates to:
+  /// **'House Night (40% Day / 60% Night)'**
+  String get houseNightProfile40Day60Night;
+
+  /// No description provided for @usageProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage profile *'**
+  String get usageProfile;
+
+  /// No description provided for @smallHouseRural.
+  ///
+  /// In en, this message translates to:
+  /// **'Small house (rural)'**
+  String get smallHouseRural;
+
+  /// No description provided for @mediumHouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium house'**
+  String get mediumHouse;
+
+  /// No description provided for @largeHouseRuralVilla.
+  ///
+  /// In en, this message translates to:
+  /// **'Large house / Rural villa'**
+  String get largeHouseRuralVilla;
+
+  /// No description provided for @workshopSmallBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Workshop / Small business'**
+  String get workshopSmallBusiness;
+
+  /// No description provided for @network.
+  ///
+  /// In en, this message translates to:
+  /// **'Network *'**
+  String get network;
+
+  /// No description provided for @internalNetworkOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal network (Optional but recommended)'**
+  String get internalNetworkOptional;
+
+  /// No description provided for @select220VOr380V.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 220V or 380V'**
+  String get select220VOr380V;
+
+  /// No description provided for @voltage220VSinglePhase.
+  ///
+  /// In en, this message translates to:
+  /// **'220V (Single-phase)'**
+  String get voltage220VSinglePhase;
+
+  /// No description provided for @voltage380VThreePhase.
+  ///
+  /// In en, this message translates to:
+  /// **'380V (Three-phase)'**
+  String get voltage380VThreePhase;
+
+  /// No description provided for @autonomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Autonomy *'**
+  String get autonomy;
+
+  /// No description provided for @selectAutonomy2DaysDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Select autonomy (2 days default)'**
+  String get selectAutonomy2DaysDefault;
+
+  /// No description provided for @dayDefault.
+  ///
+  /// In en, this message translates to:
+  /// **' (default)'**
+  String get dayDefault;
+
+  /// No description provided for @panelPowerOptional600W.
+  ///
+  /// In en, this message translates to:
+  /// **'Panel Power (Optional, default 600W)'**
+  String get panelPowerOptional600W;
+
+  /// No description provided for @coverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage'**
+  String get coverage;
+
+  /// No description provided for @voltage.
+  ///
+  /// In en, this message translates to:
+  /// **'Voltage'**
+  String get voltage;
+
+  /// No description provided for @voltageWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'For a power > 10 kW, 380V (Three-phase) is recommended.'**
+  String get voltageWarning;
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: {voltage}'**
+  String recommended(String voltage);
+
+  /// No description provided for @networkChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Network chosen'**
+  String get networkChosen;
+
+  /// No description provided for @selectedProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected profile'**
+  String get selectedProfile;
+
+  /// No description provided for @monthlyConsumptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly consumption'**
+  String get monthlyConsumptionLabel;
+
+  /// No description provided for @dailyConsumptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily consumption'**
+  String get dailyConsumptionLabel;
+
+  /// No description provided for @coveredEnergyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Covered energy'**
+  String get coveredEnergyLabel;
+
+  /// No description provided for @requiredPvPowerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Required PV power'**
+  String get requiredPvPowerLabel;
+
+  /// No description provided for @installedPvCapacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed PV capacity (kWc)'**
+  String get installedPvCapacityLabel;
+
+  /// No description provided for @recommendedInverterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended inverter'**
+  String get recommendedInverterLabel;
+
+  /// No description provided for @coverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage'**
+  String get coverageLabel;
+
+  /// No description provided for @voltageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get voltageLabel;
+
+  /// No description provided for @newMonthlyBillLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New monthly bill'**
+  String get newMonthlyBillLabel;
+
+  /// No description provided for @targetEnergyCoveredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target energy covered'**
+  String get targetEnergyCoveredLabel;
+
+  /// No description provided for @consumptionProfileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumption profile'**
+  String get consumptionProfileLabel;
+
+  /// No description provided for @dayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get dayLabel;
+
+  /// No description provided for @nightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get nightLabel;
+
+  /// No description provided for @dayPartEnergyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Day part energy'**
+  String get dayPartEnergyLabel;
+
+  /// No description provided for @nightEnergyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Night energy'**
+  String get nightEnergyLabel;
+
+  /// No description provided for @usableBatteryCapacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Usable battery capacity'**
+  String get usableBatteryCapacityLabel;
+
+  /// No description provided for @nightEnergyCoveredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Night energy covered'**
+  String get nightEnergyCoveredLabel;
+
+  /// No description provided for @gridNightEnergyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid night energy'**
+  String get gridNightEnergyLabel;
+
+  /// No description provided for @nightCoveragePercentageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Night coverage'**
+  String get nightCoveragePercentageLabel;
+
+  /// No description provided for @monthlySavingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly savings'**
+  String get monthlySavingsLabel;
+
+  /// No description provided for @billAfterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill after'**
+  String get billAfterLabel;
+
+  /// No description provided for @yearlySavingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly savings'**
+  String get yearlySavingsLabel;
+
+  /// No description provided for @tenYearsSavingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'10 years savings'**
+  String get tenYearsSavingsLabel;
+
+  /// No description provided for @twentyYearsSavingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'20 years savings'**
+  String get twentyYearsSavingsLabel;
+
+  /// No description provided for @co2AvoidedTonPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'CO₂ avoided (ton/year): {co2}'**
+  String co2AvoidedTonPerYear(String co2);
+
+  /// No description provided for @equivalentTreesPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Equivalent trees/year: {trees}'**
+  String equivalentTreesPerYear(int trees);
+
+  /// No description provided for @emonth.
+  ///
+  /// In en, this message translates to:
+  /// **'E_month'**
+  String get emonth;
+
+  /// No description provided for @eday.
+  ///
+  /// In en, this message translates to:
+  /// **'E_day'**
+  String get eday;
+
+  /// No description provided for @ecovered.
+  ///
+  /// In en, this message translates to:
+  /// **'E_covered'**
+  String get ecovered;
+
+  /// No description provided for @pvpowerkw.
+  ///
+  /// In en, this message translates to:
+  /// **'PV power (kW)'**
+  String get pvpowerkw;
+
+  /// No description provided for @numpanels.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of panels'**
+  String get numpanels;
+
+  /// No description provided for @pvkwc.
+  ///
+  /// In en, this message translates to:
+  /// **'PV (kWc)'**
+  String get pvkwc;
+
+  /// No description provided for @inverterkw.
+  ///
+  /// In en, this message translates to:
+  /// **'Inverter (kW)'**
+  String get inverterkw;
+
+  /// No description provided for @savingMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly savings'**
+  String get savingMonth;
+
+  /// No description provided for @billAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill after'**
+  String get billAfter;
+
+  /// No description provided for @pvRequiredKw.
+  ///
+  /// In en, this message translates to:
+  /// **'PV required (kW)'**
+  String get pvRequiredKw;
+
+  /// No description provided for @numberOfPanelsN.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of panels (N)'**
+  String get numberOfPanelsN;
+
+  /// No description provided for @batteryCapacityKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery capacity (kWh)'**
+  String get batteryCapacityKwh;
+
+  /// No description provided for @inverterRecommendedKw.
+  ///
+  /// In en, this message translates to:
+  /// **'Inverter recommended (kW)'**
+  String get inverterRecommendedKw;
+
+  /// No description provided for @profileOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile (optional)'**
+  String get profileOptional;
+
+  /// No description provided for @selectProfileDefaultHouse45.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a profile (default: House - 45% self-consumption)'**
+  String get selectProfileDefaultHouse45;
+
+  /// No description provided for @houseResidential45SelfConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'House (Residential) - 45% self-consumption'**
+  String get houseResidential45SelfConsumption;
+
+  /// No description provided for @commerceCommercial65SelfConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Commerce (Commercial) - 65% self-consumption'**
+  String get commerceCommercial65SelfConsumption;
+
+  /// No description provided for @desiredCoveragePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Desired coverage (%) *'**
+  String get desiredCoveragePercent;
+
+  /// No description provided for @pleaseSelectNetworkType.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select the network type (220V or 380V)'**
+  String get pleaseSelectNetworkType;
+
+  /// No description provided for @pleaseFillAllRequiredFieldsNetworkCoverageProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields (Network, Coverage, Profile)'**
+  String get pleaseFillAllRequiredFieldsNetworkCoverageProfile;
+
+  /// No description provided for @coverageMustBeBetween30And90ForHybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage must be between 30% and 90% for HYBRID'**
+  String get coverageMustBeBetween30And90ForHybrid;
+
+  /// No description provided for @batteryCapacityRequiredForHybridSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery capacity is required for HYBRID system'**
+  String get batteryCapacityRequiredForHybridSystem;
+
+  /// No description provided for @pleaseSelectUsageProfileAndAutonomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select usage profile and autonomy'**
+  String get pleaseSelectUsageProfileAndAutonomy;
+
+  /// No description provided for @selectedProfileDayNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected profile (Day/Night)'**
+  String get selectedProfileDayNight;
+
+  /// No description provided for @panelsN.
+  ///
+  /// In en, this message translates to:
+  /// **'panels (N)'**
+  String get panelsN;
+
+  /// No description provided for @batteryUsable.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery usable'**
+  String get batteryUsable;
+
+  /// No description provided for @nightCoveragePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Night coverage (%)'**
+  String get nightCoveragePercent;
+
+  /// No description provided for @gridNightKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid night (kWh)'**
+  String get gridNightKwh;
+
+  /// No description provided for @enterAddressOrGpsManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your address or GPS coordinates manually'**
+  String get enterAddressOrGpsManually;
+
+  /// No description provided for @uploadBillOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a bill (optional)'**
+  String get uploadBillOptional;
+
+  /// No description provided for @errorCannotOpenCalculator.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: Cannot open calculator. {error}'**
+  String errorCannotOpenCalculator(String error);
+
+  /// No description provided for @quoteRequestSentSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote request sent successfully'**
+  String get quoteRequestSentSuccessfully;
+
+  /// No description provided for @errorLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading: {error}'**
+  String errorLoading(String error);
+
+  /// No description provided for @cannotCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot call: {phone}'**
+  String cannotCall(String phone);
 }
 
 class _AppLocalizationsDelegate

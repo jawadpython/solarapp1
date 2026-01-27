@@ -70,16 +70,31 @@ class ModernSidebar extends StatelessWidget {
                 ),
                 if (!isCollapsed) ...[
                   const SizedBox(width: 12),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Tawfir Energy',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                          letterSpacing: 0.5,
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'TAWFIR ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textPrimary,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'ENERGY',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Text(

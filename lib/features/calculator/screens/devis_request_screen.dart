@@ -501,7 +501,7 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                     vertical: 16,
                   ),
                   prefixIcon: const Icon(Icons.location_on_outlined),
-                  helperText: 'Entrez votre adresse ou coordonnées GPS manuellement',
+                  helperText: AppLocalizations.of(context)!.enterAddressOrGpsManually,
                 ),
               ),
               const SizedBox(height: 20),
@@ -541,14 +541,14 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Upload temporarily disabled. Feature will be activated soon 👍'),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.uploadDisabled),
                       duration: Duration(seconds: 3),
                     ),
                   );
                 },
                 icon: const Icon(Icons.upload_file),
-                label: const Text('Télécharger une facture (optionnel)'),
+                label: Text(AppLocalizations.of(context)!.uploadBillOptional),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),
@@ -584,9 +584,9 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Envoyer la demande',
-                          style: TextStyle(
+                      : Text(
+                          AppLocalizations.of(context)!.sendRequest,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),

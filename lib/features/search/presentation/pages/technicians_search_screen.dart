@@ -89,7 +89,7 @@ class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorLoading(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -122,7 +122,7 @@ class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Impossible d\'appeler: $phone'),
+            content: Text(AppLocalizations.of(context)!.cannotCall(phone)),
             backgroundColor: Colors.red,
           ),
         );

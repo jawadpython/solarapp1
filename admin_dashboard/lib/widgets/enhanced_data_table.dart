@@ -75,6 +75,41 @@ class _EnhancedDataTableState extends State<EnhancedDataTable> {
       ...widget.columns,
     ];
 
+    if (widget.data.isEmpty) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 24,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(40),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text(
+                'Aucune donnée à afficher',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -89,6 +124,7 @@ class _EnhancedDataTableState extends State<EnhancedDataTable> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.max,
         children: [
           // Bulk action bar
           if (_selectedIds.isNotEmpty)
@@ -126,12 +162,22 @@ class _EnhancedDataTableState extends State<EnhancedDataTable> {
             ),
           // Data Table
           Expanded(
-            child: DataTable2(
-              columnSpacing: 24,
-              horizontalMargin: 20,
-              minWidth: 800,
-              columns: enhancedColumns,
-              rows: _paginatedData.map((item) {
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: constraints.maxWidth > 0 ? constraints.maxWidth : 800,
+                      ),
+                      child: DataTable2(
+                        columnSpacing: 24,
+                        horizontalMargin: 20,
+                        minWidth: constraints.maxWidth > 0 ? constraints.maxWidth : 800,
+                    columns: enhancedColumns,
+                    rows: _paginatedData.map((item) {
                 final id = item['id']?.toString() ?? '';
                 final isSelected = _selectedIds.contains(id);
                 final originalRow = widget.buildRow(item, isSelected);
@@ -171,6 +217,11 @@ class _EnhancedDataTableState extends State<EnhancedDataTable> {
               ),
               smRatio: 0.75,
               lmRatio: 1.5,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           // Pagination

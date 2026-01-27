@@ -41,12 +41,25 @@ class HomePage extends StatelessWidget {
                 children: [
                   const Icon(Icons.solar_power, size: 48, color: Colors.white),
                   const SizedBox(height: 16),
-                  Text(
-                    'Welcome to Tawfir Energy',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Welcome to TAWFIR ',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
+                        TextSpan(
+                          text: 'ENERGY',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(

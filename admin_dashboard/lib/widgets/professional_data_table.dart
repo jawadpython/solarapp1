@@ -95,27 +95,28 @@ class _ProfessionalDataTableState extends State<ProfessionalDataTable> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 4),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 24,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
           // Toolbar: Search + Filters
           Container(
             padding: const EdgeInsets.all(20),
@@ -254,12 +255,22 @@ class _ProfessionalDataTableState extends State<ProfessionalDataTable> {
           ),
           // Data Table
           Expanded(
-            child: DataTable2(
-              columnSpacing: 24,
-              horizontalMargin: 20,
-              minWidth: 800,
-              columns: widget.columns,
-              rows: _paginatedData.map((item) => widget.buildRow(item)).toList(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: constraints.maxWidth > 0 ? constraints.maxWidth : 800,
+                      ),
+                      child: DataTable2(
+                        columnSpacing: 24,
+                        horizontalMargin: 20,
+                        minWidth: constraints.maxWidth > 0 ? constraints.maxWidth : 800,
+                    columns: widget.columns,
+                    rows: _paginatedData.map((item) => widget.buildRow(item)).toList(),
               headingRowDecoration: BoxDecoration(
                 color: const Color(0xFFF8F9FA),
                 border: Border(
@@ -282,6 +293,11 @@ class _ProfessionalDataTableState extends State<ProfessionalDataTable> {
               // Performance optimizations
               smRatio: 0.75,
               lmRatio: 1.5,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           // Pagination
@@ -351,9 +367,9 @@ class _ProfessionalDataTableState extends State<ProfessionalDataTable> {
                 ],
               ),
             ),
-        ],
-      ),
-    );
+            ],
+          ),
+        );
   }
 
   Widget _buildPageButton(int page) {

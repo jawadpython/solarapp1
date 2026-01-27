@@ -125,18 +125,22 @@ class _DevisRequestsPageState extends State<DevisRequestsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Page Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // CRITICAL: Use LayoutBuilder for proper constraints on Flutter Web
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max, // CRITICAL: Fill available space
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Page Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   const Text(
                     'Demandes de Devis',
                     style: TextStyle(
@@ -162,13 +166,13 @@ class _DevisRequestsPageState extends State<DevisRequestsPage> {
                       );
                     },
                   ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Advanced Filters Panel
-          StreamBuilder<QuerySnapshot>(
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Advanced Filters Panel
+            StreamBuilder<QuerySnapshot>(
             stream: _firestoreService.streamDevisRequests(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox();
@@ -188,10 +192,10 @@ class _DevisRequestsPageState extends State<DevisRequestsPage> {
                 initialSearch: _searchQuery,
               );
             },
-          ),
-          const SizedBox(height: 20),
-          // Export Bar
-          StreamBuilder<QuerySnapshot>(
+            ),
+            const SizedBox(height: 20),
+            // Export Bar
+            StreamBuilder<QuerySnapshot>(
             stream: _firestoreService.streamDevisRequests(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox();
@@ -262,9 +266,9 @@ class _DevisRequestsPageState extends State<DevisRequestsPage> {
                 ],
               ),
             ),
-          // Data Table
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
+            // Data Table
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
               stream: _firestoreService.streamDevisRequests(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -389,9 +393,11 @@ class _DevisRequestsPageState extends State<DevisRequestsPage> {
                 );
               },
             ),
+            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -562,4 +568,3 @@ class _ActionButtons extends StatelessWidget {
     );
   }
 }
-

@@ -1,0 +1,430 @@
+/**
+ * CALCULATEUR SOLAIRE — VERSION CORRIGÉE (MAROC)
+ * - Heures solaires FIXES: H = 5.5 h/jour (toutes régions)
+ * - Formules en FR + validations
+ * - Sélection onduleur (ON-GRID / HYBRID / OFF-GRID)
+ * - Sélection variateur/VFD (POMPAGE)
+ *
+ * Unités:
+ * - Facture: DH/mois
+ * - Tarif: DH/kWh
+ * - Energies: kWh (mois/jour)
+ * - Puissances: kW, kWc, Wp
+ * - Pompage: Débit m3/h, HMT m
+ */
+
+/* =========================
+   0) CONSTANTES
+========================= */
+const CONST = {
+  // Énergie
+  TARIF: 1.30,              // DH/kWh
+  H: 5.5,                   // h/jour (FIXE Maroc)
+  PR: 0.80,                 // Performance Ratio
+  FRAIS_FIXES: 50.0,        // DH/mois
+  FACTURE_MIN: 50.0,        // DH/mois
+
+  // Batterie (choisis un seul modèle — ici modèle simple)
+  DoD: 0.80,                // profondeur décharge (lithium)
+  ETA_BAT: 0.90,            // rendement batterie
+  BAT_USABLE_FACTOR: 0.90,  // part utilisable (simple)
+
+  // Environnement
+  EF_CO2: 0.6,              // kgCO2 / kWh
+  CO2_PAR_ARBRE: 22.0,      // kgCO2 / arbre / an
+
+  // Auto-consommation ON-GRID
+  AUTO_MAISON: 0.45,
+  AUTO_COMMERCE: 0.65
+};
+
+/* =========================
+   1) OUTILS (helpers)
+========================= */
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function assertPositive(name, value) {
+  if (typeof value !== "number" || !isFinite(value) || value <= 0) {
+    throw new Error(`${name} doit être > 0`);
+  }
+}
+
+function ceil(n) {
+  return Math.ceil(n);
+}
+
+/**
+ * Arrondi par paliers (table onduleur)
+ * Retourne une taille (kW) recommandée.
+ */
+function palierOnduleur(kW) {
+  const x = kW;
+  if (x <= 3) return 3;
+  if (x <= 5) return 5;
+  if (x <= 7) return 6;
+  if (x <= 9) return 8;
+  if (x <= 11) return 10;
+  if (x <= 13) return 12;
+  if (x <= 16) return 15;
+  if (x <= 18) return 17;
+  if (x <= 22) return 20;
+  if (x <= 27) return 25;
+  if (x <= 33) return 30;
+  if (x <= 40) return 40;
+  if (x <= 50) return 50;
+  if (x <= 60) return 60;
+  if (x <= 80) return 80;
+  if (x <= 100) return 100;
+  return 100; // ou "sur demande"
+}
+
+function recommandationTension(pOnd_kW, tensionChoisie /*220|380|null*/) {
+  const reco = (pOnd_kW > 5) ? 380 : 220;
+
+  // warning si user force 220V avec >5kW
+  const warning = (tensionChoisie === 220 && pOnd_kW > 5)
+    ? "Avertissement: >5kW => recommandé 380V (triphasé)"
+    : null;
+
+  return { tensionRecommandee: reco, warning };
+}
+
+/* =========================
+   2) IMPACT ENVIRONNEMENTAL
+========================= */
+function impactEnvFromCoveredKWhMonth(covered_kWh_month) {
+  const kWh_an = covered_kWh_month * 12;
+  const co2_kg_an = kWh_an * CONST.EF_CO2;
+  return {
+    kWh_saved_month: covered_kWh_month,
+    kWh_saved_year: kWh_an,
+    CO2_kg_year: co2_kg_an,
+    CO2_ton_year: co2_kg_an / 1000,
+    trees_equivalent: co2_kg_an / CONST.CO2_PAR_ARBRE
+  };
+}
+
+/* =========================
+   3) CALCUL ON-GRID
+========================= */
+function calcOnGrid({
+  factureDH,
+  panneauWp,
+  profil /*"Maison"|"Commerce"*/,
+  tension /*220|380|null*/
+}) {
+  assertPositive("factureDH", factureDH);
+  assertPositive("panneauWp", panneauWp);
+
+  const auto = (profil === "Commerce") ? CONST.AUTO_COMMERCE : CONST.AUTO_MAISON;
+
+  const E_month = factureDH / CONST.TARIF;      // kWh/mois
+  const E_day = E_month / 30;                   // kWh/jour
+  const P_panel = panneauWp / 1000;             // kW
+
+  const denom = CONST.H * CONST.PR;             // 5.5*0.8=4.4
+  const P_PV = E_day / denom;                   // kW requis
+  const N = ceil(P_PV / P_panel);               // nb panneaux
+  const PV_kWc = N * P_panel;                   // kWc installé
+
+  const PV_kWh_month = PV_kWc * CONST.H * CONST.PR * 30; // kWh/mois
+  const self_used = PV_kWh_month * auto;                  // kWh/mois
+  const covered_kWh = Math.min(self_used, E_month);
+
+  const bill_calc = CONST.FRAIS_FIXES + (E_month - covered_kWh) * CONST.TARIF;
+  const bill_after = Math.max(CONST.FACTURE_MIN, bill_calc);
+
+  const savings_month = factureDH - bill_after;
+  const coverage_pct = (covered_kWh / E_month) * 100;
+
+  // Onduleur ON-GRID: base = PV_kWc
+  const onduleur_reco = palierOnduleur(PV_kWc);
+  const tens = recommandationTension(onduleur_reco, tension);
+
+  return {
+    inputs: { factureDH, panneauWp, profil, tension },
+    E_month, E_day,
+    P_panel, P_PV, N, PV_kWc,
+    PV_kWh_month,
+    auto_consommation_ratio: auto,
+    self_used_kWh_month: self_used,
+    covered_kWh_month: covered_kWh,
+    coverage_pct,
+    bill_after_DH: bill_after,
+    savings_month_DH: savings_month,
+    savings_year_DH: savings_month * 12,
+    savings_10y_DH: savings_month * 12 * 10,
+    savings_20y_DH: savings_month * 12 * 20,
+    onduleur_recommande_kW: onduleur_reco,
+    tension_recommandee: tens.tensionRecommandee,
+    warning_tension: tens.warning,
+    environnement: impactEnvFromCoveredKWhMonth(covered_kWh)
+  };
+}
+
+/* =========================
+   4) CALCUL HYBRID (CORRIGÉ)
+========================= */
+function calcHybrid({
+  factureDH,
+  panneauWp,
+  couverturePct /*30..90*/,
+  capaciteBatterie_kWh,
+  profil /*"Maison"|"Commerce"|"Industrie"|"MaisonNuit"*/,
+  tension /*220|380|null*/
+}) {
+  assertPositive("factureDH", factureDH);
+  assertPositive("panneauWp", panneauWp);
+  assertPositive("capaciteBatterie_kWh", capaciteBatterie_kWh);
+
+  // clamp couverture
+  const covPct = clamp(couverturePct, 30, 90);
+  const ratio = covPct / 100;
+
+  // ratios jour/nuit
+  const ratios = {
+    Maison:      { jour: 0.60, nuit: 0.40 },
+    Commerce:    { jour: 0.80, nuit: 0.20 },
+    Industrie:   { jour: 0.90, nuit: 0.10 },
+    MaisonNuit:  { jour: 0.40, nuit: 0.60 }
+  };
+  const r = ratios[profil] || ratios["Maison"];
+
+  const E_month = factureDH / CONST.TARIF;
+  const E_day = E_month / 30;
+  const E_target_day = E_day * ratio;                 // ✅ énergie cible (kWh/jour)
+
+  const P_panel = panneauWp / 1000;
+  const denom = CONST.H * CONST.PR;
+
+  // ✅ SIZING PV CORRIGÉ: sur E_target_day, pas E_day
+  const P_PV = E_target_day / denom;
+  const N = ceil(P_PV / P_panel);
+  const PV_kWc = N * P_panel;
+
+  const PV_kWh_month = PV_kWc * CONST.H * CONST.PR * 30;
+
+  // couverture énergie réaliste
+  const target_kWh_month = E_month * ratio;
+  const covered_kWh = Math.min(PV_kWh_month, target_kWh_month, E_month);
+
+  // Batterie (nuit)
+  const E_night_need = E_target_day * r.nuit;     // kWh/jour
+  const batUsable = capaciteBatterie_kWh * CONST.BAT_USABLE_FACTOR;
+  const E_night_covered = Math.min(E_night_need, batUsable);
+  const E_grid_night = Math.max(0, E_night_need - E_night_covered);
+  const couverture_nuit_pct = (E_night_need > 0) ? (E_night_covered / E_night_need) * 100 : 0;
+
+  // Facture
+  const bill_calc = CONST.FRAIS_FIXES + (E_month - covered_kWh) * CONST.TARIF;
+  const bill_after = Math.max(CONST.FACTURE_MIN, bill_calc);
+
+  // Limite économies 90% (optionnel mais demandé avant)
+  const savings_raw = factureDH - bill_after;
+  const savings_month = Math.min(savings_raw, factureDH * 0.90);
+
+  const coverage_pct = (covered_kWh / E_month) * 100;
+
+  // Onduleur HYBRID: PV_kWc * 1.10 (marge)
+  const onduleur_reco = palierOnduleur(PV_kWc * 1.10);
+  const tens = recommandationTension(onduleur_reco, tension);
+
+  return {
+    inputs: { factureDH, panneauWp, couverturePct: covPct, capaciteBatterie_kWh, profil, tension },
+    E_month, E_day,
+    ratio_couverture: ratio,
+    E_target_day,
+    P_panel, P_PV, N, PV_kWc,
+    PV_kWh_month,
+    covered_kWh_month: covered_kWh,
+    coverage_pct,
+    bill_after_DH: bill_after,
+    savings_month_DH: savings_month,
+    savings_year_DH: savings_month * 12,
+    battery: {
+      batUsable_kWh: batUsable,
+      E_night_need_kWh: E_night_need,
+      E_night_covered_kWh: E_night_covered,
+      E_grid_night_kWh: E_grid_night,
+      couverture_nuit_pct
+    },
+    onduleur_recommande_kW: onduleur_reco,
+    tension_recommandee: tens.tensionRecommandee,
+    warning_tension: tens.warning,
+    environnement: impactEnvFromCoveredKWhMonth(covered_kWh)
+  };
+}
+
+/* =========================
+   5) CALCUL OFF-GRID
+========================= */
+function calcOffGrid({
+  E_day_profile_kWh,     // ex: 5 / 10 / 20 / 30
+  joursAutonomie,        // 1..3
+  panneauWp,
+  tension /*220|380|null*/
+}) {
+  assertPositive("E_day_profile_kWh", E_day_profile_kWh);
+  assertPositive("panneauWp", panneauWp);
+
+  const J = clamp(joursAutonomie, 1, 3);
+  const E_day = E_day_profile_kWh;
+
+  const denom = CONST.H * CONST.PR;
+  const P_PV = E_day / denom;
+
+  const P_panel = panneauWp / 1000;
+  const N = ceil(P_PV / P_panel);
+  const PV_kWc = N * P_panel;
+
+  // Batterie (modèle plus "sûr": DoD*EtaBat)
+  const battery_kWh = (E_day * J) / (CONST.DoD * CONST.ETA_BAT);
+
+  // Onduleur OFF-GRID: marge 20%
+  const onduleur_reco = palierOnduleur(PV_kWc * 1.20);
+  const tens = recommandationTension(onduleur_reco, tension);
+
+  // Off-grid = 100% couverture (énergie)
+  const kWh_saved_an = E_day * 365;
+  const co2_kg_an = kWh_saved_an * CONST.EF_CO2;
+
+  return {
+    inputs: { E_day_profile_kWh: E_day, joursAutonomie: J, panneauWp, tension },
+    E_day,
+    P_panel, P_PV, N, PV_kWc,
+    battery_kWh_required: battery_kWh,
+    onduleur_recommande_kW: onduleur_reco,
+    tension_recommandee: tens.tensionRecommandee,
+    warning_tension: tens.warning,
+    environnement: {
+      kWh_saved_year: kWh_saved_an,
+      CO2_kg_year: co2_kg_an,
+      CO2_ton_year: co2_kg_an / 1000,
+      trees_equivalent: co2_kg_an / CONST.CO2_PAR_ARBRE
+    }
+  };
+}
+
+/* =========================
+   6) POMPAGE SOLAIRE + VFD
+========================= */
+/**
+ * Sélection VFD/Variateur (pompe AC) par paliers simples.
+ * - On choisit un variateur >= P_pump * marge
+ * - marge conseillée: 1.20
+ */
+function palierVFD(kW) {
+  // Tu peux utiliser la même table que l’onduleur (simple)
+  return palierOnduleur(kW);
+}
+
+function calcPompage({
+  debit_m3h,            // m3/h (si L/min -> Lmin*0.06)
+  hmt_m,                // m
+  rendementPompe = 0.50,// ex 0.50
+  typePompe /*"AC"|"DC"*/,
+  panneauWp,
+  tension /*220|380|null*/
+}) {
+  assertPositive("debit_m3h", debit_m3h);
+  assertPositive("hmt_m", hmt_m);
+  assertPositive("panneauWp", panneauWp);
+  assertPositive("rendementPompe", rendementPompe);
+
+  // 1) Puissance hydraulique (kW) — formule standard
+  const P_hyd = (debit_m3h * hmt_m) / 367;
+
+  // 2) Puissance électrique pompe (kW)
+  const P_pump = P_hyd / rendementPompe;
+
+  // 3) Puissance PV requise
+  const P_PV = P_pump / CONST.PR;
+
+  // 4) Panneaux
+  const N = ceil((P_PV * 1000) / panneauWp);
+  const PV_kWc = (N * panneauWp) / 1000;
+
+  // 5) Variateur / contrôleur
+  let variateur = null;
+
+  if (typePompe === "AC") {
+    // Variateur solaire (VFD) recommandé >= P_pump * 1.20
+    const vfd_needed = P_pump * 1.20;
+    const vfd_reco = palierVFD(vfd_needed);
+
+    const tens = recommandationTension(vfd_reco, tension);
+
+    variateur = {
+      type: "Variateur solaire (VFD) pour pompe AC",
+      P_pump_kW: P_pump,
+      vfd_needed_kW: vfd_needed,
+      vfd_recommande_kW: vfd_reco,
+      tension_recommandee: tens.tensionRecommandee,
+      warning_tension: tens.warning
+    };
+  } else {
+    // Pompe DC: عادة ما كتحتاج contrôleur/driver DC ماشي VFD classique
+    variateur = {
+      type: "Contrôleur / Driver DC (pompe DC) — pas de VFD AC classique",
+      P_pump_kW: P_pump,
+      note: "Si tu veux forcer une sélection, utilise un contrôleur DC >= P_pump * 1.15"
+    };
+  }
+
+  return {
+    inputs: { debit_m3h, hmt_m, rendementPompe, typePompe, panneauWp, tension },
+    P_hyd_kW: P_hyd,
+    P_pump_kW: P_pump,
+    P_PV_kW: P_PV,
+    N_panneaux: N,
+    PV_kWc,
+    variateur
+  };
+}
+
+/* =========================
+   7) EXEMPLES (TESTS RAPIDES)
+========================= */
+function runTests() {
+  // ON-GRID test
+  const ongrid = calcOnGrid({
+    factureDH: 1000,
+    panneauWp: 550,
+    profil: "Maison",
+    tension: 220
+  });
+
+  // HYBRID test
+  const hybrid = calcHybrid({
+    factureDH: 1000,
+    panneauWp: 550,
+    couverturePct: 70,
+    capaciteBatterie_kWh: 10,
+    profil: "MaisonNuit",
+    tension: 220
+  });
+
+  // OFF-GRID test
+  const offgrid = calcOffGrid({
+    E_day_profile_kWh: 10,
+    joursAutonomie: 2,
+    panneauWp: 550,
+    tension: null
+  });
+
+  // POMPAGE test
+  const pompage = calcPompage({
+    debit_m3h: 10,
+    hmt_m: 40,
+    rendementPompe: 0.50,
+    typePompe: "AC",
+    panneauWp: 550,
+    tension: 220
+  });
+
+  return { ongrid, hybrid, offgrid, pompage };
+}
+
+// Exemple: console.log(runTests());

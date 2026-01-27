@@ -23,7 +23,7 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
   double _numberOfPanels = 0;
   double _estimatedSavings = 0;
 
-  final List<int> _panelPowers = [400, 450, 500, 550, 600, 650];
+  final List<int> _panelPowers = [400, 450, 500, 550, 600, 650, 700];
 
   @override
   void dispose() {
