@@ -182,16 +182,6 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
     _formKey.currentState?.reset();
   }
 
-  void _uploadCertificates() {
-    // Firebase Storage temporarily disabled - billing not enabled
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.uploadDisabled),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -396,19 +386,6 @@ class _TechnicianRegistrationScreenState extends State<TechnicianRegistrationScr
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                         prefixIcon: const Icon(Icons.school),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _uploadCertificates,
-                      icon: const Icon(Icons.upload_file),
-                      label: Text(localizations.uploadDocuments),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                     ),
                   ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/features/auth/presentation/pages/login_page.dart';
 import 'package:noor_energy/features/auth/presentation/pages/login_screen.dart';
-import 'package:noor_energy/features/auth/presentation/pages/register_page.dart';
+import 'package:noor_energy/features/auth/presentation/pages/signup_page.dart';
 import 'package:noor_energy/features/home/presentation/pages/home_page.dart';
 import 'package:noor_energy/features/home/presentation/pages/home_screen.dart';
 import 'package:noor_energy/features/project_study/presentation/pages/project_study_page.dart';
@@ -78,7 +78,7 @@ class AppRoutes {
       case loginScreen:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case register:
-        return MaterialPageRoute(builder: (_) => const RegisterPage());
+        return MaterialPageRoute(builder: (_) => const SignupPage());
       case projectStudy:
         return MaterialPageRoute(builder: (_) => const ProjectStudyPage());
       case projectType:

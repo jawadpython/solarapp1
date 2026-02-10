@@ -1474,4 +1474,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String cannotCall(String phone) {
     return 'Cannot call: $phone';
   }
+
+  @override
+  String get offlineTitle => 'No connection';
+
+  @override
+  String get offlineMessage => 'Please connect to the internet to use the app.';
 }

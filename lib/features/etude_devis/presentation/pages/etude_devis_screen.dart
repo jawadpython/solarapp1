@@ -21,8 +21,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
   final _firestoreService = FirestoreService();
 
   String? _selectedSystemType;
-  String? _consumptionMethod;
-  String? _selectedFile;
+  String? _consumptionMethod; // Defaults to enterKwh (file upload removed for now)
   bool _isSubmitting = false;
 
   final List<String> _systemTypes = ['On-grid', 'Off-grid', 'Hybride', 'Pompe'];
@@ -38,11 +37,7 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
     return _selectedSystemType != null &&
         _consumptionMethod != null &&
         _locationController.text.isNotEmpty &&
-        // File upload temporarily disabled - removed from validation
-        // Form is valid if: method is 'Entrer kWh' with filled consumption, OR method is 'Télécharger facture' (file optional now)
-        (_consumptionMethod == AppLocalizations.of(context)!.enterKwh 
-            ? _consumptionController.text.isNotEmpty
-            : true); // 'Télécharger facture' method allowed but file upload disabled
+        _consumptionController.text.isNotEmpty;
   }
 
   Future<void> _submitRequest() async {
@@ -246,113 +241,44 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 2: Consumption Input
+              // Section 2: Consumption Input (kWh only; file upload removed for now)
               _SectionCard(
                 title: AppLocalizations.of(context)!.consumption,
                 isRequired: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Radio buttons for consumption method
-                    _RadioOption(
-                      value: AppLocalizations.of(context)!.enterKwh,
-                      groupValue: _consumptionMethod,
-                      onChanged: (value) {
-                        setState(() {
-                          _consumptionMethod = value;
-                          _selectedFile = null;
-                        });
-                      },
-                    ),
-                    _RadioOption(
-                      value: AppLocalizations.of(context)!.uploadBill,
-                      groupValue: _consumptionMethod,
-                      onChanged: (value) {
-                        setState(() {
-                          _consumptionMethod = value;
-                          _consumptionController.clear();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Conditional field for kWh input
-                    if (_consumptionMethod == AppLocalizations.of(context)!.enterKwh)
-                      TextFormField(
-                        controller: _consumptionController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.consumptionKwh,
-                          hintText: AppLocalizations.of(context)!.consumptionExample,
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                          prefixIcon: const Icon(Icons.bolt),
-                        ),
-                        validator: (value) {
-                          if (_consumptionMethod == AppLocalizations.of(context)!.enterKwh &&
-                              (value == null || value.isEmpty)) {
-                            return AppLocalizations.of(context)!.enterConsumption;
-                          }
-                          return null;
-                        },
-                      ),
-                    // File upload section
-                    if (_consumptionMethod == AppLocalizations.of(context)!.uploadBill) ...[
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                child: Builder(
+                  builder: (context) {
+                    if (_consumptionMethod == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) setState(() => _consumptionMethod = AppLocalizations.of(context)!.enterKwh);
+                      });
+                    }
+                    return TextFormField(
+                      controller: _consumptionController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.consumptionKwh,
+                        hintText: AppLocalizations.of(context)!.consumptionExample,
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _selectedFile ?? AppLocalizations.of(context)!.noFileSelected,
-                              style: TextStyle(
-                                color: _selectedFile != null ? Colors.black87 : Colors.grey.shade600,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            OutlinedButton.icon(
-                              onPressed: () {
-                                // Firebase Storage temporarily disabled - billing not enabled
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(AppLocalizations.of(context)!.uploadDisabled),
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.attach_file),
-                              label: Text(AppLocalizations.of(context)!.chooseBill),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                                side: const BorderSide(color: AppColors.primary),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
                         ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.bolt),
                       ),
-                    ],
-                  ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context)!.enterConsumption;
+                        }
+                        return null;
+                      },
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 20),

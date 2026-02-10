@@ -2907,6 +2907,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cannot call: {phone}'**
   String cannotCall(String phone);
+
+  /// No description provided for @offlineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get offlineTitle;
+
+  /// No description provided for @offlineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please connect to the internet to use the app.'**
+  String get offlineMessage;
 }
 
 class _AppLocalizationsDelegate

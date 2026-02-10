@@ -1487,4 +1487,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String cannotCall(String phone) {
     return 'Impossible d\'appeler: $phone';
   }
+
+  @override
+  String get offlineTitle => 'Pas de connexion';
+
+  @override
+  String get offlineMessage =>
+      'Veuillez vous connecter à Internet pour utiliser l\'application.';
 }

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/auth_service.dart';
 import 'package:noor_energy/routes/app_routes.dart';
+
+// =============================================================================
+// HOME PAGE - Shown when user is logged in. Logout clears session;
+// authStateChanges() in main.dart will then show LoginPage.
+// =============================================================================
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -11,10 +17,12 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Tawfir Energy'),
         actions: [
+          // Logout: sign out and let auth stream switch to LoginPage
           IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.login);
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await AuthService.instance.signOut();
             },
           ),
         ],

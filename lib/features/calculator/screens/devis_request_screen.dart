@@ -536,28 +536,6 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              // Upload Facture Image Button (Placeholder)
-              OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(AppLocalizations.of(context)!.uploadDisabled),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.upload_file),
-                label: Text(AppLocalizations.of(context)!.uploadBillOptional),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
               const SizedBox(height: 32),
               // Submit Button
               SizedBox(

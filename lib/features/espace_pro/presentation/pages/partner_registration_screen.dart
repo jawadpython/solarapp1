@@ -210,16 +210,6 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
     _formKey.currentState?.reset();
   }
 
-  void _uploadDocuments() {
-    // Firebase Storage temporarily disabled - billing not enabled
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.uploadDisabled),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -557,19 +547,6 @@ class _PartnerRegistrationScreenState extends State<PartnerRegistrationScreen> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                         prefixIcon: const Icon(Icons.description),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _uploadDocuments,
-                      icon: const Icon(Icons.upload_file),
-                      label: const Text('Téléverser des documents'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                     ),
                   ],

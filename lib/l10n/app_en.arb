@@ -561,5 +561,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "offlineTitle": "No connection",
+  "offlineMessage": "Please connect to the internet to use the app."
 }

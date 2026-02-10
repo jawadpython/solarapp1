@@ -3,6 +3,7 @@
 // ============================================================================
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart'; // App color constants
+import 'package:noor_energy/core/services/auth_service.dart'; // Logout
 import 'package:noor_energy/core/services/language_service.dart'; // Language switching
 import 'package:noor_energy/features/profile/screens/profile_screen.dart'; // Profile screen
 import 'package:noor_energy/features/home/widgets/home_devis_form_dialog.dart'; // Home devis form dialog
@@ -27,11 +28,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Track which bottom navigation item is selected (0 = Home, 1 = Espace Pro, etc.)
   int _currentIndex = 0;
+  // Hide "verify email" banner when user dismisses it
+  bool _hideEmailVerificationBanner = false;
+  bool _resendingVerification = false;
 
 
   // ==========================================================================
   // HELPER METHOD: Show bottom menu sheet
   // ==========================================================================
+  /// Subtitle under TAWFIR ENERGY: show "Hi, Name" if user has display name, else slogan.
+  String _displaySubtitle(BuildContext context) {
+    final name = AuthService.instance.currentUserDisplayName;
+    if (name != null && name.isNotEmpty) {
+      return 'Hi, $name';
+    }
+    return AppLocalizations.of(context)!.slogan;
+  }
+
   /// This method displays a bottom sheet menu when user taps the menu icon
   /// Bottom sheet slides up from bottom of screen
   void _showMenu(BuildContext context) {
@@ -48,17 +61,26 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min, // Column takes minimum space needed
           children: [
-            // ListTile: creates a menu item with icon and text
             ListTile(
-              leading: const Icon(Icons.person_outline), // Icon on left
-              title: Text(AppLocalizations.of(context)!.profile), // Menu text
+              leading: const Icon(Icons.person_outline),
+              title: Text(AppLocalizations.of(context)!.profile),
               onTap: () {
-                // When tapped: close bottom sheet, then navigate to profile
-                Navigator.pop(context); // Close bottom sheet
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ProfileScreen()),
                 );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout, color: Colors.grey.shade700),
+              title: Text(
+                'Logout',
+                style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w500),
+              ),
+              onTap: () async {
+                Navigator.pop(context);
+                await AuthService.instance.signOut();
               },
             ),
           ],
@@ -125,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      AppLocalizations.of(context)!.slogan,
+                      _displaySubtitle(context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -172,11 +194,88 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min, // Column takes minimum space needed
           children: [
+            const SizedBox(height: 16),
+            // Email verification reminder (dismissible)
+            if (!AuthService.instance.isEmailVerified && !_hideEmailVerificationBanner) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.mark_email_unread_outlined, color: AppColors.primary, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Verify your email',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Check your inbox for the verification link.',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _resendingVerification
+                          ? null
+                          : () async {
+                              setState(() => _resendingVerification = true);
+                              try {
+                                await AuthService.instance.sendEmailVerification();
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Verification email sent. Check your inbox.'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(e is Exception ? e.toString().replaceFirst('Exception: ', '') : '$e'),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                }
+                              }
+                              if (mounted) setState(() => _resendingVerification = false);
+                            },
+                      child: _resendingVerification
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Text('Resend'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, size: 20, color: Colors.grey.shade600),
+                      onPressed: () => setState(() => _hideEmailVerificationBanner = true),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
             // ==================================================================
             // BANNER SECTION with CTA Button
             // ==================================================================
-            // Spacing after AppBar for clean layout
-            const SizedBox(height: 26),
+            const SizedBox(height: 10),
             // Container: Wrapper with margins (space around the banner)
             Container(
               // Margin: Space outside the container (horizontal = left/right, vertical = top/bottom)

@@ -12,7 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   # Firebase packages
   firebase_core: ^3.15.2
-  firebase_auth: ^5.3.4
+  firebase_auth: ^5.7.0
   cloud_firestore: ^5.6.12
   # firebase_storage: ^12.4.10  # Temporarily disabled - billing not enabled
   url_launcher: ^6.3.2
@@ -24,6 +24,7 @@ dependencies:
   shared_preferences: ^2.2.2  # Local storage for language preference
   geolocator: ^13.0.1  # GPS location services
   geocoding: ^3.0.0  # Reverse geocoding (coordinates to address)
+  connectivity_plus: ^6.0.5  # Detect offline to show connect message
   # Export packages for admin dashboard
   excel: ^4.0.4
   csv: ^6.0.0

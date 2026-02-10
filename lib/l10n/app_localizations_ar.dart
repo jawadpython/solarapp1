@@ -1458,4 +1458,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String cannotCall(String phone) {
     return 'لا يمكن الاتصال: $phone';
   }
+
+  @override
+  String get offlineTitle => 'لا يوجد اتصال';
+
+  @override
+  String get offlineMessage => 'يرجى الاتصال بالإنترنت لاستخدام التطبيق.';
 }

@@ -564,5 +564,7 @@
   },
   "yearlySavingsLabel": "Économie annuelle",
   "tenYearsSavingsLabel": "Économie 10 ans",
-  "twentyYearsSavingsLabel": "Économie 20 ans"
+  "twentyYearsSavingsLabel": "Économie 20 ans",
+  "offlineTitle": "Pas de connexion",
+  "offlineMessage": "Veuillez vous connecter à Internet pour utiliser l'application."
 }

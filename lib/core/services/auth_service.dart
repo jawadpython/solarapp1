@@ -1,140 +1,135 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// AuthService handles all authentication operations using Firebase Auth.
-/// 
-/// Firebase Auth provides:
-/// - Email/password authentication
-/// - User session management
-/// - Secure token handling
+// =============================================================================
+// AUTH SERVICE - Firebase Authentication only (email & password).
+// No custom logic, no passwords in Firestore. All auth via FirebaseAuth.
+// =============================================================================
+
 class AuthService {
-  // FirebaseAuth instance - the main entry point for Firebase Authentication
+  AuthService._();
+  static final AuthService instance = AuthService._();
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // ============================================================
-  // GETTERS - Access current authentication state
-  // ============================================================
-
-  /// Returns the currently signed-in user, or null if no user is signed in.
-  /// Firebase automatically persists the user session.
+  /// Current signed-in user, or null if not logged in.
   User? get currentUser => _auth.currentUser;
 
-  /// Quick check if a user is currently authenticated.
-  bool get isAuthenticated => currentUser != null;
+  /// Display name set at sign up (or null). Use in app bar / profile.
+  String? get currentUserDisplayName => _auth.currentUser?.displayName;
 
-  /// Get the unique user ID (UID) - used to identify user data in Firestore.
-  String? get currentUserId => currentUser?.uid;
-
-  /// Get the user's email address.
-  String? get currentUserEmail => currentUser?.email;
-
-  /// Stream that emits whenever the auth state changes.
-  /// Useful for listening to login/logout events in the UI.
+  /// Stream that emits when auth state changes (login, logout).
+  /// Use in main.dart to switch between LoginPage and HomePage.
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // ============================================================
-  // SIGN IN - Authenticate existing user
-  // ============================================================
-
-  /// Signs in a user with email and password.
-  /// 
-  /// Returns [User] on success, throws [FirebaseAuthException] on failure.
-  /// 
-  /// Common error codes:
-  /// - 'user-not-found': No user with this email
-  /// - 'wrong-password': Incorrect password
-  /// - 'invalid-email': Email format is invalid
-  Future<User?> signInWithEmail(String email, String password) async {
+  // ---------------------------------------------------------------------------
+  // SIGN UP - Create new account (email, password, and optional display name).
+  // ---------------------------------------------------------------------------
+  /// Creates a new user with email and password. If [displayName] is provided,
+  /// it is stored in Firebase Auth and available as currentUser.displayName.
+  Future<User?> signUp(String email, String password, {String? displayName}) async {
     try {
-      // signInWithEmailAndPassword authenticates the user
-      // and automatically saves the session
-      final UserCredential credential = await _auth.signInWithEmailAndPassword(
+      final cred = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
-      
-      // credential.user contains the authenticated user info
-      return credential.user;
+      final user = cred.user;
+      if (user != null && displayName != null && displayName.trim().isNotEmpty) {
+        await user.updateDisplayName(displayName.trim());
+      }
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+      return user;
     } on FirebaseAuthException catch (e) {
-      // Re-throw with the error code for handling in UI
-      throw _handleAuthError(e);
+      throw Exception(_messageFromCode(e.code, e.message));
     }
   }
 
-  // ============================================================
-  // SIGN UP - Create new user account
-  // ============================================================
-
-  /// Creates a new user account with email and password.
-  /// 
-  /// Returns [User] on success, throws [FirebaseAuthException] on failure.
-  /// 
-  /// Common error codes:
-  /// - 'email-already-in-use': Account exists with this email
-  /// - 'weak-password': Password is too weak (min 6 chars)
-  /// - 'invalid-email': Email format is invalid
-  Future<User?> signUpWithEmail(String email, String password) async {
+  // ---------------------------------------------------------------------------
+  // SIGN IN - Log in existing user.
+  // ---------------------------------------------------------------------------
+  /// Signs in with email and password.
+  /// Throws [Exception] with a user-friendly message on FirebaseAuthException.
+  Future<User?> signIn(String email, String password) async {
     try {
-      // createUserWithEmailAndPassword creates the account
-      // and automatically signs in the user
-      final UserCredential credential = await _auth.createUserWithEmailAndPassword(
+      final cred = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
-      
-      return credential.user;
+      return cred.user;
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthError(e);
+      throw Exception(_messageFromCode(e.code, e.message));
     }
   }
 
-  // ============================================================
-  // SIGN OUT - End user session
-  // ============================================================
-
-  /// Signs out the current user.
-  /// 
-  /// This clears the local session and tokens.
-  /// After sign out, currentUser will be null.
+  // ---------------------------------------------------------------------------
+  // SIGN OUT - End session.
+  // ---------------------------------------------------------------------------
+  /// Signs out the current user. After this, authStateChanges will emit null.
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
-  // ============================================================
-  // PASSWORD RESET
-  // ============================================================
-
-  /// Sends a password reset email to the specified address.
-  /// 
-  /// The email contains a link that allows the user to reset their password.
+  // ---------------------------------------------------------------------------
+  // FORGOT PASSWORD - Send reset email.
+  // ---------------------------------------------------------------------------
+  /// Sends a password reset email to the given address. User clicks link in email to set new password.
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthError(e);
+      throw Exception(_messageFromCode(e.code, e.message));
     }
   }
 
-  // ============================================================
-  // ERROR HANDLING
-  // ============================================================
+  // ---------------------------------------------------------------------------
+  // PROFILE - Update display name.
+  // ---------------------------------------------------------------------------
+  /// Updates the current user's display name (shown in app bar, profile).
+  Future<void> updateDisplayName(String name) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not signed in');
+    await user.updateDisplayName(name.trim());
+  }
 
-  /// Converts Firebase error codes to user-friendly messages.
-  String _handleAuthError(FirebaseAuthException e) {
-    switch (e.code) {
+  // ---------------------------------------------------------------------------
+  // EMAIL VERIFICATION - Send verification email (e.g. after signup).
+  // ---------------------------------------------------------------------------
+  /// Sends a verification email to the current user. Call after signUp.
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    if (user.emailVerified) return;
+    await user.sendEmailVerification();
+  }
+
+  /// Whether the current user's email is verified.
+  bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;
+
+  /// Current user email (for profile display).
+  String? get currentUserEmail => _auth.currentUser?.email;
+
+  // ---------------------------------------------------------------------------
+  // ERROR HANDLING - Map Firebase codes to readable messages.
+  // ---------------------------------------------------------------------------
+  String _messageFromCode(String code, String? fallback) {
+    switch (code) {
       case 'user-not-found':
-        return 'Aucun compte trouvé avec cet email.';
+        return 'No account found with this email.';
       case 'wrong-password':
-        return 'Mot de passe incorrect.';
+        return 'Wrong password.';
       case 'email-already-in-use':
-        return 'Un compte existe déjà avec cet email.';
+        return 'An account already exists with this email.';
       case 'weak-password':
-        return 'Le mot de passe doit contenir au moins 6 caractères.';
+        return 'Password must be at least 6 characters.';
       case 'invalid-email':
-        return 'Format d\'email invalide.';
+        return 'Invalid email format.';
+      case 'invalid-credential':
+        return 'Invalid email or password.';
       case 'too-many-requests':
-        return 'Trop de tentatives. Réessayez plus tard.';
+        return 'Too many attempts. Try again later.';
       default:
-        return 'Une erreur est survenue: ${e.message}';
+        return fallback ?? 'Something went wrong. Try again.';
     }
   }
 }
