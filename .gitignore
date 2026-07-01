@@ -53,3 +53,6 @@ upload-keystore.jks
 # Firebase Functions secrets (Resend API key etc.)
 functions/.env
 functions/.env.*
+
+# Standalone auth email API secrets
+server/auth-email-api/.env

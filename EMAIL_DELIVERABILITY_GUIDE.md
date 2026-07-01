@@ -2,6 +2,8 @@
 
 ## Emails in spam right now?
 
+**If Firebase Blaze billing is off:** Cloud Functions fail with *"billing is disabled"*. The app then uses Firebase’s default sender (`@firebaseapp.com`) and emails go to spam — even if Resend is configured in `functions/.env`. **Fix:** deploy `server/auth-email-api` on Render (free) — see **[DEPLOY_AUTH_EMAIL_API.md](DEPLOY_AUTH_EMAIL_API.md)**.
+
 1. **Tell users to check spam/junk** – The app already says “check your email (including spam folder)”. Ask users to look in spam and, if they find the email, mark it as **Not spam** so future emails go to inbox.
 2. **Send from your domain (best fix)** – Configure **Resend** below so verification and password-reset emails are sent from your domain (e.g. `noreply@yourdomain.com`) with SPF/DKIM. Then redeploy Cloud Functions.
 3. **Firebase Console (quick win)** – In [Firebase Console](https://console.firebase.google.com) → your project (**solar-app-f698e**) → **Authentication** → **Templates**, set a clear **sender name** (e.g. “Tawfir Energy”) and edit the email templates. You can also set **SMTP** there if your provider supports it.

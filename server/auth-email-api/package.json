@@ -1,0 +1,19 @@
+{
+  "name": "noor-energy-auth-email-api",
+  "description": "Send Firebase Auth verification/reset emails via Resend (no Blaze plan required)",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "firebase-admin": "^12.0.0",
+    "resend": "^4.0.0"
+  }
+}

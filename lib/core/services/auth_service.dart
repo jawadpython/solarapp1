@@ -1,12 +1,19 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:http/http.dart' as http;
 
+import 'package:noor_energy/core/constants/auth_email_api_config.dart';
 import 'package:noor_energy/core/constants/auth_email_continue_urls.dart';
 
 // =============================================================================
 // AUTH SERVICE - Firebase Authentication (email & password).
-// Verification and password-reset emails are sent via Cloud Functions + Resend
-// (your domain) when configured, to reduce spam; otherwise Firebase built-in.
+// Verification and password-reset emails are sent via Resend (your domain):
+//   1) Standalone auth-email API (no Blaze) — preferred when configured
+//   2) Firebase Cloud Functions + Resend (requires Blaze billing)
+//   3) Firebase built-in emails (often spam) — last resort only
 // =============================================================================
 
 class AuthService {
@@ -41,13 +48,10 @@ class AuthService {
         await user.updateDisplayName(displayName.trim());
       }
       if (user != null && !user.emailVerified) {
-        // Try to send verification email; don't fail sign-up if it fails
         try {
           await _sendVerificationEmailPreferred();
         } catch (e) {
-          // Email failed (rate limit, network, etc.) - user can request again later
-          // ignore: avoid_print
-          print('Verification email failed after sign-up: $e');
+          debugPrint('Verification email failed after sign-up: $e');
         }
       }
       return user;
@@ -59,8 +63,6 @@ class AuthService {
   // ---------------------------------------------------------------------------
   // SIGN IN - Log in existing user.
   // ---------------------------------------------------------------------------
-  /// Signs in with email and password.
-  /// Throws [Exception] with a user-friendly message on FirebaseAuthException.
   Future<User?> signIn(String email, String password) async {
     try {
       final cred = await _auth.signInWithEmailAndPassword(
@@ -76,7 +78,6 @@ class AuthService {
   // ---------------------------------------------------------------------------
   // SIGN OUT - End session.
   // ---------------------------------------------------------------------------
-  /// Signs out the current user. After this, authStateChanges will emit null.
   Future<void> signOut() async {
     await _auth.signOut();
   }
@@ -84,18 +85,24 @@ class AuthService {
   // ---------------------------------------------------------------------------
   // FORGOT PASSWORD - Send reset email.
   // ---------------------------------------------------------------------------
-  /// Sends a password reset email to the given address. User clicks link in email to set new password.
-  /// Prefers Cloud Function (Resend/your domain) to avoid spam; falls back to Firebase built-in.
   Future<void> sendPasswordResetEmail(String email) async {
     final trimmed = email.trim();
+
+    if (await _sendPasswordResetViaAuthEmailApi(trimmed)) return;
+
     try {
       await FirebaseFunctions.instance
           .httpsCallable('sendAuthPasswordResetEmail')
           .call({'email': trimmed});
       return;
-    } catch (_) {
-      // Fallback: use Firebase built-in (may go to spam)
+    } catch (e) {
+      debugPrint('Cloud Function password reset failed: $e');
     }
+
+    debugPrint(
+      'Using Firebase built-in password reset (may land in spam). '
+      'Deploy server/auth-email-api or enable Blaze for Cloud Functions.',
+    );
     try {
       await _auth.sendPasswordResetEmail(
         email: trimmed,
@@ -112,7 +119,6 @@ class AuthService {
   // ---------------------------------------------------------------------------
   // PROFILE - Update display name.
   // ---------------------------------------------------------------------------
-  /// Updates the current user's display name (shown in app bar, profile).
   Future<void> updateDisplayName(String name) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not signed in');
@@ -122,8 +128,6 @@ class AuthService {
   // ---------------------------------------------------------------------------
   // EMAIL VERIFICATION - Send verification email (e.g. after signup).
   // ---------------------------------------------------------------------------
-  /// Sends a verification email to the current user. Call after signUp.
-  /// Prefers Cloud Function (Resend/your domain) to avoid spam; falls back to Firebase built-in.
   Future<void> sendEmailVerification() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -131,28 +135,28 @@ class AuthService {
     await _sendVerificationEmailPreferred();
   }
 
-  /// Tries custom Resend email first; on failure uses Firebase built-in.
-  /// Throws if both fail (caller should catch if needed).
   Future<void> _sendVerificationEmailPreferred() async {
-    // Try Cloud Function (Resend) first
+    if (await _sendVerificationViaAuthEmailApi()) return;
+
     try {
       await FirebaseFunctions.instance
           .httpsCallable('sendAuthVerificationEmail')
           .call();
-      return; // Success
+      return;
     } catch (e) {
-      // ignore: avoid_print
-      print('Cloud Function verification email failed: $e');
+      debugPrint('Cloud Function verification email failed: $e');
     }
 
-    // Fallback: Firebase built-in (may go to spam)
     final user = _auth.currentUser;
     if (user != null && !user.emailVerified) {
+      debugPrint(
+        'Using Firebase built-in verification email (may land in spam). '
+        'Deploy server/auth-email-api or enable Blaze for Cloud Functions.',
+      );
       try {
         await user.sendEmailVerification(
           ActionCodeSettings(
             url: kEmailVerifiedContinueUrl,
-            // false: true was collapsing continueUrl to the bare firebaseapp domain (SPA/admin).
             handleCodeInApp: false,
           ),
         );
@@ -160,6 +164,62 @@ class AuthService {
         throw Exception(_messageFromCode(e.code, e.message));
       }
     }
+  }
+
+  Future<bool> _sendVerificationViaAuthEmailApi() async {
+    if (!AuthEmailApiConfig.isConfigured) return false;
+
+    final user = _auth.currentUser;
+    if (user == null) return false;
+
+    try {
+      final idToken = await user.getIdToken();
+      final uri = Uri.parse(
+        '${AuthEmailApiConfig.baseUrl}/v1/send-verification',
+      );
+      final response = await http.post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      debugPrint(
+        'Auth email API verification failed (${response.statusCode}): ${response.body}',
+      );
+    } catch (e) {
+      debugPrint('Auth email API verification error: $e');
+    }
+    return false;
+  }
+
+  Future<bool> _sendPasswordResetViaAuthEmailApi(String email) async {
+    if (!AuthEmailApiConfig.isConfigured) return false;
+
+    try {
+      final uri = Uri.parse(
+        '${AuthEmailApiConfig.baseUrl}/v1/send-password-reset',
+      );
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      debugPrint(
+        'Auth email API password reset failed (${response.statusCode}): ${response.body}',
+      );
+    } catch (e) {
+      debugPrint('Auth email API password reset error: $e');
+    }
+    return false;
   }
 
   /// Whether the current user's email is verified.
@@ -176,9 +236,6 @@ class AuthService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // ERROR HANDLING - Map Firebase codes to readable messages.
-  // ---------------------------------------------------------------------------
   String _messageFromCode(String code, String? fallback) {
     switch (code) {
       case 'user-not-found':

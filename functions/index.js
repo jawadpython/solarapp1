@@ -15,18 +15,51 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineString } from "firebase-functions/params";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 import { getApps, initializeApp } from "firebase-admin/app";
+import { v2 as cloudinary } from "cloudinary";
 import { Resend } from "resend";
 
 const resendApiKey = defineString("RESEND_API_KEY", { description: "Resend API key" });
 const resendFromEmail = defineString("RESEND_FROM_EMAIL", { description: "From email e.g. noreply@yourdomain.com" });
 const resendFromName = defineString("RESEND_FROM_NAME", { default: "Tawfir Energy" });
 
+const cloudinaryCloudName = defineString("CLOUDINARY_CLOUD_NAME", {
+  description: "Cloudinary cloud name",
+});
+const cloudinaryApiKey = defineString("CLOUDINARY_API_KEY", {
+  description: "Cloudinary API key",
+});
+const cloudinaryApiSecret = defineString("CLOUDINARY_API_SECRET", {
+  description: "Cloudinary API secret",
+});
+
 if (!getApps().length) {
   initializeApp();
 }
 
 const auth = getAuth();
+const db = getFirestore();
+
+function configureCloudinary() {
+  const cloudName = cloudinaryCloudName.value();
+  const apiKey = cloudinaryApiKey.value();
+  const apiSecret = cloudinaryApiSecret.value();
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Missing Cloudinary config. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to functions/.env."
+    );
+  }
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
+}
+
+async function assertAdmin(uid) {
+  const adminDoc = await db.collection("admins").doc(uid).get();
+  if (!adminDoc.exists) {
+    throw new HttpsError("permission-denied", "Admin access required.");
+  }
+}
 
 /** Firebase Auth redirect after email action (must be hosted + authorized domain). */
 const EMAIL_VERIFIED_CONTINUE_URL =
@@ -180,5 +213,39 @@ export const sendAuthPasswordResetEmail = onCall(
       throw new HttpsError("internal", "Failed to send reset email. Try again later.");
     }
     return { ok: true, id: data?.id };
+  }
+);
+
+/**
+ * Callable: Delete a Cloudinary asset (admin product image delete).
+ * Requires Cloudinary API credentials in functions/.env.
+ */
+export const deleteCloudinaryAsset = onCall(
+  { enforceAppCheck: false },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Must be signed in.");
+    }
+    await assertAdmin(request.auth.uid);
+
+    const publicId = request.data?.publicId;
+    const resourceType = request.data?.resourceType ?? "image";
+    if (!publicId || typeof publicId !== "string") {
+      throw new HttpsError("invalid-argument", "publicId is required.");
+    }
+    if (!["image", "raw", "video"].includes(resourceType)) {
+      throw new HttpsError("invalid-argument", "Invalid resourceType.");
+    }
+
+    configureCloudinary();
+    try {
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+      });
+      return { ok: true, result: result.result };
+    } catch (e) {
+      console.error("Cloudinary delete failed", e);
+      throw new HttpsError("internal", "Could not delete Cloudinary asset.");
+    }
   }
 );

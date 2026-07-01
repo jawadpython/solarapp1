@@ -189,25 +189,31 @@ class _ProductsPageState extends State<ProductsPage> {
         initialData: data,
         onSave: (productData, imageFile) async {
           String? imageUrl = data?['imageUrl'];
+          String targetDocId = docId ?? '';
+
+          if (targetDocId.isEmpty) {
+            final ref = await _firestore.collection('products').add({
+              ...productData,
+              'imageUrl': null,
+            });
+            targetDocId = ref.id;
+          }
 
           if (imageFile != null) {
             final path = StorageService.instance.generateProductImagePath(
-              docId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+              targetDocId,
               imageFile.name,
             );
             imageUrl = await StorageService.instance.uploadImage(
               file: imageFile,
               path: path,
+              overwrite: true,
             );
           }
 
           final finalData = {...productData, 'imageUrl': imageUrl};
 
-          if (docId != null) {
-            await _firestore.collection('products').doc(docId).update(finalData);
-          } else {
-            await _firestore.collection('products').add(finalData);
-          }
+          await _firestore.collection('products').doc(targetDocId).update(finalData);
 
           if (mounted && dialogContext.mounted) Navigator.pop(dialogContext);
         },

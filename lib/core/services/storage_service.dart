@@ -1,15 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:noor_energy/core/config/cloudinary_config.dart';
 
 class StorageService {
   StorageService._();
   static final StorageService instance = StorageService._();
 
-  final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
 
   /// Pick an image from gallery
@@ -59,148 +61,98 @@ class StorageService {
     }
   }
 
-  /// Upload image to Firebase Storage
-  /// Returns the download URL on success, null on failure
+  /// Upload image to Cloudinary.
+  /// Returns the secure URL on success, null on failure.
   Future<String?> uploadImage({
     required XFile file,
     required String path,
+    bool overwrite = false,
     void Function(double)? onProgress,
   }) async {
     try {
-      final ref = _storage.ref().child(path);
-      UploadTask uploadTask;
-
-      if (kIsWeb) {
-        final bytes = await file.readAsBytes();
-        uploadTask = ref.putData(
-          bytes,
-          SettableMetadata(contentType: 'image/${_getExtension(file.name)}'),
-        );
-      } else {
-        uploadTask = ref.putFile(
-          File(file.path),
-          SettableMetadata(contentType: 'image/${_getExtension(file.name)}'),
-        );
-      }
-
-      if (onProgress != null) {
-        uploadTask.snapshotEvents.listen((event) {
-          final progress = event.bytesTransferred / event.totalBytes;
-          onProgress(progress);
-        });
-      }
-
-      final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-      debugPrint('Image uploaded successfully: $downloadUrl');
-      return downloadUrl;
-    } on FirebaseException catch (e) {
-      debugPrint('Firebase Storage error: ${e.code} - ${e.message}');
-      return null;
+      final bytes = await file.readAsBytes();
+      return uploadImageBytes(
+        bytes: bytes,
+        path: path,
+        fileName: file.name,
+        contentType: 'image/${_getExtension(file.name)}',
+        overwrite: overwrite,
+        onProgress: onProgress,
+      );
     } catch (e) {
       debugPrint('Error uploading image: $e');
       return null;
     }
   }
 
-  /// Upload image from bytes (useful for web)
+  /// Upload image bytes (web + mobile).
   Future<String?> uploadImageBytes({
     required Uint8List bytes,
     required String path,
+    String fileName = 'upload.jpg',
     String contentType = 'image/jpeg',
+    bool overwrite = false,
     void Function(double)? onProgress,
   }) async {
-    try {
-      final ref = _storage.ref().child(path);
-      final uploadTask = ref.putData(
-        bytes,
-        SettableMetadata(contentType: contentType),
-      );
-
-      if (onProgress != null) {
-        uploadTask.snapshotEvents.listen((event) {
-          final progress = event.bytesTransferred / event.totalBytes;
-          onProgress(progress);
-        });
-      }
-
-      final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-      debugPrint('Image uploaded successfully: $downloadUrl');
-      return downloadUrl;
-    } on FirebaseException catch (e) {
-      debugPrint('Firebase Storage error: ${e.code} - ${e.message}');
-      return null;
-    } catch (e) {
-      debugPrint('Error uploading image bytes: $e');
-      return null;
-    }
+    return _uploadToCloudinary(
+      bytes: bytes,
+      path: path,
+      fileName: fileName,
+      resourceType: 'image',
+      overwrite: overwrite,
+      onProgress: onProgress,
+    );
   }
 
-  /// Upload file selected with file_picker.
+  /// Upload file selected with file_picker (images or PDF).
   Future<String?> uploadPlatformFile({
     required PlatformFile file,
     required String path,
     void Function(double)? onProgress,
   }) async {
     try {
-      final ref = _storage.ref().child(path);
-      final metadata = SettableMetadata(
-        contentType: _guessContentType(file.name),
-      );
-      late final UploadTask uploadTask;
-
+      late final Uint8List bytes;
       if (kIsWeb) {
-        final bytes = file.bytes;
-        if (bytes == null) return null;
-        uploadTask = ref.putData(bytes, metadata);
+        final webBytes = file.bytes;
+        if (webBytes == null) return null;
+        bytes = webBytes;
       } else {
         final filePath = file.path;
         if (filePath == null || filePath.isEmpty) return null;
-        uploadTask = ref.putFile(File(filePath), metadata);
+        bytes = await File(filePath).readAsBytes();
       }
 
-      if (onProgress != null) {
-        uploadTask.snapshotEvents.listen((event) {
-          final total = event.totalBytes;
-          if (total > 0) {
-            onProgress(event.bytesTransferred / total);
-          }
-        });
-      }
-
-      final snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
-    } on FirebaseException catch (e) {
-      debugPrint('Firebase Storage error: ${e.code} - ${e.message}');
-      return null;
+      final resourceType = _isPdf(file.name) ? 'raw' : 'image';
+      return _uploadToCloudinary(
+        bytes: bytes,
+        path: path,
+        fileName: file.name,
+        resourceType: resourceType,
+        onProgress: onProgress,
+      );
     } catch (e) {
       debugPrint('Error uploading platform file: $e');
       return null;
     }
   }
 
-  /// Delete an image from Firebase Storage by URL
+  /// Removes a product from Firestore. Cloudinary files are not deleted here
+  /// (that would require a paid Firebase Blaze backend). Orphaned files can
+  /// be cleaned up manually in the Cloudinary Media Library if needed.
   Future<bool> deleteImage(String url) async {
-    try {
-      final ref = _storage.refFromURL(url);
-      await ref.delete();
-      debugPrint('Image deleted successfully: $url');
-      return true;
-    } on FirebaseException catch (e) {
-      debugPrint('Firebase Storage error deleting: ${e.code} - ${e.message}');
-      return false;
-    } catch (e) {
-      debugPrint('Error deleting image: $e');
-      return false;
+    if (CloudinaryConfig.isCloudinaryUrl(url)) {
+      debugPrint(
+        'Cloudinary asset kept in Media Library (no Blaze backend): $url',
+      );
+    } else {
+      debugPrint('Skipping legacy storage URL delete: $url');
     }
+    return true;
   }
 
-  /// Generate a unique path for product images
+  /// Stable Cloudinary path per product so re-uploads can overwrite the image.
   String generateProductImagePath(String productId, String fileName) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final ext = _getExtension(fileName);
-    return 'products/$productId/${timestamp}_$productId.$ext';
+    return 'products/$productId/cover';
   }
 
   /// Generate a unique path for user uploads
@@ -217,24 +169,96 @@ class StorageService {
     return '$folder/${timestamp}_upload.$ext';
   }
 
+  Future<String?> _uploadToCloudinary({
+    required Uint8List bytes,
+    required String path,
+    required String fileName,
+    required String resourceType,
+    bool overwrite = false,
+    void Function(double)? onProgress,
+  }) async {
+    if (!CloudinaryConfig.isConfigured) {
+      debugPrint(
+        'Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME and '
+        'CLOUDINARY_UPLOAD_PRESET via --dart-define or cloudinary_config.dart.',
+      );
+      return null;
+    }
+
+    final (folder, publicId) = _parseStoragePath(path);
+    final uri = Uri.parse(
+      'https://api.cloudinary.com/v1_1/${CloudinaryConfig.cloudName}/$resourceType/upload',
+    );
+
+    onProgress?.call(0.05);
+
+    try {
+      final request = http.MultipartRequest('POST', uri)
+        ..fields['upload_preset'] = CloudinaryConfig.uploadPreset
+        ..fields['public_id'] = publicId;
+
+      if (folder.isNotEmpty) {
+        request.fields['folder'] = folder;
+      }
+
+      if (overwrite) {
+        request.fields['overwrite'] = 'true';
+      }
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+        ),
+      );
+
+      onProgress?.call(0.35);
+
+      final streamedResponse = await request.send();
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      onProgress?.call(0.85);
+
+      if (streamedResponse.statusCode < 200 || streamedResponse.statusCode >= 300) {
+        debugPrint(
+          'Cloudinary upload failed (${streamedResponse.statusCode}): $responseBody',
+        );
+        return null;
+      }
+
+      final json = jsonDecode(responseBody) as Map<String, dynamic>;
+      final secureUrl = json['secure_url'] as String?;
+      onProgress?.call(1.0);
+      debugPrint('Cloudinary upload OK: $secureUrl');
+      return secureUrl;
+    } catch (e) {
+      debugPrint('Cloudinary upload error: $e');
+      return null;
+    }
+  }
+
+  (String folder, String publicId) _parseStoragePath(String path) {
+    final lastSlash = path.lastIndexOf('/');
+    if (lastSlash == -1) {
+      return ('', _stripExtension(path));
+    }
+
+    final folder = path.substring(0, lastSlash);
+    final fileName = path.substring(lastSlash + 1);
+    return (folder, _stripExtension(fileName));
+  }
+
+  String _stripExtension(String fileName) {
+    final dotIndex = fileName.lastIndexOf('.');
+    if (dotIndex <= 0) return fileName;
+    return fileName.substring(0, dotIndex);
+  }
+
+  bool _isPdf(String fileName) => fileName.toLowerCase().endsWith('.pdf');
+
   String _getExtension(String fileName) {
     final parts = fileName.split('.');
     return parts.length > 1 ? parts.last.toLowerCase() : 'jpg';
-  }
-
-  String _guessContentType(String fileName) {
-    final ext = _getExtension(fileName);
-    switch (ext) {
-      case 'pdf':
-        return 'application/pdf';
-      case 'png':
-        return 'image/png';
-      case 'webp':
-        return 'image/webp';
-      case 'jpg':
-      case 'jpeg':
-      default:
-        return 'image/jpeg';
-    }
   }
 }
