@@ -142,7 +142,7 @@ class AuthService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not signed in');
 
-    final idToken = await user.getIdToken();
+    final idToken = await user.getIdToken(true);
     await _postAuthEmailApiOrThrow(
       path: '/v1/send-verification',
       headers: {
@@ -184,8 +184,19 @@ class AuthService {
           return;
         }
 
-        lastError =
-            'HTTP ${response.statusCode}: ${response.body}';
+        String message = 'HTTP ${response.statusCode}';
+        try {
+          final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+          final err = decoded['error']?.toString();
+          final detail = decoded['detail']?.toString();
+          if (err != null && err.isNotEmpty) {
+            message = detail != null && detail.isNotEmpty ? '$err ($detail)' : err;
+          }
+        } catch (_) {
+          if (response.body.isNotEmpty) message = response.body;
+        }
+
+        lastError = message;
         debugPrint('Auth email API failed ($path) attempt $attempt: $lastError');
       } catch (e) {
         lastError = e;

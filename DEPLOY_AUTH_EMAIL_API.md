@@ -94,7 +94,28 @@ First emails may still hit spam. Mark **Not spam** once in Gmail — reputation 
 | Symptom | Fix |
 |---------|-----|
 | Email still from `@firebaseapp.com` | API URL not set in app, or API call failed — check Render logs |
-| Render 500 on send | Check Resend API key and verified domain |
+| Render 500 on **Resend** button | See below — usually rate limit or bad env var |
+| Health shows no `"version":2` | Old server still running — **Manual Deploy** on Render |
+
+### Error 500 when tapping Resend (renvoyer)
+
+1. **Redeploy Render** with latest `server/auth-email-api` code (health must show `"version":2`).
+2. On Render → **Environment**, **remove** `FIREBASE_AUTH_LINK_DOMAIN` unless you connected that domain in Firebase Auth.
+3. If the app says **"Too many verification emails"** — wait 15–30 minutes (Firebase rate limit).
+4. If it says **"Session expired"** — sign out, sign in again, then resend.
+5. Check Render **Logs** tab right after resend — the real error is logged there.
+
+### Resend shows email but still spam
+
+Resend **delivered** ≠ inbox. Gmail often puts new domains in spam until reputation builds:
+
+1. Resend → your domain → **disable** Open + Click tracking
+2. Add **DMARC** DNS record (section 3)
+3. Change `RESEND_FROM_EMAIL` to `support@jawadsoftware.com` (not noreply)
+4. Mark the email **Not spam** once in Gmail
+5. Test score at [mail-tester.com](https://www.mail-tester.com) — send a verification to their address
+
+The verification link uses `firebaseapp.com` while From is `jawadsoftware.com` — this hurts deliverability until you connect your own domain to Firebase Hosting.
 | First email slow (~30s) | Free Render instance was asleep; normal on free tier |
 | Cloud Function logs say “billing is disabled” | Expected on Spark — use this API instead |
 

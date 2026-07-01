@@ -15,8 +15,8 @@ const PASSWORD_RESET_CONTINUE_URL =
   process.env.PASSWORD_RESET_CONTINUE_URL ||
   "https://solar-app-f698e.firebaseapp.com/password-reset-complete.html";
 
-/** Optional: e.g. jawadsoftware.com — must be in Firebase Auth authorized domains */
-const AUTH_LINK_DOMAIN = process.env.FIREBASE_AUTH_LINK_DOMAIN || undefined;
+/** Only set FIREBASE_AUTH_LINK_DOMAIN if that domain is connected in Firebase Auth */
+const AUTH_LINK_DOMAIN = process.env.FIREBASE_AUTH_LINK_DOMAIN?.trim() || undefined;
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -26,10 +26,26 @@ function requireEnv(name) {
   return value;
 }
 
+function parseServiceAccountJson(raw) {
+  const trimmed = raw.trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // Render env sometimes stores JSON with broken newlines in private_key
+    const fixed = trimmed
+      .replace(/\r\n/g, "\\n")
+      .replace(/\n/g, "\\n")
+      .replace(/\\n/g, "\n")
+      .replace(/"private_key": "-----BEGIN PRIVATE KEY-----\\n/, '"private_key": "-----BEGIN PRIVATE KEY-----\n')
+      .replace(/\\n-----END PRIVATE KEY-----\\n"/, '\n-----END PRIVATE KEY-----\n"');
+    return JSON.parse(fixed);
+  }
+}
+
 function initFirebase() {
   if (getApps().length) return;
   const raw = requireEnv("FIREBASE_SERVICE_ACCOUNT_JSON");
-  initializeApp({ credential: cert(JSON.parse(raw)) });
+  initializeApp({ credential: cert(parseServiceAccountJson(raw)) });
 }
 
 function getResend() {
@@ -54,6 +70,42 @@ function actionCodeSettings(continueUrl) {
     settings.linkDomain = AUTH_LINK_DOMAIN;
   }
   return settings;
+}
+
+function mapFirebaseError(e) {
+  const code = e?.code || e?.errorInfo?.code || "";
+  const message = e?.message || "Unknown error";
+
+  if (
+    code === "auth/too-many-requests" ||
+    message.includes("TOO_MANY_ATTEMPTS_TRY_LATER")
+  ) {
+    return {
+      status: 429,
+      error: "Too many verification emails sent. Please wait 15–30 minutes and try again.",
+      code,
+    };
+  }
+
+  if (code === "auth/invalid-continue-uri" || code === "auth/unauthorized-continue-uri") {
+    return {
+      status: 500,
+      error: "Email link configuration error. Contact support.",
+      code,
+      detail: message,
+    };
+  }
+
+  if (code === "auth/invalid-dynamic-link-domain" || message.includes("linkDomain")) {
+    return {
+      status: 500,
+      error: "Invalid FIREBASE_AUTH_LINK_DOMAIN on server. Remove it from Render env vars.",
+      code,
+      detail: message,
+    };
+  }
+
+  return { status: 500, error: "Internal error.", code, detail: message };
 }
 
 function transactionalHtml({ title, intro, buttonLabel, link, footerNote }) {
@@ -94,7 +146,7 @@ function transactionalHtml({ title, intro, buttonLabel, link, footerNote }) {
           <tr>
             <td style="color:#94a3b8;font-size:12px;line-height:1.5;border-top:1px solid #e2e8f0;padding-top:16px;">
               ${footerNote}<br>
-              Tawfir Energy — solar energy services
+              Tawfir Energy
             </td>
           </tr>
         </table>
@@ -105,19 +157,15 @@ function transactionalHtml({ title, intro, buttonLabel, link, footerNote }) {
 </html>`;
 }
 
-async function sendTransactionalEmail({ to, subject, html, text, tag }) {
+async function sendTransactionalEmail({ to, subject, html, text }) {
   const { client, fromEmail, replyTo } = getResend();
   return client.emails.send({
     from: fromEmail,
     to: [to],
-    reply_to: replyTo,
+    replyTo,
     subject,
     html,
     text,
-    tags: [{ name: "category", value: tag }],
-    headers: {
-      "X-Entity-Ref-ID": `${tag}-${Date.now()}-${to}`,
-    },
   });
 }
 
@@ -132,6 +180,7 @@ app.get("/health", (_req, res) => {
   res.json({
     ok: true,
     service: "auth-email-api",
+    version: 2,
     resendConfigured: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL),
     linkDomain: AUTH_LINK_DOMAIN || null,
   });
@@ -145,23 +194,40 @@ app.post("/v1/send-verification", async (req, res) => {
       return res.status(401).json({ error: "Missing Authorization Bearer token." });
     }
 
-    const decoded = await auth.verifyIdToken(token);
+    let decoded;
+    try {
+      decoded = await auth.verifyIdToken(token);
+    } catch (e) {
+      console.error("verifyIdToken failed", e);
+      return res.status(401).json({
+        error: "Session expired. Sign out and sign in again, then resend.",
+        detail: e?.message,
+      });
+    }
+
     const email = decoded.email;
     if (!email) {
       return res.status(400).json({ error: "No email on account." });
     }
 
-    const link = await auth.generateEmailVerificationLink(
-      email,
-      actionCodeSettings(EMAIL_VERIFIED_CONTINUE_URL),
-    );
+    let link;
+    try {
+      link = await auth.generateEmailVerificationLink(
+        email,
+        actionCodeSettings(EMAIL_VERIFIED_CONTINUE_URL),
+      );
+    } catch (e) {
+      console.error("generateEmailVerificationLink failed", e);
+      const mapped = mapFirebaseError(e);
+      return res.status(mapped.status).json(mapped);
+    }
 
     const subject = "Confirm your Tawfir Energy account";
     const text =
       `Confirm your Tawfir Energy account\n\n` +
-      `Thanks for signing up. Open this link to verify your email address:\n\n${link}\n\n` +
-      `If you did not create an account, you can ignore this email.\n\n` +
-      `— Tawfir Energy`;
+      `Open this link to verify your email:\n\n${link}\n\n` +
+      `If you did not create an account, ignore this email.\n\n` +
+      `Tawfir Energy`;
 
     const html = transactionalHtml({
       title: "Confirm your email",
@@ -172,24 +238,22 @@ app.post("/v1/send-verification", async (req, res) => {
       footerNote: "If you did not create an account, you can safely ignore this email.",
     });
 
-    const { data, error } = await sendTransactionalEmail({
-      to: email,
-      subject,
-      html,
-      text,
-      tag: "verify",
-    });
+    const { data, error } = await sendTransactionalEmail({ to: email, subject, html, text });
 
     if (error) {
       console.error("Resend verification failed", error);
-      return res.status(500).json({ error: "Failed to send verification email.", detail: error.message });
+      return res.status(500).json({
+        error: "Failed to send verification email.",
+        detail: error.message,
+      });
     }
 
-    console.log(`Verification email sent to ${email} via Resend id=${data?.id}`);
+    console.log(`Verification email sent to ${email} id=${data?.id}`);
     return res.json({ ok: true, id: data?.id, provider: "resend" });
   } catch (e) {
     console.error("send-verification error", e);
-    return res.status(500).json({ error: "Internal error." });
+    const mapped = mapFirebaseError(e);
+    return res.status(mapped.status).json(mapped);
   }
 });
 
@@ -211,48 +275,45 @@ app.post("/v1/send-password-reset", async (req, res) => {
         return res.json({ ok: true });
       }
       console.error("generatePasswordResetLink failed", e);
-      return res.status(500).json({ error: "Could not generate reset link." });
+      const mapped = mapFirebaseError(e);
+      return res.status(mapped.status).json(mapped);
     }
 
     const subject = "Reset your Tawfir Energy password";
     const text =
       `Reset your Tawfir Energy password\n\n` +
       `Open this link to choose a new password:\n\n${link}\n\n` +
-      `If you did not request this, ignore this email. Your password will not change.\n\n` +
-      `— Tawfir Energy`;
+      `Tawfir Energy`;
 
     const html = transactionalHtml({
       title: "Reset your password",
-      intro:
-        "We received a request to reset the password for your Tawfir Energy account.",
+      intro: "We received a request to reset your Tawfir Energy account password.",
       buttonLabel: "Reset password",
       link,
       footerNote:
-        "If you did not request a password reset, you can ignore this email. Your password will not change.",
+        "If you did not request a password reset, ignore this email. Your password will not change.",
     });
 
-    const { data, error } = await sendTransactionalEmail({
-      to: email,
-      subject,
-      html,
-      text,
-      tag: "reset",
-    });
+    const { data, error } = await sendTransactionalEmail({ to: email, subject, html, text });
 
     if (error) {
       console.error("Resend reset failed", error);
-      return res.status(500).json({ error: "Failed to send reset email.", detail: error.message });
+      return res.status(500).json({
+        error: "Failed to send reset email.",
+        detail: error.message,
+      });
     }
 
-    console.log(`Password reset email sent to ${email} via Resend id=${data?.id}`);
+    console.log(`Password reset email sent to ${email} id=${data?.id}`);
     return res.json({ ok: true, id: data?.id, provider: "resend" });
   } catch (e) {
     console.error("send-password-reset error", e);
-    return res.status(500).json({ error: "Internal error." });
+    const mapped = mapFirebaseError(e);
+    return res.status(mapped.status).json(mapped);
   }
 });
 
 const port = Number(process.env.PORT || 8080);
 app.listen(port, () => {
-  console.log(`auth-email-api listening on port ${port}`);
+  console.log(`auth-email-api v2 listening on port ${port}`);
 });
