@@ -7,7 +7,7 @@
 /// `--dart-define=AUTH_EMAIL_API_URL=https://noor-auth-email.onrender.com`
 class AuthEmailApiConfig {
   /// Paste your deployed API URL here (no trailing slash).
-  static const String fileBaseUrl = '';
+  static const String fileBaseUrl = 'https://solarapp1.onrender.com';
 
   static String get baseUrl {
     const fromEnv = String.fromEnvironment('AUTH_EMAIL_API_URL');

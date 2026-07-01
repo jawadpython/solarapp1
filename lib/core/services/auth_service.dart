@@ -9,11 +9,9 @@ import 'package:noor_energy/core/constants/auth_email_api_config.dart';
 import 'package:noor_energy/core/constants/auth_email_continue_urls.dart';
 
 // =============================================================================
-// AUTH SERVICE - Firebase Authentication (email & password).
-// Verification and password-reset emails are sent via Resend (your domain):
-//   1) Standalone auth-email API (no Blaze) — preferred when configured
-//   2) Firebase Cloud Functions + Resend (requires Blaze billing)
-//   3) Firebase built-in emails (often spam) — last resort only
+// AUTH SERVICE - Verification/reset emails via Resend (auth-email API on Render).
+// When the API URL is configured we do NOT fall back to Firebase built-in mail
+// (those always use @firebaseapp.com and land in spam).
 // =============================================================================
 
 class AuthService {
@@ -21,22 +19,13 @@ class AuthService {
   static final AuthService instance = AuthService._();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  static const Duration _apiTimeout = Duration(seconds: 90);
+  static const int _apiMaxAttempts = 3;
 
-  /// Current signed-in user, or null if not logged in.
   User? get currentUser => _auth.currentUser;
-
-  /// Display name set at sign up (or null). Use in app bar / profile.
   String? get currentUserDisplayName => _auth.currentUser?.displayName;
-
-  /// Stream that emits when auth state changes (login, logout).
-  /// Use in main.dart to switch between LoginPage and HomePage.
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // ---------------------------------------------------------------------------
-  // SIGN UP - Create new account (email, password, and optional display name).
-  // ---------------------------------------------------------------------------
-  /// Creates a new user with email and password. If [displayName] is provided,
-  /// it is stored in Firebase Auth and available as currentUser.displayName.
   Future<User?> signUp(String email, String password, {String? displayName}) async {
     try {
       final cred = await _auth.createUserWithEmailAndPassword(
@@ -60,9 +49,6 @@ class AuthService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // SIGN IN - Log in existing user.
-  // ---------------------------------------------------------------------------
   Future<User?> signIn(String email, String password) async {
     try {
       final cred = await _auth.signInWithEmailAndPassword(
@@ -75,20 +61,17 @@ class AuthService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // SIGN OUT - End session.
-  // ---------------------------------------------------------------------------
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
-  // ---------------------------------------------------------------------------
-  // FORGOT PASSWORD - Send reset email.
-  // ---------------------------------------------------------------------------
   Future<void> sendPasswordResetEmail(String email) async {
     final trimmed = email.trim();
 
-    if (await _sendPasswordResetViaAuthEmailApi(trimmed)) return;
+    if (AuthEmailApiConfig.isConfigured) {
+      await _sendPasswordResetViaAuthEmailApiOrThrow(trimmed);
+      return;
+    }
 
     try {
       await FirebaseFunctions.instance
@@ -99,10 +82,6 @@ class AuthService {
       debugPrint('Cloud Function password reset failed: $e');
     }
 
-    debugPrint(
-      'Using Firebase built-in password reset (may land in spam). '
-      'Deploy server/auth-email-api or enable Blaze for Cloud Functions.',
-    );
     try {
       await _auth.sendPasswordResetEmail(
         email: trimmed,
@@ -116,18 +95,12 @@ class AuthService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // PROFILE - Update display name.
-  // ---------------------------------------------------------------------------
   Future<void> updateDisplayName(String name) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not signed in');
     await user.updateDisplayName(name.trim());
   }
 
-  // ---------------------------------------------------------------------------
-  // EMAIL VERIFICATION - Send verification email (e.g. after signup).
-  // ---------------------------------------------------------------------------
   Future<void> sendEmailVerification() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -136,7 +109,10 @@ class AuthService {
   }
 
   Future<void> _sendVerificationEmailPreferred() async {
-    if (await _sendVerificationViaAuthEmailApi()) return;
+    if (AuthEmailApiConfig.isConfigured) {
+      await _sendVerificationViaAuthEmailApiOrThrow();
+      return;
+    }
 
     try {
       await FirebaseFunctions.instance
@@ -149,10 +125,6 @@ class AuthService {
 
     final user = _auth.currentUser;
     if (user != null && !user.emailVerified) {
-      debugPrint(
-        'Using Firebase built-in verification email (may land in spam). '
-        'Deploy server/auth-email-api or enable Blaze for Cloud Functions.',
-      );
       try {
         await user.sendEmailVerification(
           ActionCodeSettings(
@@ -166,69 +138,83 @@ class AuthService {
     }
   }
 
-  Future<bool> _sendVerificationViaAuthEmailApi() async {
-    if (!AuthEmailApiConfig.isConfigured) return false;
-
+  Future<void> _sendVerificationViaAuthEmailApiOrThrow() async {
     final user = _auth.currentUser;
-    if (user == null) return false;
+    if (user == null) throw Exception('Not signed in');
 
-    try {
-      final idToken = await user.getIdToken();
-      final uri = Uri.parse(
-        '${AuthEmailApiConfig.baseUrl}/v1/send-verification',
-      );
-      final response = await http.post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $idToken',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return true;
-      }
-      debugPrint(
-        'Auth email API verification failed (${response.statusCode}): ${response.body}',
-      );
-    } catch (e) {
-      debugPrint('Auth email API verification error: $e');
-    }
-    return false;
+    final idToken = await user.getIdToken();
+    await _postAuthEmailApiOrThrow(
+      path: '/v1/send-verification',
+      headers: {
+        'Authorization': 'Bearer $idToken',
+        'Content-Type': 'application/json',
+      },
+    );
   }
 
-  Future<bool> _sendPasswordResetViaAuthEmailApi(String email) async {
-    if (!AuthEmailApiConfig.isConfigured) return false;
-
-    try {
-      final uri = Uri.parse(
-        '${AuthEmailApiConfig.baseUrl}/v1/send-password-reset',
-      );
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return true;
-      }
-      debugPrint(
-        'Auth email API password reset failed (${response.statusCode}): ${response.body}',
-      );
-    } catch (e) {
-      debugPrint('Auth email API password reset error: $e');
-    }
-    return false;
+  Future<void> _sendPasswordResetViaAuthEmailApiOrThrow(String email) async {
+    await _postAuthEmailApiOrThrow(
+      path: '/v1/send-password-reset',
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
   }
 
-  /// Whether the current user's email is verified.
+  /// Wakes Render free tier, then retries POST (cold starts can take 30–60s).
+  Future<void> _postAuthEmailApiOrThrow({
+    required String path,
+    required Map<String, String> headers,
+    String? body,
+  }) async {
+    final uri = Uri.parse('${AuthEmailApiConfig.baseUrl}$path');
+    Object? lastError;
+
+    for (var attempt = 1; attempt <= _apiMaxAttempts; attempt++) {
+      try {
+        if (attempt == 1) {
+          await _wakeAuthEmailApi();
+        }
+
+        final response = await http
+            .post(uri, headers: headers, body: body)
+            .timeout(_apiTimeout);
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          debugPrint('Auth email API OK ($path) attempt $attempt');
+          return;
+        }
+
+        lastError =
+            'HTTP ${response.statusCode}: ${response.body}';
+        debugPrint('Auth email API failed ($path) attempt $attempt: $lastError');
+      } catch (e) {
+        lastError = e;
+        debugPrint('Auth email API error ($path) attempt $attempt: $e');
+      }
+
+      if (attempt < _apiMaxAttempts) {
+        await Future<void>.delayed(Duration(seconds: attempt * 2));
+      }
+    }
+
+    throw Exception(
+      'Could not send email via Resend. Wait one minute and try again. '
+      '($lastError)',
+    );
+  }
+
+  Future<void> _wakeAuthEmailApi() async {
+    try {
+      final healthUri = Uri.parse('${AuthEmailApiConfig.baseUrl}/health');
+      await http.get(healthUri).timeout(const Duration(seconds: 60));
+    } catch (e) {
+      debugPrint('Auth email API wake-up ping: $e');
+    }
+  }
+
   bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;
-
-  /// Current user email (for profile display).
   String? get currentUserEmail => _auth.currentUser?.email;
 
-  /// Reload user data from Firebase (call when app resumes to check email verification).
   Future<void> reloadUser() async {
     final user = _auth.currentUser;
     if (user != null) {

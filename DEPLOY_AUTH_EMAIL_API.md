@@ -22,8 +22,9 @@ This small server does the same job as `sendAuthVerificationEmail` / `sendAuthPa
 | `RESEND_API_KEY` | Your `re_…` key |
 | `RESEND_FROM_EMAIL` | e.g. `noreply@jawadsoftware.com` (domain must be verified in Resend) |
 | `RESEND_FROM_NAME` | `Tawfir Energy` |
+| `RESEND_REPLY_TO` | `support@jawadsoftware.com` (recommended — better than noreply-only) |
 
-6. Deploy. Copy the public URL, e.g. `https://noor-auth-email.onrender.com`.
+6. Deploy. Copy the public URL, e.g. `https://solarapp1.onrender.com`.
 
 7. Test: open `https://YOUR-URL.onrender.com/health` — should return `{"ok":true}`.
 
@@ -32,7 +33,7 @@ This small server does the same job as `sendAuthVerificationEmail` / `sendAuthPa
 Open `lib/core/constants/auth_email_api_config.dart`:
 
 ```dart
-static const String fileBaseUrl = 'https://noor-auth-email.onrender.com';
+static const String fileBaseUrl = 'https://solarapp1.onrender.com';
 ```
 
 Rebuild and publish the app.
@@ -48,9 +49,45 @@ v=DMARC1; p=none; rua=mailto:noreply@jawadsoftware.com
 
 ## 4. How the app chooses a sender
 
-1. **Auth email API** (this server) — if `fileBaseUrl` is set  
-2. **Cloud Functions + Resend** — only if Blaze billing is enabled  
-3. **Firebase default** — spam-prone; used only when both above fail  
+1. **Auth email API** (Render) — if `fileBaseUrl` is set (**no Firebase spam fallback**)
+2. **Cloud Functions + Resend** — only if Blaze billing is enabled
+3. **Firebase default** — only when API URL is **not** configured
+
+## 5. Still landing in spam?
+
+### Check which sender was used
+
+Open the spam email → **Show original**:
+
+| From | Meaning |
+|------|---------|
+| `noreply@jawadsoftware.com` | Resend worked — fix DNS/reputation below |
+| `@firebaseapp.com` | Old app or API failed — rebuild APK + check Render logs |
+
+Also check [Resend → Emails](https://resend.com/emails) after a test — if empty, Render did not send.
+
+### Resend dashboard (do now)
+
+1. Domain **Verified** (SPF + DKIM green)
+2. **Disable Open tracking** and **Click tracking** on that domain
+3. Add **DMARC** (see section 3)
+4. Redeploy Render after pulling latest `server/auth-email-api` code
+
+### Rebuild the app
+
+```powershell
+flutter build apk --release
+```
+
+The latest app retries Render cold starts (up to 90s) and will **not** silently send Firebase spam emails.
+
+### Domain mismatch (advanced)
+
+Links in the email point to `firebaseapp.com` while From is `jawadsoftware.com` — filters dislike this. Long-term: connect your domain to Firebase Hosting and set `FIREBASE_AUTH_LINK_DOMAIN=jawadsoftware.com` on Render.
+
+### New domain reputation
+
+First emails may still hit spam. Mark **Not spam** once in Gmail — reputation improves quickly.
 
 ## Troubleshooting
 
