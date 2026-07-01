@@ -205,7 +205,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get panelPower => 'قوة اللوحة';
 
   @override
-  String get panelPowerW => 'قوة اللوحة (واط)';
+  String get panelPowerW => 'قدرة اللوحة (واط)';
 
   @override
   String get selectPanelPower => 'اختر قوة اللوحة';
@@ -1251,6 +1251,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'للقوة > 10 كيلوواط، يُوصى بـ 380V (ثلاثي الطور).';
 
   @override
+  String get regulatoryWarning =>
+      'التركيبات > 11 كيلوواط ذروة تتطلب موافقة ONEE للربط بالشبكة (القانون 82-21).';
+
+  @override
   String recommended(String voltage) {
     return 'موصى به: $voltage';
   }
@@ -1451,7 +1455,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String errorLoading(String error) {
-    return 'خطأ أثناء التحميل: $error';
+    return 'خطأ في التحميل';
   }
 
   @override
@@ -1464,4 +1468,467 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get offlineMessage => 'يرجى الاتصال بالإنترنت لاستخدام التطبيق.';
+
+  @override
+  String get validationPleaseEnterEmail => 'يرجى إدخال بريدك الإلكتروني';
+
+  @override
+  String get validationPleaseEnterPassword => 'يرجى إدخال كلمة المرور';
+
+  @override
+  String get validationPasswordMinLength =>
+      'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+
+  @override
+  String get validationPasswordsDoNotMatch => 'كلمات المرور غير متطابقة';
+
+  @override
+  String get validationPleaseEnterName => 'يرجى إدخال اسمك';
+
+  @override
+  String get darkMode => 'الوضع الداكن';
+
+  @override
+  String get darkModeDescription => 'استخدام السمة الداكنة';
+
+  @override
+  String get signInToContinue => 'قم بتسجيل الدخول للمتابعة';
+
+  @override
+  String get forgotPasswordTitle => 'نسيت كلمة المرور؟';
+
+  @override
+  String get forgotPasswordMessage =>
+      'أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get yourEmail => 'بريدك الإلكتروني';
+
+  @override
+  String get sendResetLink => 'إرسال رابط إعادة التعيين';
+
+  @override
+  String get checkEmailForReset =>
+      'تحقق من بريدك الإلكتروني للحصول على رابط إعادة التعيين';
+
+  @override
+  String get passwordResetSuccessSnack =>
+      'تم تحديث كلمة المرور. سجّل الدخول بكلمة المرور الجديدة.';
+
+  @override
+  String get signUp => 'إنشاء حساب';
+
+  @override
+  String get signUpDescription =>
+      'استخدم بريدك الإلكتروني وكلمة مرور (6 أحرف على الأقل).';
+
+  @override
+  String get yourFullName => 'اسمك الكامل';
+
+  @override
+  String get atLeast6Characters => '6 أحرف على الأقل';
+
+  @override
+  String get repeatYourPassword => 'كرر كلمة المرور';
+
+  @override
+  String get accountCreated =>
+      'تم إنشاء الحساب! تحقق من بريدك الإلكتروني للتحقق (بما في ذلك مجلد الرسائل غير المرغوب فيها).';
+
+  @override
+  String get verifyYourEmail => 'تحقق من بريدك الإلكتروني';
+
+  @override
+  String get checkInboxSpam =>
+      'تحقق من صندوق الوارد (ومجلد الرسائل غير المرغوب فيها) للحصول على رابط التحقق.';
+
+  @override
+  String get resend => 'إعادة الإرسال';
+
+  @override
+  String get verificationEmailSent =>
+      'تم إرسال بريد التحقق. تحقق من صندوق الوارد والرسائل غير المرغوب فيها.';
+
+  @override
+  String get account => 'الحساب';
+
+  @override
+  String get editName => 'تعديل الاسم';
+
+  @override
+  String get yourName => 'اسمك';
+
+  @override
+  String get nameUpdated => 'تم تحديث الاسم';
+
+  @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String hiName(String name) {
+    return 'مرحباً، $name';
+  }
+
+  @override
+  String get validationPleaseEnterCompanyName => 'يرجى إدخال اسم الشركة';
+
+  @override
+  String get validationPleaseEnterIce => 'يرجى إدخال ICE';
+
+  @override
+  String get validationPleaseEnterIf => 'يرجى إدخال IF';
+
+  @override
+  String get validationPleaseEnterRc => 'يرجى إدخال RC';
+
+  @override
+  String get validationPleaseEnterPatente => 'يرجى إدخال Patente';
+
+  @override
+  String get validationPleaseEnterAddress => 'يرجى إدخال العنوان';
+
+  @override
+  String get validationPleaseEnterCity => 'يرجى إدخال مدينتك';
+
+  @override
+  String get validationPleaseEnterPhone => 'يرجى إدخال رقم هاتفك';
+
+  @override
+  String get validationPleaseEnterEmailPartner => 'يرجى إدخال بريدك الإلكتروني';
+
+  @override
+  String get validationPleaseEnterLastName => 'يرجى إدخال اسمك الأخير';
+
+  @override
+  String get validationPleaseEnterFirstName => 'يرجى إدخال اسمك الأول';
+
+  @override
+  String get validationPleaseEnterSpecialty => 'يرجى إدخال تخصصك';
+
+  @override
+  String referenceLabel(String ref) {
+    return 'المرجع: $ref';
+  }
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get menu => 'القائمة';
+
+  @override
+  String callToComingSoon(String phone) {
+    return 'مكالمة إلى $phone (الميزة قادمة قريباً)';
+  }
+
+  @override
+  String whatsAppToComingSoon(String phone) {
+    return 'واتساب إلى $phone (الميزة قادمة قريباً)';
+  }
+
+  @override
+  String get certifiedTechniciansTitle => 'الفنيون المعتمدون';
+
+  @override
+  String get cityFilterLabel => 'المدينة:';
+
+  @override
+  String get specialtyFilterLabel => 'التخصص:';
+
+  @override
+  String get noTechnicianFound => 'لم يتم العثور على فني';
+
+  @override
+  String get modifyFiltersOrRetry => 'غيّر الفلاتر أو أعد المحاولة لاحقاً.';
+
+  @override
+  String get refresh => 'تحديث';
+
+  @override
+  String get active => 'نشط';
+
+  @override
+  String get inactive => 'غير نشط';
+
+  @override
+  String get notAvailable => 'غير متوفر';
+
+  @override
+  String get partnersTitle => 'الشركاء';
+
+  @override
+  String get noPartnerAvailable => 'لا يوجد شريك متاح';
+
+  @override
+  String get partnersListComingSoon => 'سيتم تحديث قائمة الشركاء قريباً.';
+
+  @override
+  String get companyDocumentsOptional => 'مستندات الشركة (اختياري)';
+
+  @override
+  String get documentsUrlsComingSoon => 'روابط المستندات (ستُفعّل لاحقاً)';
+
+  @override
+  String get certificatesOptional => 'الشهادات (اختياري)';
+
+  @override
+  String get certificatesUrlsComingSoon => 'روابط الشهادات (ستُفعّل لاحقاً)';
+
+  @override
+  String get exampleIce => 'مثال: 123456789012345';
+
+  @override
+  String get exampleIf => 'مثال: 12345678';
+
+  @override
+  String get exampleRc => 'مثال: 12345';
+
+  @override
+  String get examplePatente => 'مثال: 123456';
+
+  @override
+  String get exampleAddress => 'مثال: 123 شارع مثال، الحي...';
+
+  @override
+  String get exampleLastName => 'مثال: العلمي';
+
+  @override
+  String get exampleFirstName => 'مثال: أحمد';
+
+  @override
+  String get newStudyDevisRequest => 'طلب دراسة وعرض سعر جديد';
+
+  @override
+  String typeAndConsumption(String type, String consumption) {
+    return 'النوع: $type - الاستهلاك: $consumption';
+  }
+
+  @override
+  String get projectStudyTitle => 'دراسة المشروع';
+
+  @override
+  String get selectProjectType => 'اختر نوع المشروع';
+
+  @override
+  String get pumpingStudyTitle => 'ضخ - دراسة المشروع';
+
+  @override
+  String get onGridStudyTitle => 'متصل بالشبكة - دراسة المشروع';
+
+  @override
+  String get offGridStudyTitle => 'معزول - دراسة المشروع';
+
+  @override
+  String get hybridStudyTitle => 'هجين - دراسة المشروع';
+
+  @override
+  String get powerUnit => 'وحدة القدرة';
+
+  @override
+  String pumpPowerKwHp(String unit) {
+    return 'قدرة المضخة ($unit)';
+  }
+
+  @override
+  String get wellDepthM => 'عمق البئر (م)';
+
+  @override
+  String get workingHoursPerDay => 'ساعات العمل يومياً';
+
+  @override
+  String get dailyConsumptionKwh => 'الاستهلاك اليومي (كيلوواط ساعة)';
+
+  @override
+  String get monthlyConsumptionKwh => 'الاستهلاك الشهري (كيلوواط ساعة)';
+
+  @override
+  String get sunHoursPerDay => 'ساعات الشمس يومياً';
+
+  @override
+  String get autonomyDaysLabel => 'أيام الاستقلالية';
+
+  @override
+  String get batteryVoltage => 'توتر البطارية';
+
+  @override
+  String get solarCoveragePercent => 'التغطية الشمسية (%)';
+
+  @override
+  String get blackoutHoursOptional => 'ساعات الانقطاع (اختياري)';
+
+  @override
+  String get electricalConsumption => 'الاستهلاك الكهربائي';
+
+  @override
+  String get enterYourConsumption => 'أدخل استهلاكك';
+
+  @override
+  String get unitLabelShort => 'الوحدة';
+
+  @override
+  String get kwhPerMonth => 'كيلوواط ساعة/شهر';
+
+  @override
+  String get estimatedInstallationPower => 'القدرة التقديرية للتركيب';
+
+  @override
+  String get requestQuoteButton => 'طلب عرض سعر';
+
+  @override
+  String get pleaseEnterConsumption => 'يرجى إدخال الاستهلاك';
+
+  @override
+  String get pleaseEnterValidNumber => 'يرجى إدخال رقم صالح';
+
+  @override
+  String get pleaseEnterDepth => 'يرجى إدخال العمق';
+
+  @override
+  String get pleaseEnterHours => 'يرجى إدخال الساعات';
+
+  @override
+  String get pleaseEnterDays => 'يرجى إدخال أيام الاستقلالية';
+
+  @override
+  String get pleaseEnterPercentage => 'يرجى إدخال النسبة المئوية';
+
+  @override
+  String get percentageBetween1And100 => 'يرجى إدخال نسبة بين 1 و 100';
+
+  @override
+  String get pleaseEnterSunHours => 'يرجى إدخال ساعات الشمس';
+
+  @override
+  String get selectAutonomyDays => 'اختر أيام الاستقلالية';
+
+  @override
+  String exPlaceholder(String value) {
+    return 'مثال: $value';
+  }
+
+  @override
+  String get startSolarJourney => 'ابدأ رحلتك الشمسية';
+
+  @override
+  String get fillDetailsForStudy => 'أدخل التفاصيل للحصول على دراسة مخصصة.';
+
+  @override
+  String get projectTypeLabel => 'نوع المشروع';
+
+  @override
+  String get residential => 'سكني';
+
+  @override
+  String get commercial => 'تجاري';
+
+  @override
+  String get locationLabel => 'الموقع';
+
+  @override
+  String get enterCityOrAddressHint => 'أدخل مدينتك أو عنوانك';
+
+  @override
+  String get getStudy => 'الحصول على الدراسة';
+
+  @override
+  String get installationOrMaintenance => 'تركيب أو صيانة';
+
+  @override
+  String get chooseService => 'اختر الخدمة';
+
+  @override
+  String get installationService => 'التركيب';
+
+  @override
+  String get maintenanceService => 'الصيانة';
+
+  @override
+  String get productDetails => 'تفاصيل المنتج';
+
+  @override
+  String get requestQuoteTitle => 'طلب عرض سعر';
+
+  @override
+  String get financingForm => 'التمويل';
+
+  @override
+  String get interventionChoice => 'التدخل';
+
+  @override
+  String get emptyStateTitle => 'لا يوجد شيء';
+
+  @override
+  String get emptyStateMessage => 'لا توجد عناصر لعرضها.';
+
+  @override
+  String get labelOptional => 'التسمية (اختياري)';
+
+  @override
+  String get hintOptional => 'التلميح (اختياري)';
+
+  @override
+  String get addressLabel => 'العنوان';
+
+  @override
+  String get addressOptional => 'العنوان (اختياري)';
+
+  @override
+  String get enterAddressManually => 'أدخل عنوانك يدوياً';
+
+  @override
+  String get placeType => 'نوع المكان';
+
+  @override
+  String get trustedBy => 'يثقون بنا';
+
+  @override
+  String get trustedBySubtitle => 'شركات اختارت حلولنا للطاقة الشمسية';
+
+  @override
+  String get uploadCertificateImages => 'تحميل صور الشهادات';
+
+  @override
+  String get tapToUploadCertificates => 'اضغط لتحميل صور الشهادات';
+
+  @override
+  String get imagesSelected => 'صور مختارة';
+
+  @override
+  String get uploading => 'جاري التحميل';
+
+  @override
+  String get certificatesHint =>
+      'صف شهاداتك (مثل: تركيب الطاقة الشمسية، الكهرباء)';
+
+  @override
+  String get supportChat => 'دعم المحادثة';
+
+  @override
+  String get chatWithSupport =>
+      'تحدث مع فريق الدعم لدينا. نرد عادة في غضون ساعات قليلة.';
+
+  @override
+  String get errorLoadingChat => 'خطأ في تحميل المحادثة';
+
+  @override
+  String get noMessagesYet => 'لا توجد رسائل بعد';
+
+  @override
+  String get startConversation => 'ابدأ محادثة مع فريقنا';
+
+  @override
+  String get typeMessage => 'اكتب رسالة...';
+
+  @override
+  String get chatInfoDescription =>
+      'فريق الدعم لدينا هنا لمساعدتك في أي أسئلة حول حلول الطاقة الشمسية أو التركيبات أو الدعم التقني.';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get yesterday => 'أمس';
+
+  @override
+  String get noProducts => 'لا توجد منتجات متاحة حالياً';
 }

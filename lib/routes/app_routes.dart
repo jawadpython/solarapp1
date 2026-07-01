@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:noor_energy/features/auth/presentation/pages/login_page.dart';
 import 'package:noor_energy/features/auth/presentation/pages/login_screen.dart';
 import 'package:noor_energy/features/auth/presentation/pages/signup_page.dart';
-import 'package:noor_energy/features/home/presentation/pages/home_page.dart';
 import 'package:noor_energy/features/home/presentation/pages/home_screen.dart';
 import 'package:noor_energy/features/project_study/presentation/pages/project_study_page.dart';
 import 'package:noor_energy/features/project_study/presentation/pages/project_type_screen.dart';
@@ -30,6 +29,7 @@ import 'package:noor_energy/core/utils/admin_access_helper.dart';
 import 'package:noor_energy/features/search/presentation/pages/search_choice_screen.dart';
 import 'package:noor_energy/features/search/presentation/pages/companies_search_screen.dart';
 import 'package:noor_energy/features/search/presentation/pages/technicians_search_screen.dart';
+import 'package:noor_energy/features/auth/presentation/pages/email_verified_route_page.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -66,8 +66,30 @@ class AppRoutes {
   static const String companiesSearch = '/companies-search';
   static const String techniciansSearch = '/technicians-search';
 
+  /// Deeplink route names Firebase / OS may send after email verification.
+  static const String emailVerified = 'email_verified';
+  static const String emailVerifiedSlash = '/email_verified';
+  static const String emailVerifiedHyphen = '/email-verified';
+
+  static bool _isEmailVerifiedRoute(String? name) {
+    if (name == null) return false;
+    final n = name.toLowerCase();
+    return n == emailVerified ||
+        n == emailVerifiedSlash ||
+        n == emailVerifiedHyphen ||
+        n.endsWith('email-verified') ||
+        n.endsWith('email_verified');
+  }
+
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+    final name = settings.name;
+    if (_isEmailVerifiedRoute(name)) {
+      return MaterialPageRoute<void>(
+        builder: (_) => const EmailVerifiedRoutePage(),
+      );
+    }
+
+    switch (name) {
       case home:
         // Redirect old home route to HomeScreen
         return MaterialPageRoute(builder: (_) => const HomeScreen());
@@ -95,13 +117,38 @@ class AppRoutes {
       case pumpingForm:
         return MaterialPageRoute(builder: (_) => const PumpingFormScreen());
       case quoteRequest:
-        final args = settings.arguments as Map<String, dynamic>;
+        final args = settings.arguments;
+        if (args is! Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (_) => const Scaffold(
+              body: Center(
+                child: Text('Invalid quote request data. Please retry.'),
+              ),
+            ),
+          );
+        }
+
+        final systemType = args['systemType'];
+        final panels = args['panels'];
+        final systemPower = args['systemPower'];
+        final batteryCapacity = args['batteryCapacity'];
+
+        if (systemType is! String || panels is! int || systemPower is! num) {
+          return MaterialPageRoute(
+            builder: (_) => const Scaffold(
+              body: Center(
+                child: Text('Incomplete quote request data. Please retry.'),
+              ),
+            ),
+          );
+        }
+
         return MaterialPageRoute(
           builder: (_) => QuoteRequestScreen(
-            systemType: args['systemType'] as String,
-            panels: args['panels'] as int,
-            systemPower: args['systemPower'] as double,
-            batteryCapacity: args['batteryCapacity'] as double?,
+            systemType: systemType,
+            panels: panels,
+            systemPower: systemPower.toDouble(),
+            batteryCapacity: batteryCapacity is num ? batteryCapacity.toDouble() : null,
           ),
         );
       case installationMaintenanceChoice:

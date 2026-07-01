@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,17 +19,37 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _cityController = TextEditingController();
-  final _gpsController = TextEditingController();
+  final _addressController = TextEditingController();
   final _noteController = TextEditingController();
 
   bool _isSubmitting = false;
 
+  bool get _isFormValid =>
+      _fullNameController.text.trim().isNotEmpty &&
+      _phoneController.text.trim().isNotEmpty &&
+      _cityController.text.trim().isNotEmpty;
+
+  void _syncFormValidity() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fullNameController.addListener(_syncFormValidity);
+    _phoneController.addListener(_syncFormValidity);
+    _cityController.addListener(_syncFormValidity);
+  }
+
   @override
   void dispose() {
+    _fullNameController.removeListener(_syncFormValidity);
+    _phoneController.removeListener(_syncFormValidity);
+    _cityController.removeListener(_syncFormValidity);
     _fullNameController.dispose();
     _phoneController.dispose();
     _cityController.dispose();
-    _gpsController.dispose();
+    _addressController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -53,25 +74,27 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
       // Generate unique ID
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       
-      // Prepare data map according to requirements
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+
       final data = {
         'id': id,
         'createdAt': FieldValue.serverTimestamp(),
         'fullName': _fullNameController.text.trim(),
         'phone': _phoneController.text.trim(),
         'city': _cityController.text.trim(),
-        'gps': _gpsController.text.trim().isEmpty ? null : _gpsController.text.trim(),
+        'gps': _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
         'note': _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-        'source': 'home', // Metadata: source
-        'hasTechnicalData': false, // Metadata: hasTechnicalData
-        'status': 'pending', // Default status
+        'source': 'home',
+        'hasTechnicalData': false,
+        'status': 'pending',
+        if (userId != null) 'userId': userId,
       };
 
       // Save to Firestore
       final docRef = await db.collection('devis_requests').add(data).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
-          throw Exception(AppLocalizations.of(context)!.gpsDetectionFailed);
+          throw Exception(AppLocalizations.of(context)!.errorSending);
         },
       );
 
@@ -168,7 +191,7 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -182,6 +205,7 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -196,17 +220,16 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
                         AppLocalizations.of(context)!.requestFreeStudy,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -217,21 +240,20 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // Full Name
                 TextFormField(
                   controller: _fullNameController,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.fullNameLabel,
                     hintText: AppLocalizations.of(context)!.nameHint,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -255,14 +277,14 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
                     labelText: AppLocalizations.of(context)!.phoneLabel,
                     hintText: AppLocalizations.of(context)!.phoneHint,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -285,14 +307,14 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
                     labelText: AppLocalizations.of(context)!.cityLabel,
                     hintText: AppLocalizations.of(context)!.cityHint,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -308,21 +330,21 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
-                // GPS (Optional)
+                // Address (Optional)
                 TextFormField(
-                  controller: _gpsController,
+                  controller: _addressController,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.gpsOptional,
-                    hintText: AppLocalizations.of(context)!.gpsCoordinates,
+                    labelText: AppLocalizations.of(context)!.addressOptional,
+                    hintText: AppLocalizations.of(context)!.enterAddressManually,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -340,14 +362,14 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
                     labelText: AppLocalizations.of(context)!.noteOptional,
                     hintText: AppLocalizations.of(context)!.addAdditionalInfo,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -360,10 +382,11 @@ class _HomeDevisFormDialogState extends State<HomeDevisFormDialog> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitRequest,
+                    onPressed:
+                        (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

@@ -24,6 +24,14 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Use theme's input decoration but ensure consistent fill color
+    final fillColor = isDark 
+        ? colorScheme.surfaceContainerHighest
+        : const Color(0xFFF5F5F5); // Light gray for light mode
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,6 +40,7 @@ class AppTextField extends StatelessWidget {
             label!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
                 ),
           ),
           const SizedBox(height: 8),
@@ -45,6 +54,20 @@ class AppTextField extends StatelessWidget {
             hintText: hint,
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
+            filled: true,
+            fillColor: fillColor,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: colorScheme.outline),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: colorScheme.outline),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: colorScheme.primary, width: 2),
+            ),
           ),
         ),
       ],

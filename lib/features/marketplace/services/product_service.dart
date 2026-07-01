@@ -57,59 +57,39 @@ class ProductService {
           .listen(
         (snapshot) {
           try {
-            debugPrint('📦 Products snapshot received: ${snapshot.docs.length} documents');
-            
             final allProducts = <ProductModel>[];
-            
+
             for (var doc in snapshot.docs) {
               try {
                 final data = doc.data() as Map<String, dynamic>;
-                debugPrint('📄 Document ${doc.id} data: $data');
                 final product = ProductModel.fromJson(data);
-                debugPrint('✅ Parsed product: ${product.model} (${product.brand}) - Status: "${product.status}"');
                 allProducts.add(product);
               } catch (e) {
-                debugPrint('❌ Error parsing product document ${doc.id}: $e');
+                if (kDebugMode) debugPrint('❌ Error parsing product ${doc.id}: $e');
               }
             }
-            
-            debugPrint('📊 Total products parsed: ${allProducts.length}');
-            
-            // Filter active products (case-insensitive, also include if status is empty/missing)
-            // For debugging: if no active products found, show all products
+
+            // Filter: only status == 'active' (case-insensitive)
             var activeProducts = allProducts.where((product) {
-              final status = product.status.toLowerCase().trim();
-              final isActive = status == 'active' || status.isEmpty;
-              if (!isActive) {
-                debugPrint('🚫 Filtered out product: ${product.model} - Status: "${product.status}"');
-              }
-              return isActive;
+              return product.status.toLowerCase().trim() == 'active';
             }).toList();
-            
-            // Debug: If no active products but we have products, show all (temporary)
-            if (activeProducts.isEmpty && allProducts.isNotEmpty) {
-              debugPrint('⚠️ No active products found, showing all products for debugging');
-              activeProducts = allProducts;
-            }
-            
-            debugPrint('✅ Active products after filtering: ${activeProducts.length}');
-            
-            // Sort by brand, then category in memory (no index needed)
+
+            // Sort by brand then category in memory
             activeProducts.sort((a, b) {
               final brandCompare = a.brand.compareTo(b.brand);
               if (brandCompare != 0) return brandCompare;
               return a.category.compareTo(b.category);
             });
-            
+
             controller.add(activeProducts);
           } catch (e) {
-            debugPrint('❌ Error mapping products snapshot: $e');
-            controller.add(<ProductModel>[]); // Return empty list on error
+            if (kDebugMode) debugPrint('❌ Error mapping products snapshot: $e');
+            controller.addError(e);
           }
         },
         onError: (error) {
-          debugPrint('Error in getProducts stream: $error');
-          controller.add(<ProductModel>[]); // Return empty list on error
+          if (kDebugMode) debugPrint('Error in getProducts stream: $error');
+          controller.addError(error);
         },
         cancelOnError: false, // Don't cancel on error
       );
@@ -119,8 +99,8 @@ class ProductService {
         subscription.cancel();
       };
     } catch (e) {
-      debugPrint('Error setting up getProducts stream: $e');
-      controller.add(<ProductModel>[]); // Return empty list on initialization error
+      if (kDebugMode) debugPrint('Error setting up getProducts stream: $e');
+      controller.addError(e);
     }
     
     return controller.stream;

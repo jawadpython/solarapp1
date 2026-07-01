@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/auth_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 // =============================================================================
@@ -33,17 +35,17 @@ class _LoginPageState extends State<LoginPage> {
   /// Basic validation: non-empty email, password length >= 6.
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
+      return AppLocalizations.of(context)?.validationPleaseEnterEmail ?? 'Please enter your email';
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      return AppLocalizations.of(context)?.validationPleaseEnterPassword ?? 'Please enter your password';
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalizations.of(context)?.validationPasswordMinLength ?? 'Password must be at least 6 characters';
     }
     return null;
   }
@@ -56,9 +58,10 @@ class _LoginPageState extends State<LoginPage> {
         emailController: emailController,
         onSend: () async {
           final email = emailController.text.trim();
+          final loc = AppLocalizations.of(context)!;
           if (email.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please enter your email')),
+              SnackBar(content: Text(loc.validationPleaseEnterEmail)),
             );
             return;
           }
@@ -67,8 +70,8 @@ class _LoginPageState extends State<LoginPage> {
             if (context.mounted) Navigator.of(ctx).pop();
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Check your email for the reset link'),
+                SnackBar(
+                  content: Text(loc.checkEmailForReset),
                   backgroundColor: AppColors.success,
                 ),
               );
@@ -97,6 +100,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    HapticFeedback.lightImpact();
     setState(() => _isLoading = true);
 
     try {
@@ -128,18 +132,18 @@ class _LoginPageState extends State<LoginPage> {
                 Icon(Icons.solar_power, size: 72, color: AppColors.primary),
                 const SizedBox(height: 16),
                 Text(
-                  'Tawfir Energy',
+                  AppLocalizations.of(context)!.appTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to continue',
+                  AppLocalizations.of(context)!.signInToContinue,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -172,11 +176,11 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.email,
+                    hintText: AppLocalizations.of(context)!.enterEmail,
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: _validateEmail,
                   onChanged: (_) => setState(() => _errorMessage = null),
@@ -185,11 +189,11 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Enter your password',
-                    prefixIcon: Icon(Icons.lock_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.password,
+                    hintText: AppLocalizations.of(context)!.enterPassword,
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: _validatePassword,
                   onChanged: (_) => setState(() => _errorMessage = null),
@@ -199,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => _showForgotPasswordDialog(context),
-                    child: const Text('Forgot password?'),
+                    child: Text(AppLocalizations.of(context)!.forgotPassword),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -221,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text('Login'),
+                        : Text(AppLocalizations.of(context)!.login),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -229,10 +233,15 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account? "),
+                    Flexible(
+                      child: Text(
+                        AppLocalizations.of(context)!.noAccount,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, AppRoutes.register),
-                      child: const Text('Sign up'),
+                      child: Text(AppLocalizations.of(context)!.signUp),
                     ),
                   ],
                 ),
@@ -270,26 +279,27 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Forgot password?'),
+      title: Text(loc.forgotPasswordTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Enter your email and we\'ll send you a link to reset your password.',
-              style: TextStyle(fontSize: 14),
+            Text(
+              loc.forgotPasswordMessage,
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: widget.emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                hintText: 'Your email',
-                prefixIcon: Icon(Icons.email_outlined),
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.email,
+                hintText: loc.yourEmail,
+                prefixIcon: const Icon(Icons.email_outlined),
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -298,7 +308,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(loc.cancel),
         ),
         ElevatedButton(
           onPressed: _sending
@@ -315,7 +325,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Send reset link'),
+              : Text(loc.sendResetLink),
         ),
       ],
     );

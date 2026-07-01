@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/project_study/widgets/result_card.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class PumpingFormScreen extends StatefulWidget {
@@ -37,10 +38,11 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
 
   void _calculate() {
     final pumpPowerInput = double.tryParse(_pumpPowerController.text) ?? 0;
+    final depthMeters = double.tryParse(_pumpDepthController.text) ?? 0;
     final hours = double.tryParse(_workingHoursController.text) ?? 8;
 
     // Safe division by zero check
-    if (pumpPowerInput > 0 && hours > 0 && _defaultSunHours > 0) {
+    if (pumpPowerInput > 0 && depthMeters > 0 && hours > 0 && _defaultSunHours > 0) {
       double pumpPowerKw;
       
       if (_isKw) {
@@ -50,8 +52,10 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
         pumpPowerKw = pumpPowerInput * 0.746;
       }
       
-      // PUMPING Formula: DailyEnergy = pumpPower * hours
-      final dailyEnergy = pumpPowerKw * hours;
+      // Include depth impact (HMT) so this input affects sizing.
+      // 40 m is the baseline depth used by current business examples.
+      final depthFactor = (depthMeters / 40).clamp(0.5, 3.0);
+      final dailyEnergy = pumpPowerKw * hours * depthFactor;
       
       // PvKw = DailyEnergy / SunHours
       _pvPower = dailyEnergy / _defaultSunHours;
@@ -76,12 +80,13 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('PUMPING - Étude de projet'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: Text(AppLocalizations.of(context)!.pumpingStudyTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -118,20 +123,20 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
               const SizedBox(height: 32),
 
               // Pump Power Unit Toggle
-              const Text(
-                'Unité de puissance',
+              Text(
+                AppLocalizations.of(context)!.powerUnit,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: Row(
                   children: [
@@ -152,7 +157,7 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                               'kW',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _isKw ? Colors.white : Colors.grey.shade700,
+                                color: _isKw ? Colors.white : colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -176,7 +181,7 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                               'HP',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: !_isKw ? Colors.white : Colors.grey.shade700,
+                                color: !_isKw ? Colors.white : colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -190,11 +195,11 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
 
               // Pump Power
               Text(
-                'Puissance de la pompe (${_isKw ? "kW" : "HP"})',
-                style: const TextStyle(
+                AppLocalizations.of(context)!.pumpPowerKwHp(_isKw ? 'kW' : 'HP'),
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -214,10 +219,10 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                 decoration: InputDecoration(
                   hintText: _isKw ? 'Ex: 2.5' : 'Ex: 3.5',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -229,12 +234,12 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
               const SizedBox(height: 24),
 
               // Pump Depth
-              const Text(
-                'Profondeur du puits (m)',
+              Text(
+                AppLocalizations.of(context)!.wellDepthM,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -253,10 +258,10 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 50',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -268,12 +273,12 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
               const SizedBox(height: 24),
 
               // Working Hours
-              const Text(
-                'Heures de travail par jour',
+              Text(
+                AppLocalizations.of(context)!.workingHoursPerDay,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -293,10 +298,10 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 8',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -308,21 +313,21 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
               const SizedBox(height: 24),
 
               // Panel Power
-              const Text(
-                'Puissance du panneau (W)',
+              Text(
+                AppLocalizations.of(context)!.panelPowerW,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
@@ -377,9 +382,9 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                           }
                         : null,
                     icon: const Icon(Icons.request_quote, size: 24),
-                    label: const Text(
-                      'Demander un devis',
-                      style: TextStyle(
+                    label: Text(
+                      AppLocalizations.of(context)!.requestQuoteButton,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -387,7 +392,7 @@ class _PumpingFormScreenState extends State<PumpingFormScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledBackgroundColor: colorScheme.outline,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),

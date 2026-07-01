@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'admin_v2/admin_layout.dart';
 import 'admin_v2/utils/app_theme.dart';
@@ -22,12 +23,12 @@ void main() async {
   try {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyBIJ17OtVeS218IBjnmf1UoWsxsu3YY0-k",
-        authDomain: "tawfir-energy-prod-98053.firebaseapp.com",
-        projectId: "tawfir-energy-prod-98053",
-        storageBucket: "tawfir-energy-prod-98053.firebasestorage.app",
-        messagingSenderId: "751649516744",
-        appId: "1:751649516744:web:a43278ec8ae222cba449fd",
+        apiKey: "AIzaSyAP5DyZ9uuM3QxbYeBlwuV6vJSXBrIX60w",
+        authDomain: "solar-app-f698e.firebaseapp.com",
+        projectId: "solar-app-f698e",
+        storageBucket: "solar-app-f698e.firebasestorage.app",
+        messagingSenderId: "744790277180",
+        appId: "1:744790277180:web:0c03d9f13f78fa83695739",
       ),
     );
     debugPrint('✅ Admin V2: Firebase initialized successfully');
@@ -54,7 +55,7 @@ class AdminV2App extends StatelessWidget {
         scaffoldBackgroundColor: AppTheme.backgroundColor,
       ),
       debugShowCheckedModeBanner: false,
-      // Check if user is logged in
+      // Check if user is logged in, then verify they are an admin
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -66,16 +67,132 @@ class AdminV2App extends StatelessWidget {
               ),
             );
           }
-          
-          // If user is logged in, show admin dashboard
-          if (snapshot.hasData) {
-            return const AdminLayoutV2();
+
+          if (!snapshot.hasData) {
+            return _LoginPage();
           }
-          
-          // If not logged in, show login page
-          return _LoginPage();
+
+          // User is logged in: verify they are in the admins collection
+          return _AdminGate(user: snapshot.data!);
         },
       ),
+    );
+  }
+}
+
+/// Checks Firestore admins/{uid}. If document exists, user is admin → show dashboard.
+/// Otherwise show "Access denied" and sign out.
+class _AdminGate extends StatelessWidget {
+  final User user;
+
+  const _AdminGate({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('admins').doc(user.uid).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: AppTheme.backgroundColor,
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            backgroundColor: AppTheme.backgroundColor,
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: AppTheme.errorColor),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Erreur de vérification',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      snapshot.error.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      child: const Text('Déconnexion'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        final isAdmin = snapshot.data?.exists ?? false;
+        if (isAdmin) {
+          return const AdminLayoutV2();
+        }
+
+        // Not an admin: show access denied
+        return Scaffold(
+          backgroundColor: AppTheme.backgroundColor,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppTheme.errorColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.block,
+                      size: 64,
+                      color: AppTheme.errorColor,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Accès refusé',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Ce compte n\'est pas autorisé à accéder au tableau de bord admin.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () => FirebaseAuth.instance.signOut(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Se déconnecter'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

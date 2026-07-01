@@ -4,6 +4,7 @@ import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/calculator/models/calculator_result.dart';
 import 'package:noor_energy/features/calculator/services/region_service.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
+import 'package:noor_energy/routes/app_routes.dart';
 
 class ResultOffGridScreen extends StatefulWidget {
   final OffGridResult result;
@@ -70,14 +71,15 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
     final co2Tonnes = impact['co2Tonnes']!;
     final arbres = impact['arbres']!;
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -86,73 +88,80 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.eco,
-                  color: Colors.green,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  AppLocalizations.of(context)!.environmentalImpact,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+          Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final green = isDark ? AppColors.successOnDark : Colors.green;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: green.withOpacity(isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(Icons.eco, color: green, size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.environmentalImpact,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.green.shade200,
-                width: 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.co2AvoidedTonPerYear(co2Tonnes.toStringAsFixed(1)),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? green.withOpacity(0.2) : Colors.green.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? green.withOpacity(0.4) : Colors.green.withOpacity(0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.co2AvoidedTonPerYear(co2Tonnes.toStringAsFixed(1)),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? green : Colors.green.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          AppLocalizations.of(context)!.equivalentTreesPerYear(arbres.round()),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? green : Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  AppLocalizations.of(context)!.equivalentTreesPerYear(arbres.round()),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 12),
           Text(
             AppLocalizations.of(context)!.environmentalEstimationNote,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: colorScheme.onSurfaceVariant,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -165,12 +174,13 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
   Widget build(BuildContext context) {
     final result = widget.result;
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.resultOffGrid),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -183,11 +193,11 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -217,7 +227,7 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -286,7 +296,7 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
                                 AppLocalizations.of(context)!.voltage,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey.shade600,
+                                  color: colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -357,6 +367,33 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
                       ),
                     ),
                   ],
+                  if (result.showRegulatoryWarning) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue.shade300, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.blue.shade700),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context)!.regulatoryWarning,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -365,32 +402,41 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
             _buildEnvironmentalImpactCard(result.kwhDay),
             const SizedBox(height: 20),
             // Info Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(context)!.basedOnSunHoursInfo(
-                        result.sunHours.toStringAsFixed(1),
-                        _regionName ?? result.regionCode,
-                      ),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue.shade900,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final infoColor = isDark ? AppColors.infoOnDark : Colors.blue.shade700;
+                final infoBg = isDark ? infoColor.withOpacity(0.15) : Colors.blue.withOpacity(0.08);
+                final infoBorder = isDark ? infoColor.withOpacity(0.35) : Colors.blue.withOpacity(0.25);
+                final infoText = isDark ? Theme.of(context).colorScheme.onSurface : Colors.blue.shade900;
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: infoBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: infoBorder),
                   ),
-                ],
-              ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: infoColor, size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.basedOnSunHoursInfo(
+                            result.sunHours.toStringAsFixed(1),
+                            _regionName ?? result.regionCode,
+                          ),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: infoText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             // Disclaimer
@@ -399,7 +445,7 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -409,7 +455,16 @@ class _ResultOffGridScreenState extends State<ResultOffGridScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.quoteRequest,
+                    arguments: {
+                      'systemType': result.systemType,
+                      'panels': result.panels,
+                      'systemPower': result.pvPowerKW,
+                      'batteryCapacity': result.batteryKwh,
+                    },
+                  );
                 },
                 icon: const Icon(Icons.request_quote, size: 24),
                 label: Text(
@@ -453,10 +508,11 @@ class _ResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withValues(alpha: 0.2),
@@ -482,7 +538,7 @@ class _ResultItem extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

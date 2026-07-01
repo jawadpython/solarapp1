@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
+import 'package:noor_energy/features/admin/widgets/partner_documents_dialog.dart';
 import '../services/firestore_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/status_chip.dart';
@@ -7,6 +9,99 @@ import '../utils/date_formatter.dart';
 import '../widgets/simple_data_table.dart';
 import '../widgets/export_bar.dart';
 import '../widgets/request_detail_dialog.dart';
+
+Future<void> runApprovePartnerApplication({
+  required BuildContext context,
+  required AdminFirestoreService firestoreService,
+  required Map<String, dynamic> item,
+}) async {
+  final id = item['id']?.toString() ?? '';
+  if (id.isEmpty) return;
+
+  final resolved = PartnerServiceTypes.serviceTypeFromMap(item);
+  String? specialityOverride;
+
+  if (resolved.isEmpty) {
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        String selected = PartnerServiceTypes.canonicalLabels.first;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Approuver la candidature'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Aucun type de service n\'est indiqué sur cette candidature. Choisissez celui qui sera enregistré pour le partenaire :',
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButton<String>(
+                      value: selected,
+                      isExpanded: true,
+                      items: PartnerServiceTypes.canonicalLabels
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) {
+                        if (v != null) {
+                          setDialogState(() => selected = v);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, selected),
+                  child: const Text('Approuver'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (!context.mounted || picked == null) return;
+    specialityOverride = picked;
+  } else {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Approuver la candidature'),
+        content: const Text('Voulez-vous approuver cette candidature ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Approuver'),
+          ),
+        ],
+      ),
+    );
+    if (!context.mounted || confirm != true) return;
+  }
+
+  await firestoreService.approvePartnerApplication(
+    id,
+    specialityOverride: specialityOverride,
+  );
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Candidature approuvée')),
+    );
+  }
+}
 
 /// Partner Applications Page with approve/reject
 class PartnerApplicationsPage extends StatelessWidget {
@@ -65,7 +160,20 @@ class PartnerApplicationsPage extends StatelessWidget {
                   }).toList();
                   return ExportBar(
                     data: allData,
-                    columns: const ['Date', 'Entreprise', 'ICE', 'IF', 'RC', 'Patente', 'Adresse', 'Ville', 'Téléphone', 'Email', 'Statut'],
+                    columns: const [
+                      'Date',
+                      'Entreprise',
+                      'ICE',
+                      'IF',
+                      'RC',
+                      'Patente',
+                      'Adresse',
+                      'Ville',
+                      'Téléphone',
+                      'Email',
+                      'Type de service',
+                      'Statut',
+                    ],
                     title: 'Candidatures Partenaires',
                     fileName: 'partner_applications',
                   );
@@ -88,7 +196,7 @@ class PartnerApplicationsPage extends StatelessWidget {
                     }).toList() ?? [];
                     return SimpleDataTable(
                       data: data,
-                      columns: const ['Date', 'Entreprise', 'ICE', 'RC', 'Téléphone', 'Ville', 'Email', 'Statut', 'Actions'],
+                      columns: const ['Date', 'Entreprise', 'ICE', 'RC', 'Téléphone', 'Ville', 'Email', 'Type de service', 'Statut', 'Actions'],
                       buildRow: (context, item, index) {
                         return Row(
                           children: [
@@ -143,6 +251,16 @@ class PartnerApplicationsPage extends StatelessWidget {
                             ),
                             Expanded(
                               flex: 2,
+                              child: Text(
+                                () {
+                                  final st = PartnerServiceTypes.serviceTypeFromMap(item);
+                                  return st.isEmpty ? '—' : st;
+                                }(),
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
                               child: StatusChip(status: item['status']?.toString() ?? 'pending'),
                             ),
                             Expanded(
@@ -153,31 +271,11 @@ class PartnerApplicationsPage extends StatelessWidget {
                                     IconButton(
                                       icon: const Icon(Icons.check, size: 18),
                                       onPressed: () async {
-                                        final confirm = await showDialog<bool>(
+                                        await runApprovePartnerApplication(
                                           context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: const Text('Approuver la candidature'),
-                                            content: const Text('Voulez-vous approuver cette candidature ?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(context, false),
-                                                child: const Text('Annuler'),
-                                              ),
-                                              ElevatedButton(
-                                                onPressed: () => Navigator.pop(context, true),
-                                                child: const Text('Approuver'),
-                                              ),
-                                            ],
-                                          ),
+                                          firestoreService: firestoreService,
+                                          item: item,
                                         );
-                                        if (confirm == true) {
-                                          await firestoreService.approvePartnerApplication(item['id']?.toString() ?? '');
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Candidature approuvée')),
-                                            );
-                                          }
-                                        }
                                       },
                                       color: AppTheme.successColor,
                                       tooltip: 'Approuver',
@@ -217,6 +315,12 @@ class PartnerApplicationsPage extends StatelessWidget {
                                     ),
                                   ],
                                   IconButton(
+                                    icon: const Icon(Icons.attach_file, size: 18),
+                                    onPressed: () => showPartnerDocumentsDialog(context, item),
+                                    color: AppTheme.primaryColor,
+                                    tooltip: 'Documents entreprise',
+                                  ),
+                                  IconButton(
                                     icon: const Icon(Icons.visibility, size: 18),
                                     onPressed: () {
                                       showDialog(
@@ -230,6 +334,54 @@ class PartnerApplicationsPage extends StatelessWidget {
                                     },
                                     color: AppTheme.infoColor,
                                     tooltip: 'Voir détails',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Supprimer la candidature'),
+                                          content: const Text(
+                                            'Supprimer définitivement cette candidature ? Cette action est irréversible.',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context, false),
+                                              child: const Text('Annuler'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.pop(context, true),
+                                              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
+                                              child: const Text('Supprimer'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        try {
+                                          await firestoreService.deletePartnerApplication(
+                                            item['id']?.toString() ?? '',
+                                          );
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Candidature supprimée')),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Échec: $e'),
+                                                backgroundColor: AppTheme.errorColor,
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                    color: AppTheme.errorColor,
+                                    tooltip: 'Supprimer',
                                   ),
                                 ],
                               ),

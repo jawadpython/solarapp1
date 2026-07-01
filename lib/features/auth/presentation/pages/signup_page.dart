@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/auth_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 // =============================================================================
@@ -36,31 +38,31 @@ class _SignupPageState extends State<SignupPage> {
 
   String? _validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your name';
+      return AppLocalizations.of(context)?.validationPleaseEnterName ?? 'Please enter your name';
     }
     return null;
   }
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
+      return AppLocalizations.of(context)?.validationPleaseEnterEmail ?? 'Please enter your email';
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter a password';
+      return AppLocalizations.of(context)?.validationPleaseEnterPassword ?? 'Please enter a password';
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalizations.of(context)?.validationPasswordMinLength ?? 'Password must be at least 6 characters';
     }
     return null;
   }
 
   String? _validateConfirm(String? value) {
     if (value != _passwordController.text) {
-      return 'Passwords do not match';
+      return AppLocalizations.of(context)?.validationPasswordsDoNotMatch ?? 'Passwords do not match';
     }
     return null;
   }
@@ -70,19 +72,42 @@ class _SignupPageState extends State<SignupPage> {
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    HapticFeedback.lightImpact();
     setState(() => _isLoading = true);
 
     try {
       await AuthService.instance.signUp(
         _emailController.text.trim(),
         _passwordController.text,
+        displayName: _nameController.text.trim(),
       );
-      // authStateChanges in main.dart will switch to HomePage.
+      if (mounted) {
+        setState(() => _isLoading = false);
+        // Clear entire stack and show HomeScreen so user is not stuck on signup or login
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRoutes.homeScreen,
+          (route) => false,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.accountCreated),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 6),
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e is Exception ? e.toString().replaceFirst('Exception: ', '') : '$e';
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e is Exception ? e.toString().replaceFirst('Exception: ', '') : '$e';
+        });
+      }
     }
   }
 
@@ -90,9 +115,9 @@ class _SignupPageState extends State<SignupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign up'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(AppLocalizations.of(context)!.signUp),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
       ),
       body: SafeArea(
@@ -105,17 +130,17 @@ class _SignupPageState extends State<SignupPage> {
               children: [
                 const SizedBox(height: 16),
                 Text(
-                  'Create an account',
+                  AppLocalizations.of(context)!.createAccount,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Use your email and a password (min 6 characters).',
+                  AppLocalizations.of(context)!.signUpDescription,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
                 const SizedBox(height: 24),
@@ -146,11 +171,11 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                    hintText: 'Your full name',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.name,
+                    hintText: AppLocalizations.of(context)!.yourFullName,
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: _validateName,
                   onChanged: (_) => setState(() => _errorMessage = null),
@@ -159,11 +184,11 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.email,
+                    hintText: AppLocalizations.of(context)!.enterEmail,
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: _validateEmail,
                   onChanged: (_) => setState(() => _errorMessage = null),
@@ -172,11 +197,11 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'At least 6 characters',
-                    prefixIcon: Icon(Icons.lock_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.password,
+                    hintText: AppLocalizations.of(context)!.atLeast6Characters,
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: _validatePassword,
                   onChanged: (_) => setState(() => _errorMessage = null),
@@ -185,11 +210,11 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm password',
-                    hintText: 'Repeat your password',
-                    prefixIcon: Icon(Icons.lock_outlined),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.confirmPassword,
+                    hintText: AppLocalizations.of(context)!.repeatYourPassword,
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: _validateConfirm,
                   onChanged: (_) => setState(() => _errorMessage = null),
@@ -213,7 +238,7 @@ class _SignupPageState extends State<SignupPage> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text('Sign up'),
+                        : Text(AppLocalizations.of(context)!.signUp),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -221,10 +246,15 @@ class _SignupPageState extends State<SignupPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Already have an account? '),
+                    Flexible(
+                      child: Text(
+                        AppLocalizations.of(context)!.alreadyHaveAccount,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Login'),
+                      child: Text(AppLocalizations.of(context)!.login),
                     ),
                   ],
                 ),

@@ -2,12 +2,14 @@
 // IMPORTS - Import necessary packages and files
 // ============================================================================
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:noor_energy/core/constants/app_colors.dart'; // App color constants
 import 'package:noor_energy/core/services/auth_service.dart'; // Logout
 import 'package:noor_energy/core/services/language_service.dart'; // Language switching
 import 'package:noor_energy/features/profile/screens/profile_screen.dart'; // Profile screen
 import 'package:noor_energy/features/home/widgets/home_devis_form_dialog.dart'; // Home devis form dialog
 import 'package:noor_energy/features/marketplace/screens/marketplace_screen.dart'; // Marketplace screen
+import 'package:noor_energy/features/chat/presentation/pages/chat_screen.dart'; // Chat screen
 import 'package:noor_energy/routes/app_routes.dart'; // Navigation routes
 import 'package:noor_energy/l10n/app_localizations.dart'; // Localizations
 
@@ -25,13 +27,43 @@ class HomeScreen extends StatefulWidget {
 // ============================================================================
 // HOMESCREEN STATE - Manages the state and UI of the home screen
 // ============================================================================
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // Track which bottom navigation item is selected (0 = Home, 1 = Espace Pro, etc.)
   int _currentIndex = 0;
   // Hide "verify email" banner when user dismisses it
   bool _hideEmailVerificationBanner = false;
   bool _resendingVerification = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkEmailVerification();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkEmailVerification();
+    }
+  }
+
+  Future<void> _checkEmailVerification() async {
+    try {
+      await AuthService.instance.reloadUser();
+      if (mounted && AuthService.instance.isEmailVerified) {
+        setState(() {
+          _hideEmailVerificationBanner = true;
+        });
+      }
+    } catch (_) {}
+  }
 
   // ==========================================================================
   // HELPER METHOD: Show bottom menu sheet
@@ -40,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _displaySubtitle(BuildContext context) {
     final name = AuthService.instance.currentUserDisplayName;
     if (name != null && name.isNotEmpty) {
-      return 'Hi, $name';
+      return AppLocalizations.of(context)!.hiName(name);
     }
     return AppLocalizations.of(context)!.slogan;
   }
@@ -48,21 +80,22 @@ class _HomeScreenState extends State<HomeScreen> {
   /// This method displays a bottom sheet menu when user taps the menu icon
   /// Bottom sheet slides up from bottom of screen
   void _showMenu(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     // showModalBottomSheet creates a modal bottom sheet (popup from bottom)
     showModalBottomSheet(
       context: context, // Required: tells Flutter which screen to show this on
-      // Shape: rounds the top corners of the bottom sheet
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      // Builder: creates the content inside the bottom sheet
       builder: (context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 20), // Space inside container
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Column takes minimum space needed
+          mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.person_outline),
+              leading: Icon(Icons.person_outline, color: colorScheme.onSurfaceVariant),
               title: Text(AppLocalizations.of(context)!.profile),
               onTap: () {
                 Navigator.pop(context);
@@ -73,12 +106,13 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout, color: Colors.grey.shade700),
+              leading: Icon(Icons.logout, color: colorScheme.onSurfaceVariant),
               title: Text(
-                'Logout',
-                style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w500),
+                AppLocalizations.of(context)!.logout,
+                style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.w500),
               ),
               onTap: () async {
+                HapticFeedback.lightImpact();
                 Navigator.pop(context);
                 await AuthService.instance.signOut();
               },
@@ -96,15 +130,12 @@ class _HomeScreenState extends State<HomeScreen> {
   /// It's called automatically by Flutter whenever the screen needs to be displayed
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Scaffold: The main structure of the screen (like a page frame)
     return Scaffold(
-      backgroundColor: Colors.grey.shade50, // Light grey background color
-      
-      // ======================================================================
-      // APPBAR - Top bar with brand logo, title, and action buttons
-      // ======================================================================
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leadingWidth: 0,
@@ -126,10 +157,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           TextSpan(
                             text: 'TAWFIR ',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
-                              color: Colors.black,
+                              color: colorScheme.onSurface,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -152,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -164,16 +195,22 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.notifications_none, color: Colors.grey.shade700),
-            tooltip: 'Notifications',
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.notifications),
+                ),
+              );
+            },
+            icon: Icon(Icons.notifications_none, color: colorScheme.onSurfaceVariant),
+            tooltip: AppLocalizations.of(context)!.notifications,
           ),
           IconButton(
             onPressed: () {
               _showMenu(context);
             },
-            icon: Icon(Icons.menu, color: Colors.grey.shade700),
-            tooltip: 'Menu',
+            icon: Icon(Icons.menu, color: colorScheme.onSurfaceVariant),
+            tooltip: AppLocalizations.of(context)!.menu,
           ),
           const SizedBox(width: 8),
         ],
@@ -181,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            color: Colors.grey.shade200,
+            color: colorScheme.outline.withOpacity(0.5),
           ),
         ),
       ),
@@ -215,17 +252,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Verify your email',
+                            AppLocalizations.of(context)!.verifyYourEmail,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: colorScheme.onSurface,
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Check your inbox for the verification link.',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                            AppLocalizations.of(context)!.checkInboxSpam,
+                            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -239,8 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 await AuthService.instance.sendEmailVerification();
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Verification email sent. Check your inbox.'),
+                                    SnackBar(
+                                      content: Text(AppLocalizations.of(context)!.verificationEmailSent),
                                       backgroundColor: AppColors.success,
                                     ),
                                   );
@@ -259,10 +296,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                       child: _resendingVerification
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Resend'),
+                          : Text(AppLocalizations.of(context)!.resend),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, size: 20, color: Colors.grey.shade600),
+                      icon: Icon(Icons.close, size: 20, color: colorScheme.onSurfaceVariant),
                       onPressed: () => setState(() => _hideEmailVerificationBanner = true),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -398,9 +435,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     AppLocalizations.of(context)!.servicesSubtitle,
                     style: TextStyle(
-                      fontSize: 14, // Smaller than title
-                      color: Colors.grey.shade600, // Grey color
-                      fontWeight: FontWeight.w400, // Normal weight
+                      fontSize: 14,
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],
@@ -515,12 +552,12 @@ class _HomeScreenState extends State<HomeScreen> {
             // ESPACE PRO HELPER TEXT - Information text about professional space
             // ==================================================================
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), // Padding inside container
-              color: Colors.white, // White background
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              color: colorScheme.surface,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Center content horizontally
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.info_outline, size: 14, color: Colors.grey.shade500), // Info icon
+                  Icon(Icons.info_outline, size: 14, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 6), // Small space between icon and text
                   Flexible(
                     // Flexible: Allows text to wrap if too long
@@ -529,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       textAlign: TextAlign.center, // Center text
                       style: TextStyle(
                         fontSize: 11, // Small text size
-                        color: Colors.grey.shade600, // Grey color
+                        color: colorScheme.onSurfaceVariant, // Grey color
                         fontStyle: FontStyle.italic, // Italic style
                       ),
                     ),
@@ -545,47 +582,37 @@ class _HomeScreenState extends State<HomeScreen> {
       // BOTTOM NAVIGATION BAR - Bottom menu with icons
       // ======================================================================
       bottomNavigationBar: Container(
-        // BoxDecoration: Styles the bottom navigation container
         decoration: BoxDecoration(
-          color: Colors.white, // White background
+          color: colorScheme.surface,
           boxShadow: [
-            // Shadow above the bar (negative offset moves shadow up)
             BoxShadow(
-              color: Colors.black.withOpacity(0.05), // Very light shadow (5% opacity)
-              blurRadius: 10, // Blur amount
-              offset: const Offset(0, -5), // Shadow position (x=0, y=-5 moves up)
+              color: Theme.of(context).shadowColor.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
         child: BottomNavigationBar(
-          currentIndex: _currentIndex, // Which tab is currently selected
+          currentIndex: _currentIndex,
           // onTap: Called when user taps a navigation item
           onTap: (index) {
-            if (index == 0) {
-              // Home - already on home, just update index
-              setState(() => _currentIndex = index);
-            } else if (index == 1) {
-              // Espace Pro navigation - navigate to screen
+            setState(() => _currentIndex = index);
+            // Pop any stacked screens back to home before navigating
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            if (index == 0) return;
+            if (index == 1) {
               Navigator.pushNamed(context, AppRoutes.espacePro);
-              // Don't update currentIndex since we're navigating away
             } else if (index == 2) {
-              // Chat - not implemented yet, show coming soon message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context)!.chatComingSoon),
-                  duration: const Duration(seconds: 2),
-                ),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ChatScreen()),
               );
-              // Don't update index, stay on home
             } else if (index == 3) {
-              // Boutique - navigate to MarketplaceScreen
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
               );
-              // Don't update currentIndex since we're navigating away
             } else if (index == 4) {
-              // Profile navigation
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ProfileScreen()),
@@ -593,11 +620,11 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           },
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
+          backgroundColor: colorScheme.surface,
           selectedItemColor: AppColors.primary,
-          unselectedItemColor: Colors.grey.shade500,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontSize: 12),
+          unselectedItemColor: colorScheme.onSurfaceVariant,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+          unselectedLabelStyle: const TextStyle(fontSize: 11),
           elevation: 0,
           items: [
             BottomNavigationBarItem(
@@ -654,69 +681,64 @@ class _FeatureCard extends StatelessWidget {
     required this.onTap,
   });
 
-  // Build method: Creates the UI for this card
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: Colors.white, // White card background
-      borderRadius: BorderRadius.circular(20), // Rounded corners
-      elevation: 2, // Shadow depth (makes card appear raised)
-      shadowColor: Colors.black.withOpacity(0.1), // Shadow color (10% opacity)
-      // InkWell: Provides tap feedback (ripple effect)
+      color: colorScheme.surface,
+      borderRadius: BorderRadius.circular(20),
+      elevation: 2,
+      shadowColor: Theme.of(context).shadowColor.withOpacity(0.15),
       child: InkWell(
-        onTap: onTap, // Call the onTap function when tapped
-        borderRadius: BorderRadius.circular(20), // Ripple effect shape
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          height: 170, // Increased height to accommodate text better
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14), // Adjusted padding
+          height: 170,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20), // Match Material border radius
-            border: Border.all(color: Colors.grey.shade100), // Light grey border
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
-            mainAxisSize: MainAxisSize.max, // Use maximum space available
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              // Icon container with colored background
               Container(
-                padding: const EdgeInsets.all(10), // Slightly reduced padding
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1), // Light version of card color (10% opacity)
-                  borderRadius: BorderRadius.circular(16), // Rounded icon background
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(icon, size: 26, color: color), // Slightly smaller icon
+                child: Icon(icon, size: 26, color: color),
               ),
-              const SizedBox(height: 8), // Space between icon and title
-              // Title text
+              const SizedBox(height: 8),
               Flexible(
-                // Flexible: Allows text to shrink if needed but can expand
                 child: Text(
                   title,
-                  textAlign: TextAlign.center, // Center the text
-                  maxLines: 2, // Maximum 2 lines
-                  overflow: TextOverflow.ellipsis, // Show "..." if text too long
-                  style: const TextStyle(
-                    fontSize: 13, // Slightly smaller to fit better
-                    fontWeight: FontWeight.w600, // Semi-bold
-                    color: AppColors.textPrimary, // Dark text color
-                    height: 1.3, // Increased line height for better readability
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                    height: 1.3,
                   ),
                 ),
               ),
-              // Description text (only show if not empty)
               if (description.isNotEmpty) ...[
-                const SizedBox(height: 5), // Space between title and description
+                const SizedBox(height: 5),
                 Flexible(
                   child: Text(
                     description,
                     textAlign: TextAlign.center,
-                    maxLines: 2, // Maximum 2 lines
-                    overflow: TextOverflow.ellipsis, // Show "..." if text too long
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11, // Smaller than title
-                      fontWeight: FontWeight.w400, // Normal weight
-                      color: Colors.grey.shade600, // Grey color
-                      height: 1.4, // Increased line spacing for better readability
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.4,
                     ),
                   ),
                 ),
@@ -747,11 +769,12 @@ class _TechnicianCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: Colors.white,
+      color: colorScheme.surface,
       borderRadius: BorderRadius.circular(20),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Theme.of(context).shadowColor.withOpacity(0.15),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -759,7 +782,7 @@ class _TechnicianCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade100),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -831,34 +854,30 @@ class _TechnicianCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               // Title text
-              Flexible(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    height: 1.2,
-                  ),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  height: 1.2,
                 ),
               ),
               const SizedBox(height: 6),
               // Description text
-              Flexible(
-                child: Text(
-                  description,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey.shade600,
-                    height: 1.3,
-                  ),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.3,
                 ),
               ),
             ],
@@ -951,6 +970,8 @@ class _PrimaryCalculatorCard extends StatelessWidget {
                     // Title text
                     Text(
                       title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 22, // Larger than regular cards (22 vs 14)
                         fontWeight: FontWeight.bold, // Bold text
@@ -962,6 +983,8 @@ class _PrimaryCalculatorCard extends StatelessWidget {
                     // Description text
                     Text(
                       description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w400, // Normal weight
@@ -1005,11 +1028,12 @@ class _PartnerTechnicianCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: Colors.white,
+      color: colorScheme.surface,
       borderRadius: BorderRadius.circular(20),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Theme.of(context).shadowColor.withOpacity(0.15),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -1017,7 +1041,7 @@ class _PartnerTechnicianCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade100),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1032,33 +1056,29 @@ class _PartnerTechnicianCard extends StatelessWidget {
                 child: Icon(icon, size: 28, color: color),
               ),
               const SizedBox(height: 10),
-              Flexible(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    height: 1.2,
-                  ),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  height: 1.2,
                 ),
               ),
               const SizedBox(height: 4),
-              Flexible(
-                child: Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey.shade600,
-                    height: 1.2,
-                  ),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.2,
                 ),
               ),
             ],

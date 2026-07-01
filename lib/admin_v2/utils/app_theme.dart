@@ -12,4 +12,5 @@ class AppTheme {
   static const Color warningColor = Color(0xFFFF9800);
   static const Color errorColor = Color(0xFFF44336);
   static const Color infoColor = Color(0xFF2196F3);
+  static const Color borderColor = Color(0xFFE0E0E0);
 }

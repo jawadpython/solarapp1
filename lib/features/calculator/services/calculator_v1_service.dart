@@ -1,13 +1,19 @@
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:noor_energy/features/calculator/models/calculator_result.dart';
+import 'package:noor_energy/features/calculator/services/onee_tariff_service.dart';
 import 'package:noor_energy/features/calculator/services/region_service.dart';
+
+enum _SunHoursMode { annualAverage, worstMonth }
 
 /// V1 Calculator Service with new formulas and constants
 class CalculatorV1Service {
   // Calculation Constants (V1)
   static const double prix_kWh = 1.2; // DH/kWh (legacy - kept for other systems)
-  static const double tariff_avg = 1.30; // DH/kWh - Average tariff for ON-GRID (updated from 1.2)
+  static const double tariff_avg = 1.30; // Legacy display fallback
+  static const double surplusInjectionRate = 0.20; // DH/kWh ANRE buyback (peak approx.)
+  static const double maxSurplusRatio = 0.20; // Loi 82-21: max 20% annual injection
+  static const double regulatoryPowerLimitKwc = 11.0; // Loi 82-21 declaration threshold
   static const double PR = 0.80; // Performance Ratio (updated from 0.75)
   static const double DoD = 0.8; // Depth of Discharge
   static const double eff_batt = 0.9; // Battery efficiency
@@ -15,8 +21,7 @@ class CalculatorV1Service {
   static const double co2_factor = 0.6; // kg CO2 / kWh (updated from 0.7)
   static const double kg_per_tree = 22.0; // kg CO2 / tree / year (updated from 20)
   static const double battery_usable_factor = 0.90; // Battery usable capacity factor
-  static const double fixedCharges = 50.0; // DH - Fixed charges for ON-GRID
-  static const double billMin = 50.0; // DH - Minimum bill amount for ON-GRID
+  static const double billMin = OneeTariffService.billMin;
 
   // Self-Consumption (SC) percentages for ON-GRID
   static const Map<String, double> onGridSelfConsumption = {
@@ -43,18 +48,45 @@ class CalculatorV1Service {
     'Atelier / Commerce petit': 30.0, // kWh/day
   };
 
-  // Fixed sun hours for Morocco (all regions)
-  // According to newupdate.txt: H = 5.5 h/day (FIXE Maroc)
-  static const double fixedSunHours = 5.5;
+  static const double fixedSunHours = 5.5; // Fallback when region data is missing
 
   final RegionService _regionService = RegionService.instance;
 
-  /// Get sun hours for a region
-  /// FIXED: Uses 5.5 h/day for all regions in Morocco (as per newupdate.txt)
-  Future<double> _getSunHours(String regionCode) async {
-    // Fixed value: 5.5 h/day for all regions in Morocco
-    debugPrint('Sun hours (FIXED for Morocco): $fixedSunHours h/day');
-    return fixedSunHours;
+  Future<double> _getSunHours(
+    String regionCode, {
+    _SunHoursMode mode = _SunHoursMode.annualAverage,
+  }) async {
+    final hours = switch (mode) {
+      _SunHoursMode.annualAverage =>
+        await _regionService.getAnnualAverageSunHours(regionCode),
+      _SunHoursMode.worstMonth =>
+        await _regionService.getWorstMonthSunHours(regionCode),
+    };
+    debugPrint(
+      'Sun hours ($mode, region=$regionCode): ${hours.toStringAsFixed(2)} h/day',
+    );
+    return hours;
+  }
+
+  double _kwhFromBill(double montantDH) =>
+      OneeTariffService.kwhFromBill(montantDH);
+
+  double _billAfterSolar({
+    required double montantDH,
+    required double kwhMonth,
+    required double kwhCovered,
+  }) =>
+      OneeTariffService.billAfterSolar(
+        originalBillDh: montantDH,
+        kwhMonth: kwhMonth,
+        kwhCovered: kwhCovered,
+      );
+
+  /// Optional surplus injection credit (Loi 82-21, capped at 20% of production).
+  double _surplusInjectionCredit(double pvKwhMonth, double selfUsedKwh) {
+    final surplus = math.max(0.0, pvKwhMonth - selfUsedKwh);
+    final injectable = math.min(surplus, pvKwhMonth * maxSurplusRatio);
+    return injectable * surplusInjectionRate;
   }
 
   /// Parse number accepting both comma and dot as decimal separator
@@ -84,8 +116,8 @@ class CalculatorV1Service {
     if (pvKwc <= 60) return 60;
     if (pvKwc <= 80) return 80;
     if (pvKwc <= 100) return 100;
-    // For systems > 100 kW, return 100 (or could extend table)
-    return 100;
+    // For systems > 100 kW, scale to nearest 10 kW instead of capping.
+    return (pvKwc / 10).ceil() * 10.0;
   }
 
   /// Calculate ON-GRID system with new formulas
@@ -113,55 +145,46 @@ class CalculatorV1Service {
 
     final sunHours = await _getSunHours(regionCode);
 
-    // Step 1: Monthly Consumption (kWh/month)
-    // Formula: kWh_month = bill / tariff_avg
-    final kwhMonth = montantDH / tariff_avg;
+    // Step 1: Monthly consumption from ONEE bill (reverse tariff)
+    final kwhMonth = _kwhFromBill(montantDH);
 
     // Step 2: Daily Consumption (kWh/day)
-    // Formula: kWh_day = kWh_month / 30
     final kwhDay = kwhMonth / 30;
 
     // Step 3: Panel Power (kW)
-    // Formula: P_panel = panel_w / 1000
     final panelPowerKW = panelWp / 1000;
 
-    // Step 4: PV sizing based on daily consumption
-    // Formula: P_PV = E_day / (H × PR)
-    // Where H = 5.5 h/day (fixed for Morocco), PR = 0.80
+    // Step 4: PV sizing — production matches daily need; SC applied in savings
     double pvPowerKW = kwhDay / (sunHours * PR);
-    
+
     // Step 5: Calculate number of panels needed
     int panels = (pvPowerKW / panelPowerKW).ceil();
-    
+
     // Step 6: Installed PV Capacity (kWc)
-    // Formula: PV_kwc = N × P_panel
     double pvKwc = panels * panelPowerKW;
 
     // Step 7: Monthly PV Production (kWh/month)
-    // Formula: PV_kWh_month = PV_kWp × PSH × PR × 30
     final pvKwhMonth = pvKwc * sunHours * PR * 30;
 
     // Step 8: Self-Consumed Energy (kWh/month)
-    // Formula: Self_used = PV_kWh_month × SC
     final selfUsed = pvKwhMonth * sc;
 
-    // Step 9: Covered Energy (kWh/month) - actual energy that reduces bill
-    // Formula: Covered_kWh = min(Self_used, kWh_month)
+    // Step 9: Covered Energy (kWh/month)
     final kwhCovered = math.min(selfUsed, kwhMonth);
 
-    // Step 10: Calculate new bill
-    // Formula: Bill_calc = FixedCharges + (kWh_month - Covered_kWh) × tariff_avg
-    final billCalc = fixedCharges + (kwhMonth - kwhCovered) * tariff_avg;
-    
-    // Step 11: Final bill (minimum 50 DH)
-    // Formula: Bill_after = max(50 DH, Bill_calc)
-    final billAfter = math.max(billMin, billCalc).toDouble();
+    // Step 10: New bill via ONEE tranches + optional surplus injection credit
+    var billAfter = _billAfterSolar(
+      montantDH: montantDH,
+      kwhMonth: kwhMonth,
+      kwhCovered: kwhCovered,
+    );
+    final injectionCredit = _surplusInjectionCredit(pvKwhMonth, selfUsed);
+    billAfter = math.max(billMin, billAfter - injectionCredit).toDouble();
 
-    // Step 12: Monthly Savings (DH)
-    final savingMonth = (montantDH - billAfter).toDouble();
-    
-    // Ensure savings are realistic (should not exceed bill)
-    final actualSavingMonth = math.max(0.0, math.min(savingMonth, montantDH - billMin)).toDouble();
+    // Step 11: Monthly Savings (DH)
+    final actualSavingMonth =
+        math.max(0.0, math.min(montantDH - billAfter, montantDH - billMin))
+            .toDouble();
 
     // Step 13: Coverage percentage (for display)
     final coveragePct = kwhMonth > 0 ? (kwhCovered / kwhMonth * 100) : 0.0;
@@ -169,10 +192,9 @@ class CalculatorV1Service {
     // Step 14: Inverter Selection
     final inverterKW = selectInverter(pvKwc);
 
-    // Voltage warning: Show if inverter > 10kW and voltage = 220V
-    final showVoltageWarning = inverterKW > 10 && voltage == '220V';
+    final showVoltageWarning = inverterKW > 5 && voltage == '220V';
+    final showRegulatoryWarning = pvKwc > regulatoryPowerLimitKwc;
 
-    // Step 15: Long-term Savings
     final savingYear = actualSavingMonth * 12.0;
     final saving10Y = savingYear * 10.0;
     final saving20Y = savingYear * 20.0;
@@ -192,6 +214,7 @@ class CalculatorV1Service {
       coveragePct: coveragePct,
       voltage: voltage,
       showVoltageWarning: showVoltageWarning,
+      showRegulatoryWarning: showRegulatoryWarning,
       savingMonth: actualSavingMonth,
       savingYear: savingYear,
       saving10Y: saving10Y,
@@ -232,12 +255,7 @@ class CalculatorV1Service {
 
     final sunHours = await _getSunHours(regionCode);
 
-    // Step 1: Monthly Consumption (kWh/month)
-    // Formula: kWh_month = Bill / tariff_avg
-    final kwhMonth = montantDH / tariff_avg;
-
-    // Step 2: Daily Consumption (kWh/day)
-    // Formula: kWh_day = kWh_month / 30
+    final kwhMonth = _kwhFromBill(montantDH);
     final kwhDay = kwhMonth / 30;
 
     // Step 3: Clamp coverage percentage (30-90%)
@@ -280,46 +298,45 @@ class CalculatorV1Service {
     // Formula: PV_kWh_month = PV_kWc × H × PR × 30
     final pvKwhMonth = pvKwc * sunHours * PR * 30;
 
-    // Step 11: Covered Energy (kWh/month) - realistic coverage
-    // Formula: Covered_kWh = min(PV_kWh_month, target_kWh_month, E_month)
     final targetKwhMonth = kwhMonth * selfConsumptionRatio;
-    final kwhCovered = math.min(pvKwhMonth, math.min(targetKwhMonth, kwhMonth));
 
-    // Step 12: Battery Calculations (for night coverage display)
-    // Formula: E_night_need = E_target_day × nuit_ratio (already calculated as kwhNight)
-    // Formula: Battery_usable = Battery_kWh × 0.90
+    // Battery: usable energy per day for night loads
     final batteryUsable = batteryKwh * battery_usable_factor;
-
-    // Formula: E_nuit_couvert = min(E_night_need, Battery_usable)
     final kwhNightCovered = math.min(kwhNight, batteryUsable);
-
-    // Formula: E_grid_nuit = max(0, E_night_need - E_night_covered)
     final kwhGridNight = math.max(0.0, kwhNight - kwhNightCovered);
+    final nightCoveragePct =
+        kwhNight > 0 ? (kwhNightCovered / kwhNight * 100) : 0.0;
 
-    // Night coverage percentage
-    final nightCoveragePct = kwhNight > 0 ? (kwhNightCovered / kwhNight * 100) : 0.0;
+    // Covered = PV day offset + battery night offset (monthly)
+    final pvDayCoverMonthly = math.min(pvKwhMonth, kwhDayPart * 30);
+    final batteryNightCoverMonthly = kwhNightCovered * 30;
+    final kwhCovered = math.min(
+      kwhMonth,
+      math.min(
+        targetKwhMonth,
+        pvDayCoverMonthly + batteryNightCoverMonthly,
+      ),
+    );
 
-    // Step 13: Calculate new bill
-    // Formula: Bill_calc = FixedCharges + (kWh_month - Covered_kWh) × tariff_avg
-    final billCalc = fixedCharges + (kwhMonth - kwhCovered) * tariff_avg;
-    
-    // Step 14: Final bill (minimum 50 DH)
-    // Formula: Bill_after = max(50 DH, Bill_calc)
-    final billAfter = math.max(billMin, billCalc).toDouble();
+    var billAfter = _billAfterSolar(
+      montantDH: montantDH,
+      kwhMonth: kwhMonth,
+      kwhCovered: kwhCovered,
+    );
+    final selfUsed = pvDayCoverMonthly + batteryNightCoverMonthly;
+    final injectionCredit = _surplusInjectionCredit(pvKwhMonth, selfUsed);
+    billAfter = math.max(billMin, billAfter - injectionCredit).toDouble();
 
-    // Step 15: Monthly Savings (DH)
-    final savingMonthRaw = montantDH - billAfter;
-    
-    // Step 16: Apply savings cap (Rule 1: Savings = min(Savings, Bill × 0.90))
-    final savingMonth = math.max(0.0, math.min(savingMonthRaw, montantDH * 0.90)).toDouble();
+    final savingMonth =
+        math.max(0.0, math.min(montantDH - billAfter, montantDH - billMin))
+            .toDouble();
 
     // Step 17: Inverter Selection (HYBRID: PV_kWc * 1.10 margin)
     final inverterKW = selectInverter(pvKwc * 1.10);
 
-    // Voltage warning: Show if inverter > 10kW and voltage = 220V
-    final showVoltageWarning = inverterKW > 10 && voltage == '220V';
+    final showVoltageWarning = inverterKW > 5 && voltage == '220V';
+    final showRegulatoryWarning = pvKwc > regulatoryPowerLimitKwc;
 
-    // Step 18: Long-term Savings
     final savingYear = savingMonth * 12.0;
     final saving10Y = savingYear * 10.0;
     final saving20Y = savingYear * 20.0;
@@ -352,6 +369,7 @@ class CalculatorV1Service {
       coveragePct: coveragePctDisplay, // Display coverage based on actual covered energy
       voltage: voltage,
       showVoltageWarning: showVoltageWarning,
+      showRegulatoryWarning: showRegulatoryWarning,
       savingMonth: savingMonth,
       savingYear: savingYear,
       saving10Y: saving10Y,
@@ -365,7 +383,7 @@ class CalculatorV1Service {
     debugPrint('OUTPUTS: Covered=${kwhCovered.toStringAsFixed(2)} kWh/month (${coveragePctDisplay.toStringAsFixed(1)}%)');
     debugPrint('OUTPUTS: E_day_part=${result.kwhDayPart.toStringAsFixed(2)} kWh, E_nuit=${result.kwhNight.toStringAsFixed(2)} kWh');
     debugPrint('OUTPUTS: Battery_usable=${result.batteryUsable.toStringAsFixed(2)} kWh, E_nuit_couvert=${result.kwhNightCovered.toStringAsFixed(2)} kWh, E_grid_nuit=${result.kwhGridNight.toStringAsFixed(2)} kWh');
-    debugPrint('OUTPUTS: Bill_after=${billAfter.toStringAsFixed(2)} DH, Saving=${savingMonth.toStringAsFixed(2)} DH/month (capped at ${(montantDH * 0.90).toStringAsFixed(2)} DH)');
+    debugPrint('OUTPUTS: Bill_after=${billAfter.toStringAsFixed(2)} DH, Saving=${savingMonth.toStringAsFixed(2)} DH/month');
     debugPrint('OUTPUTS: P_PV=${pvPowerKW.toStringAsFixed(2)} kW, panels=${panels}, inverter=${inverterKW} kW');
     return result;
   }
@@ -380,7 +398,8 @@ class CalculatorV1Service {
   }) async {
     debugPrint('INPUTS: OFF-GRID, profile=$profile, region=$regionCode, autonomyDays=$autonomyDays, panelWp=$panelWp, voltage=$voltage');
 
-    final sunHours = await _getSunHours(regionCode);
+    final sunHours =
+        await _getSunHours(regionCode, mode: _SunHoursMode.worstMonth);
 
     // Step 1: Daily Energy from profile
     // Formula: E_day = profile_kwh_day
@@ -415,12 +434,14 @@ class CalculatorV1Service {
     String? recommendedVoltage;
     
     if (voltage != null) {
-      // User chose voltage - show warning if inverter > 10kW and voltage = 220V
-      showVoltageWarning = inverterKW > 10 && voltage == '220V';
+      // User chose voltage - show warning if inverter > 5kW and voltage = 220V
+      showVoltageWarning = inverterKW > 5 && voltage == '220V';
     } else {
       // User did not choose voltage - recommend based on inverter power
       recommendedVoltage = inverterKW <= 10 ? '220V' : '380V';
     }
+
+    final showRegulatoryWarning = pvKwc > regulatoryPowerLimitKwc;
 
     final result = OffGridResult(
       systemType: 'OFF-GRID',
@@ -436,6 +457,7 @@ class CalculatorV1Service {
       inverterKW: inverterKW,
       voltage: voltage,
       showVoltageWarning: showVoltageWarning,
+      showRegulatoryWarning: showRegulatoryWarning,
       recommendedVoltage: recommendedVoltage,
       panelWp: panelWp,
     );
@@ -477,14 +499,13 @@ class CalculatorV1Service {
     // Formula: P_pump = P_hyd / rendement_pompe
     final pumpPowerKW = hydraulicPowerKW / rendement_pompe;
 
-    // Step 3: PV power required
-    // Formula: P_PV = P_pump / PR
-    final pvPowerKW = pumpPowerKW / PR;
+    // Step 3: Daily pump energy → PV sizing for available sun hours
+    final pumpEnergyKwhPerDay = pumpPowerKW * hoursPerDay;
+    final pvPowerKW = pumpEnergyKwhPerDay / (sunHours * PR);
 
     // Step 4: Number of panels
     // Formula: N = ceil((P_PV * 1000) / panelWp)
     final panels = ((pvPowerKW * 1000) / panelWp).ceil();
-    final pvKwc = (panels * panelWp) / 1000;
 
     // Step 5: VFD/Variateur selection (for AC pumps)
     double? vfdRecommendedKW;
@@ -499,7 +520,7 @@ class CalculatorV1Service {
       
       // Voltage recommendation
       recommendedVoltage = vfdRecommendedKW <= 10 ? '220V' : '380V';
-      showVoltageWarning = vfdRecommendedKW > 10 && (voltage == null || voltage == '220V');
+      showVoltageWarning = vfdRecommendedKW > 5 && (voltage == null || voltage == '220V');
     } else {
       // DC pump: contrôleur/driver DC (not VFD)
       vfdType = 'Contrôleur / Driver DC (pompe DC)';

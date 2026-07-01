@@ -1,0 +1,14 @@
+{
+  "name": "noor-energy-functions",
+  "description": "Cloud Functions for Tawfir Energy - custom auth emails via Resend",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0",
+    "resend": "^4.0.0"
+  }
+}

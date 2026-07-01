@@ -307,7 +307,7 @@ abstract class AppLocalizations {
   /// No description provided for @createAccount.
   ///
   /// In en, this message translates to:
-  /// **'Create account'**
+  /// **'Create an account'**
   String get createAccount;
 
   /// No description provided for @register.
@@ -487,7 +487,7 @@ abstract class AppLocalizations {
   /// No description provided for @panelPowerW.
   ///
   /// In en, this message translates to:
-  /// **'Panel Power (W)'**
+  /// **'Panel power (W)'**
   String get panelPowerW;
 
   /// No description provided for @selectPanelPower.
@@ -2530,6 +2530,12 @@ abstract class AppLocalizations {
   /// **'For a power > 10 kW, 380V (Three-phase) is recommended.'**
   String get voltageWarning;
 
+  /// No description provided for @regulatoryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Installations above 11 kWc require ONEE grid connection approval (Law 82-21).'**
+  String get regulatoryWarning;
+
   /// No description provided for @recommended.
   ///
   /// In en, this message translates to:
@@ -2899,7 +2905,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorLoading.
   ///
   /// In en, this message translates to:
-  /// **'Error loading: {error}'**
+  /// **'Error loading'**
   String errorLoading(String error);
 
   /// No description provided for @cannotCall.
@@ -2919,6 +2925,882 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please connect to the internet to use the app.'**
   String get offlineMessage;
+
+  /// No description provided for @validationPleaseEnterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get validationPleaseEnterEmail;
+
+  /// No description provided for @validationPleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get validationPleaseEnterPassword;
+
+  /// No description provided for @validationPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get validationPasswordMinLength;
+
+  /// No description provided for @validationPasswordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validationPasswordsDoNotMatch;
+
+  /// No description provided for @validationPleaseEnterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get validationPleaseEnterName;
+
+  /// No description provided for @darkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get darkMode;
+
+  /// No description provided for @darkModeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use dark theme'**
+  String get darkModeDescription;
+
+  /// No description provided for @signInToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to continue'**
+  String get signInToContinue;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a link to reset your password.'**
+  String get forgotPasswordMessage;
+
+  /// No description provided for @yourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email'**
+  String get yourEmail;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get sendResetLink;
+
+  /// No description provided for @checkEmailForReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email for the reset link'**
+  String get checkEmailForReset;
+
+  /// No description provided for @passwordResetSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password was updated. Sign in with your new password.'**
+  String get passwordResetSuccessSnack;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get signUp;
+
+  /// No description provided for @signUpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your email and a password (min 6 characters).'**
+  String get signUpDescription;
+
+  /// No description provided for @yourFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your full name'**
+  String get yourFullName;
+
+  /// No description provided for @atLeast6Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get atLeast6Characters;
+
+  /// No description provided for @repeatYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat your password'**
+  String get repeatYourPassword;
+
+  /// No description provided for @accountCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created! Check your email to verify (including spam folder).'**
+  String get accountCreated;
+
+  /// No description provided for @verifyYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyYourEmail;
+
+  /// No description provided for @checkInboxSpam.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox (and spam folder) for the verification link.'**
+  String get checkInboxSpam;
+
+  /// No description provided for @resend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get resend;
+
+  /// No description provided for @verificationEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent. Check inbox and spam.'**
+  String get verificationEmailSent;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @editName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get editName;
+
+  /// No description provided for @yourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get yourName;
+
+  /// No description provided for @nameUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Name updated'**
+  String get nameUpdated;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @hiName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, {name}'**
+  String hiName(String name);
+
+  /// No description provided for @validationPleaseEnterCompanyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the company name'**
+  String get validationPleaseEnterCompanyName;
+
+  /// No description provided for @validationPleaseEnterIce.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the ICE'**
+  String get validationPleaseEnterIce;
+
+  /// No description provided for @validationPleaseEnterIf.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the IF'**
+  String get validationPleaseEnterIf;
+
+  /// No description provided for @validationPleaseEnterRc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the RC'**
+  String get validationPleaseEnterRc;
+
+  /// No description provided for @validationPleaseEnterPatente.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the Patente'**
+  String get validationPleaseEnterPatente;
+
+  /// No description provided for @validationPleaseEnterAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the address'**
+  String get validationPleaseEnterAddress;
+
+  /// No description provided for @validationPleaseEnterCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your city'**
+  String get validationPleaseEnterCity;
+
+  /// No description provided for @validationPleaseEnterPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your phone number'**
+  String get validationPleaseEnterPhone;
+
+  /// No description provided for @validationPleaseEnterEmailPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get validationPleaseEnterEmailPartner;
+
+  /// No description provided for @validationPleaseEnterLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your last name'**
+  String get validationPleaseEnterLastName;
+
+  /// No description provided for @validationPleaseEnterFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your first name'**
+  String get validationPleaseEnterFirstName;
+
+  /// No description provided for @validationPleaseEnterSpecialty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your specialty'**
+  String get validationPleaseEnterSpecialty;
+
+  /// No description provided for @referenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ref: {ref}'**
+  String referenceLabel(String ref);
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get menu;
+
+  /// No description provided for @callToComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Call to {phone} (feature coming soon)'**
+  String callToComingSoon(String phone);
+
+  /// No description provided for @whatsAppToComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp to {phone} (feature coming soon)'**
+  String whatsAppToComingSoon(String phone);
+
+  /// No description provided for @certifiedTechniciansTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Certified Technicians'**
+  String get certifiedTechniciansTitle;
+
+  /// No description provided for @cityFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'City:'**
+  String get cityFilterLabel;
+
+  /// No description provided for @specialtyFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialty:'**
+  String get specialtyFilterLabel;
+
+  /// No description provided for @noTechnicianFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No technician found'**
+  String get noTechnicianFound;
+
+  /// No description provided for @modifyFiltersOrRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Modify filters or try again later.'**
+  String get modifyFiltersOrRetry;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get notAvailable;
+
+  /// No description provided for @partnersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Partners'**
+  String get partnersTitle;
+
+  /// No description provided for @noPartnerAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No partner available'**
+  String get noPartnerAvailable;
+
+  /// No description provided for @partnersListComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'The partners list will be updated soon.'**
+  String get partnersListComingSoon;
+
+  /// No description provided for @companyDocumentsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Company documents (optional)'**
+  String get companyDocumentsOptional;
+
+  /// No description provided for @documentsUrlsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Document URLs (will be enabled later)'**
+  String get documentsUrlsComingSoon;
+
+  /// No description provided for @certificatesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates (optional)'**
+  String get certificatesOptional;
+
+  /// No description provided for @certificatesUrlsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate URLs (will be enabled later)'**
+  String get certificatesUrlsComingSoon;
+
+  /// No description provided for @exampleIce.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 123456789012345'**
+  String get exampleIce;
+
+  /// No description provided for @exampleIf.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 12345678'**
+  String get exampleIf;
+
+  /// No description provided for @exampleRc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 12345'**
+  String get exampleRc;
+
+  /// No description provided for @examplePatente.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 123456'**
+  String get examplePatente;
+
+  /// No description provided for @exampleAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 123 Example Street, District...'**
+  String get exampleAddress;
+
+  /// No description provided for @exampleLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: Alami'**
+  String get exampleLastName;
+
+  /// No description provided for @exampleFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: Ahmed'**
+  String get exampleFirstName;
+
+  /// No description provided for @newStudyDevisRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'New study quote request'**
+  String get newStudyDevisRequest;
+
+  /// No description provided for @typeAndConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Type: {type} - Consumption: {consumption}'**
+  String typeAndConsumption(String type, String consumption);
+
+  /// No description provided for @projectStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project study'**
+  String get projectStudyTitle;
+
+  /// No description provided for @selectProjectType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select project type'**
+  String get selectProjectType;
+
+  /// No description provided for @pumpingStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PUMPING - Project study'**
+  String get pumpingStudyTitle;
+
+  /// No description provided for @onGridStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ON-GRID - Project study'**
+  String get onGridStudyTitle;
+
+  /// No description provided for @offGridStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF-GRID - Project study'**
+  String get offGridStudyTitle;
+
+  /// No description provided for @hybridStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HYBRID - Project study'**
+  String get hybridStudyTitle;
+
+  /// No description provided for @powerUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Power unit'**
+  String get powerUnit;
+
+  /// No description provided for @pumpPowerKwHp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump power ({unit})'**
+  String pumpPowerKwHp(String unit);
+
+  /// No description provided for @wellDepthM.
+  ///
+  /// In en, this message translates to:
+  /// **'Well depth (m)'**
+  String get wellDepthM;
+
+  /// No description provided for @workingHoursPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours per day'**
+  String get workingHoursPerDay;
+
+  /// No description provided for @dailyConsumptionKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily consumption (kWh)'**
+  String get dailyConsumptionKwh;
+
+  /// No description provided for @monthlyConsumptionKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly consumption (kWh)'**
+  String get monthlyConsumptionKwh;
+
+  /// No description provided for @sunHoursPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun hours per day'**
+  String get sunHoursPerDay;
+
+  /// No description provided for @autonomyDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Autonomy days'**
+  String get autonomyDaysLabel;
+
+  /// No description provided for @batteryVoltage.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery voltage'**
+  String get batteryVoltage;
+
+  /// No description provided for @solarCoveragePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Solar coverage (%)'**
+  String get solarCoveragePercent;
+
+  /// No description provided for @blackoutHoursOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Blackout hours (optional)'**
+  String get blackoutHoursOptional;
+
+  /// No description provided for @electricalConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical consumption'**
+  String get electricalConsumption;
+
+  /// No description provided for @enterYourConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your consumption'**
+  String get enterYourConsumption;
+
+  /// No description provided for @unitLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unitLabelShort;
+
+  /// No description provided for @kwhPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'kWh/month'**
+  String get kwhPerMonth;
+
+  /// No description provided for @estimatedInstallationPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated installation power'**
+  String get estimatedInstallationPower;
+
+  /// No description provided for @requestQuoteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a quote'**
+  String get requestQuoteButton;
+
+  /// No description provided for @pleaseEnterConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter consumption'**
+  String get pleaseEnterConsumption;
+
+  /// No description provided for @pleaseEnterValidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number'**
+  String get pleaseEnterValidNumber;
+
+  /// No description provided for @pleaseEnterDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter depth'**
+  String get pleaseEnterDepth;
+
+  /// No description provided for @pleaseEnterHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter hours'**
+  String get pleaseEnterHours;
+
+  /// No description provided for @pleaseEnterDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter autonomy days'**
+  String get pleaseEnterDays;
+
+  /// No description provided for @pleaseEnterPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter percentage'**
+  String get pleaseEnterPercentage;
+
+  /// No description provided for @percentageBetween1And100.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a percentage between 1 and 100'**
+  String get percentageBetween1And100;
+
+  /// No description provided for @pleaseEnterSunHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter sun hours'**
+  String get pleaseEnterSunHours;
+
+  /// No description provided for @selectAutonomyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Select autonomy days'**
+  String get selectAutonomyDays;
+
+  /// No description provided for @exPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: {value}'**
+  String exPlaceholder(String value);
+
+  /// No description provided for @startSolarJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Your Solar Journey'**
+  String get startSolarJourney;
+
+  /// No description provided for @fillDetailsForStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the details below to get a personalized solar study'**
+  String get fillDetailsForStudy;
+
+  /// No description provided for @projectTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Type'**
+  String get projectTypeLabel;
+
+  /// No description provided for @residential.
+  ///
+  /// In en, this message translates to:
+  /// **'Residential'**
+  String get residential;
+
+  /// No description provided for @commercial.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial'**
+  String get commercial;
+
+  /// No description provided for @locationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationLabel;
+
+  /// No description provided for @enterCityOrAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your city or address'**
+  String get enterCityOrAddressHint;
+
+  /// No description provided for @getStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Get study'**
+  String get getStudy;
+
+  /// No description provided for @installationOrMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation or Maintenance'**
+  String get installationOrMaintenance;
+
+  /// No description provided for @chooseService.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a service'**
+  String get chooseService;
+
+  /// No description provided for @installationService.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation'**
+  String get installationService;
+
+  /// No description provided for @maintenanceService.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get maintenanceService;
+
+  /// No description provided for @productDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Product details'**
+  String get productDetails;
+
+  /// No description provided for @requestQuoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a quote'**
+  String get requestQuoteTitle;
+
+  /// No description provided for @financingForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Financing'**
+  String get financingForm;
+
+  /// No description provided for @interventionChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Intervention'**
+  String get interventionChoice;
+
+  /// No description provided for @emptyStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here'**
+  String get emptyStateTitle;
+
+  /// No description provided for @emptyStateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No items to display.'**
+  String get emptyStateMessage;
+
+  /// No description provided for @labelOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get labelOptional;
+
+  /// No description provided for @hintOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint (optional)'**
+  String get hintOptional;
+
+  /// No description provided for @addressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get addressLabel;
+
+  /// No description provided for @addressOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (optional)'**
+  String get addressOptional;
+
+  /// No description provided for @enterAddressManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your address manually'**
+  String get enterAddressManually;
+
+  /// No description provided for @placeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Place type'**
+  String get placeType;
+
+  /// No description provided for @trustedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted By'**
+  String get trustedBy;
+
+  /// No description provided for @trustedBySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Companies that trust our solar solutions'**
+  String get trustedBySubtitle;
+
+  /// No description provided for @uploadCertificateImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload certificate images'**
+  String get uploadCertificateImages;
+
+  /// No description provided for @tapToUploadCertificates.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to upload certificate photos'**
+  String get tapToUploadCertificates;
+
+  /// No description provided for @imagesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'images selected'**
+  String get imagesSelected;
+
+  /// No description provided for @uploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get uploading;
+
+  /// No description provided for @certificatesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your certifications (e.g., Solar Installation, Electrical)'**
+  String get certificatesHint;
+
+  /// No description provided for @supportChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Chat'**
+  String get supportChat;
+
+  /// No description provided for @chatWithSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with our support team. We typically respond within a few hours.'**
+  String get chatWithSupport;
+
+  /// No description provided for @errorLoadingChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading chat'**
+  String get errorLoadingChat;
+
+  /// No description provided for @noMessagesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get noMessagesYet;
+
+  /// No description provided for @startConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a conversation with our team'**
+  String get startConversation;
+
+  /// No description provided for @typeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get typeMessage;
+
+  /// No description provided for @chatInfoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Our support team is here to help you with any questions about solar energy solutions, installations, or technical support.'**
+  String get chatInfoDescription;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @noProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'No products available yet'**
+  String get noProducts;
 }
 
 class _AppLocalizationsDelegate

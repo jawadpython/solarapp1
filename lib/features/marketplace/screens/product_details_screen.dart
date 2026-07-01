@@ -14,16 +14,16 @@ class ProductDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          // App Bar with back button
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
-            backgroundColor: Colors.white,
-            foregroundColor: AppColors.textPrimary,
+            backgroundColor: colorScheme.surface,
+            foregroundColor: colorScheme.onSurface,
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
               background: _ProductImageHeader(product: product),

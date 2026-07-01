@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/city_service.dart';
+import 'package:noor_energy/core/widgets/empty_state_widget.dart';
+import 'package:noor_energy/core/widgets/skeleton_loading.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class TechniciansListScreen extends StatefulWidget {
   const TechniciansListScreen({super.key});
@@ -17,14 +21,12 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
   List<Map<String, dynamic>> _filteredTechnicians = [];
   bool _isLoading = true;
 
-  List<String> _cities = ['Tous'];
-  List<String> _specialities = ['Tous'];
+  List<CityFilterOption> _cityOptions = [];
+  List<String> _specialities = [];
 
   @override
   void initState() {
     super.initState();
-    _selectedCity = 'Tous';
-    _selectedSpeciality = 'Tous';
     _loadTechnicians();
   }
 
@@ -34,18 +36,20 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
     });
 
     try {
+      final loc = AppLocalizations.of(context)!;
+      final allLabel = loc.all;
+      final locale = Localizations.localeOf(context).languageCode;
+      await CityService.instance.ensureLoaded();
       final technicians = await _adminService.getActiveTechnicians();
-      
-      // Extract unique cities and specialities
-      final citiesSet = <String>{'Tous'};
-      final specialitiesSet = <String>{'Tous'};
-      
+      if (_selectedCity == null) _selectedCity = CityService.allFilterId;
+      if (_selectedSpeciality == null) _selectedSpeciality = allLabel;
+
+      final cityOptions =
+          CityService.instance.buildFilterOptions(technicians, locale);
+      final specialitiesSet = <String>{allLabel};
+
       for (var tech in technicians) {
-        final city = tech['city']?.toString();
         final speciality = tech['speciality']?.toString();
-        if (city != null && city.isNotEmpty) {
-          citiesSet.add(city);
-        }
         if (speciality != null && speciality.isNotEmpty) {
           specialitiesSet.add(speciality);
         }
@@ -54,7 +58,7 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
       if (mounted) {
         setState(() {
           _allTechnicians = technicians;
-          _cities = citiesSet.toList()..sort();
+          _cityOptions = cityOptions;
           _specialities = specialitiesSet.toList()..sort();
           _applyFilters();
           _isLoading = false;
@@ -67,7 +71,7 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.errorLoading}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -76,46 +80,49 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
   }
 
   void _applyFilters() {
+    final allLabel = AppLocalizations.of(context)!.all;
     setState(() {
       _filteredTechnicians = _allTechnicians.where((tech) {
-        final city = tech['city']?.toString() ?? '';
         final speciality = tech['speciality']?.toString() ?? '';
-        final cityMatch = _selectedCity == 'Tous' || city == _selectedCity;
-        final specialityMatch = _selectedSpeciality == 'Tous' || speciality == _selectedSpeciality;
+        final cityMatch = CityService.instance.matchesCityFilter(
+          tech,
+          _selectedCity,
+        );
+        final specialityMatch = _selectedSpeciality == allLabel || speciality == _selectedSpeciality;
         return cityMatch && specialityMatch;
       }).toList();
     });
   }
 
   void _callTechnician(String phone) {
-    // TODO: Implement phone call
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Appel vers $phone (fonctionnalité à venir)')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.callToComingSoon(phone))),
     );
   }
 
   void _whatsappTechnician(String phone) {
     // TODO: Implement WhatsApp
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('WhatsApp vers $phone (fonctionnalité à venir)')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.whatsAppToComingSoon(phone))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Techniciens Certifiés'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(AppLocalizations.of(context)!.certifiedTechniciansTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: Column(
         children: [
           // Filters Section
           Container(
-            color: Colors.white,
+            color: colorScheme.surface,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
@@ -124,9 +131,9 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
                   children: [
                     const Icon(Icons.location_city, color: AppColors.primary, size: 20),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Ville:',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.cityFilterLabel,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -137,12 +144,18 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
                         child: DropdownButton<String>(
                           value: _selectedCity,
                           isExpanded: true,
-                          items: _cities.map((city) {
-                            return DropdownMenuItem(
-                              value: city,
-                              child: Text(city),
-                            );
-                          }).toList(),
+                          items: [
+                            DropdownMenuItem(
+                              value: CityService.allFilterId,
+                              child: Text(AppLocalizations.of(context)!.all),
+                            ),
+                            ..._cityOptions.map((option) {
+                              return DropdownMenuItem(
+                                value: option.id,
+                                child: Text(option.label),
+                              );
+                            }),
+                          ],
                           onChanged: (value) {
                             setState(() {
                               _selectedCity = value;
@@ -160,9 +173,9 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
                   children: [
                     const Icon(Icons.build_circle, color: AppColors.primary, size: 20),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Spécialité:',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.specialtyFilterLabel,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -198,27 +211,14 @@ class _TechniciansListScreenState extends State<TechniciansListScreen> {
           // Technicians List
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const SkeletonListLoading(itemCount: 6)
                 : _filteredTechnicians.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.search_off,
-                              size: 64,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Aucun technicien trouvé',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
+                    ? EmptyStateWidget(
+                        icon: Icons.engineering,
+                        title: AppLocalizations.of(context)!.noTechnicianFound,
+                        message: AppLocalizations.of(context)!.modifyFiltersOrRetry,
+                        ctaLabel: AppLocalizations.of(context)!.refresh,
+                        onCtaTap: _loadTechnicians,
                       )
                     : RefreshIndicator(
                         onRefresh: _loadTechnicians,
@@ -256,14 +256,15 @@ class _TechnicianCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -282,19 +283,23 @@ class _TechnicianCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        technician['name']?.toString() ?? 'N/A',
-                        style: const TextStyle(
+                        technician['name']?.toString() ?? AppLocalizations.of(context)!.notAvailable,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        technician['speciality']?.toString() ?? 'N/A',
+                        technician['speciality']?.toString() ?? AppLocalizations.of(context)!.notAvailable,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade600,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -323,12 +328,16 @@ class _TechnicianCard extends StatelessWidget {
                         color: (technician['active'] ?? true) ? Colors.green : Colors.orange,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        (technician['active'] ?? true) ? 'Actif' : 'Inactif',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: (technician['active'] ?? true) ? Colors.green : Colors.orange,
+                      Flexible(
+                        child: Text(
+                          (technician['active'] ?? true) ? AppLocalizations.of(context)!.active : AppLocalizations.of(context)!.inactive,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: (technician['active'] ?? true) ? Colors.green : Colors.orange,
+                          ),
                         ),
                       ),
                     ],
@@ -347,7 +356,7 @@ class _TechnicianCard extends StatelessWidget {
                       const Icon(Icons.star, color: Colors.amber, size: 20),
                       const SizedBox(width: 4),
                       Text(
-                        (technician['rating'] as num?)?.toStringAsFixed(1) ?? 'N/A',
+                        (technician['rating'] as num?)?.toStringAsFixed(1) ?? AppLocalizations.of(context)!.notAvailable,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -362,14 +371,22 @@ class _TechnicianCard extends StatelessWidget {
             // City
             Row(
               children: [
-                Icon(Icons.location_city, size: 16, color: Colors.grey.shade600),
+                Icon(Icons.location_city, size: 16, color: colorScheme.onSurfaceVariant),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    technician['city']?.toString() ?? 'N/A',
+                    () {
+                      final cityLabel = CityService.instance.getDisplayLabelForRecord(
+                        technician,
+                        Localizations.localeOf(context).languageCode,
+                      );
+                      return cityLabel.isEmpty
+                          ? AppLocalizations.of(context)!.notAvailable
+                          : cityLabel;
+                    }(),
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade700,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),

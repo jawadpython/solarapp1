@@ -1,0 +1,247 @@
+[
+  {
+    "id": "casablanca",
+    "name_fr": "Casablanca",
+    "name_ar": "الدار البيضاء",
+    "name_en": "Casablanca",
+    "aliases": ["casa", "dar beida", "dar el beida", "الدار البيضا", "casa blanca"]
+  },
+  {
+    "id": "rabat",
+    "name_fr": "Rabat",
+    "name_ar": "الرباط",
+    "name_en": "Rabat",
+    "aliases": ["rbati"]
+  },
+  {
+    "id": "sale",
+    "name_fr": "Salé",
+    "name_ar": "سلا",
+    "name_en": "Sale",
+    "aliases": ["sale", "sala"]
+  },
+  {
+    "id": "temara",
+    "name_fr": "Témara",
+    "name_ar": "تمارة",
+    "name_en": "Temara",
+    "aliases": ["temara"]
+  },
+  {
+    "id": "marrakech",
+    "name_fr": "Marrakech",
+    "name_ar": "مراكش",
+    "name_en": "Marrakech",
+    "aliases": ["marrakesh", "marakech"]
+  },
+  {
+    "id": "fes",
+    "name_fr": "Fès",
+    "name_ar": "فاس",
+    "name_en": "Fes",
+    "aliases": ["fez", "fes", "fès"]
+  },
+  {
+    "id": "tanger",
+    "name_fr": "Tanger",
+    "name_ar": "طنجة",
+    "name_en": "Tangier",
+    "aliases": ["tangier", "tanja", "طنجه"]
+  },
+  {
+    "id": "agadir",
+    "name_fr": "Agadir",
+    "name_ar": "أكادير",
+    "name_en": "Agadir",
+    "aliases": ["agadir"]
+  },
+  {
+    "id": "meknes",
+    "name_fr": "Meknès",
+    "name_ar": "مكناس",
+    "name_en": "Meknes",
+    "aliases": ["meknes", "meknès", "meknas"]
+  },
+  {
+    "id": "oujda",
+    "name_fr": "Oujda",
+    "name_ar": "وجدة",
+    "name_en": "Oujda",
+    "aliases": ["oujdah", "wejda"]
+  },
+  {
+    "id": "tetouan",
+    "name_fr": "Tétouan",
+    "name_ar": "تطوان",
+    "name_en": "Tetouan",
+    "aliases": ["tetuan", "tétouan", "titwan"]
+  },
+  {
+    "id": "safi",
+    "name_fr": "Safi",
+    "name_ar": "آسفي",
+    "name_en": "Safi",
+    "aliases": ["asfi"]
+  },
+  {
+    "id": "kenitra",
+    "name_fr": "Kénitra",
+    "name_ar": "القنيطرة",
+    "name_en": "Kenitra",
+    "aliases": ["kenitra", "kénitra", "qunaitra"]
+  },
+  {
+    "id": "mohammedia",
+    "name_fr": "Mohammedia",
+    "name_ar": "المحمدية",
+    "name_en": "Mohammedia",
+    "aliases": ["mohammedia", "fedala"]
+  },
+  {
+    "id": "el_jadida",
+    "name_fr": "El Jadida",
+    "name_ar": "الجديدة",
+    "name_en": "El Jadida",
+    "aliases": ["jadida", "eljadida", "mazagan"]
+  },
+  {
+    "id": "nador",
+    "name_fr": "Nador",
+    "name_ar": "الناظور",
+    "name_en": "Nador",
+    "aliases": ["nadour"]
+  },
+  {
+    "id": "beni_mellal",
+    "name_fr": "Béni Mellal",
+    "name_ar": "بني ملال",
+    "name_en": "Beni Mellal",
+    "aliases": ["beni mellal", "benimellal", "béni mellal"]
+  },
+  {
+    "id": "khouribga",
+    "name_fr": "Khouribga",
+    "name_ar": "خريبكة",
+    "name_en": "Khouribga",
+    "aliases": ["khouribga", "khoribga"]
+  },
+  {
+    "id": "settat",
+    "name_fr": "Settat",
+    "name_ar": "سطات",
+    "name_en": "Settat",
+    "aliases": ["setat"]
+  },
+  {
+    "id": "larache",
+    "name_fr": "Larache",
+    "name_ar": "العرائش",
+    "name_en": "Larache",
+    "aliases": ["el aarich", "al aarich"]
+  },
+  {
+    "id": "khemisset",
+    "name_fr": "Khémisset",
+    "name_ar": "الخميسات",
+    "name_en": "Khemisset",
+    "aliases": ["khemisset", "khémisset"]
+  },
+  {
+    "id": "berrechid",
+    "name_fr": "Berrechid",
+    "name_ar": "برشيد",
+    "name_en": "Berrechid",
+    "aliases": ["berrechid", "berchid"]
+  },
+  {
+    "id": "essaouira",
+    "name_fr": "Essaouira",
+    "name_ar": "الصويرة",
+    "name_en": "Essaouira",
+    "aliases": ["mogador", "swira"]
+  },
+  {
+    "id": "errachidia",
+    "name_fr": "Errachidia",
+    "name_ar": "الرشيدية",
+    "name_en": "Errachidia",
+    "aliases": ["erachidia", "rachidia"]
+  },
+  {
+    "id": "ouarzazate",
+    "name_fr": "Ouarzazate",
+    "name_ar": "ورزازات",
+    "name_en": "Ouarzazate",
+    "aliases": ["warzazat", "ouarzazat"]
+  },
+  {
+    "id": "taza",
+    "name_fr": "Taza",
+    "name_ar": "تازة",
+    "name_en": "Taza",
+    "aliases": ["taza"]
+  },
+  {
+    "id": "al_hoceima",
+    "name_fr": "Al Hoceïma",
+    "name_ar": "الحسيمة",
+    "name_en": "Al Hoceima",
+    "aliases": ["hoceima", "al hoceima", "al hoceïma", "hociema"]
+  },
+  {
+    "id": "laayoune",
+    "name_fr": "Laâyoune",
+    "name_ar": "العيون",
+    "name_en": "Laayoune",
+    "aliases": ["laayoune", "el aaiun", "laâyoune"]
+  },
+  {
+    "id": "dakhla",
+    "name_fr": "Dakhla",
+    "name_ar": "الداخلة",
+    "name_en": "Dakhla",
+    "aliases": ["dakhla", "ad dakhla"]
+  },
+  {
+    "id": "guelmim",
+    "name_fr": "Guelmim",
+    "name_ar": "كلميم",
+    "name_en": "Guelmim",
+    "aliases": ["guelmim", "goulimine"]
+  },
+  {
+    "id": "ifrane",
+    "name_fr": "Ifrane",
+    "name_ar": "إفران",
+    "name_en": "Ifrane",
+    "aliases": ["ifrane"]
+  },
+  {
+    "id": "azrou",
+    "name_fr": "Azrou",
+    "name_ar": "أزرو",
+    "name_en": "Azrou",
+    "aliases": ["azrou"]
+  },
+  {
+    "id": "taourirt",
+    "name_fr": "Taourirt",
+    "name_ar": "تاوريرت",
+    "name_en": "Taourirt",
+    "aliases": ["taourirt"]
+  },
+  {
+    "id": "tinghir",
+    "name_fr": "Tinghir",
+    "name_ar": "تنغير",
+    "name_en": "Tinghir",
+    "aliases": ["tinghir", "tinerhir"]
+  },
+  {
+    "id": "taroudant",
+    "name_fr": "Taroudant",
+    "name_ar": "تارودانت",
+    "name_en": "Taroudant",
+    "aliases": ["taroudannt", "taroudant"]
+  }
+]

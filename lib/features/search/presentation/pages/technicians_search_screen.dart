@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/city_service.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,13 +16,13 @@ class TechniciansSearchScreen extends StatefulWidget {
 
 class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
   final _adminService = AdminService();
-  String? _selectedCity;
+  String? _selectedCity = CityService.allFilterId;
   String? _selectedSpeciality;
   List<Map<String, dynamic>> _allTechnicians = [];
   List<Map<String, dynamic>> _filteredTechnicians = [];
   bool _isLoading = true;
 
-  List<String> _cities = [];
+  List<CityFilterOption> _cityOptions = [];
   List<String> _specialities = [];
 
   @override
@@ -36,31 +37,29 @@ class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
     });
 
     try {
+      final locale = Localizations.localeOf(context).languageCode;
+      await CityService.instance.ensureLoaded();
       final technicians = await _adminService.getActiveTechnicians();
       
       debugPrint('Loaded ${technicians.length} technicians from service');
       
-      // Extract unique cities and specialities
-      final citiesSet = <String>{};
       final specialitiesSet = <String>{};
-      
       for (var tech in technicians) {
-        final city = tech['city']?.toString();
         final speciality = tech['speciality']?.toString();
-        if (city != null && city.isNotEmpty) {
-          citiesSet.add(city);
-        }
         if (speciality != null && speciality.isNotEmpty) {
           specialitiesSet.add(speciality);
         }
       }
 
+      final cityOptions =
+          CityService.instance.buildFilterOptions(technicians, locale);
+
       if (mounted) {
         setState(() {
           _allTechnicians = technicians;
-          _cities = ['Tous', ...citiesSet.toList()..sort()];
+          _cityOptions = cityOptions;
           _specialities = ['Tous', ...specialitiesSet.toList()..sort()];
-          _selectedCity = 'Tous';
+          _selectedCity = CityService.allFilterId;
           _selectedSpeciality = 'Tous';
           _applyFilters();
           _isLoading = false;
@@ -101,11 +100,11 @@ class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
   void _applyFilters() {
     setState(() {
       _filteredTechnicians = _allTechnicians.where((tech) {
-        final city = tech['city']?.toString() ?? '';
         final speciality = tech['speciality']?.toString() ?? '';
-        final cityMatch = _selectedCity == null || 
-            _selectedCity == 'Tous' || 
-            city == _selectedCity;
+        final cityMatch = CityService.instance.matchesCityFilter(
+          tech,
+          _selectedCity,
+        );
         final specialityMatch = _selectedSpeciality == null || 
             _selectedSpeciality == 'Tous' || 
             speciality == _selectedSpeciality;
@@ -133,20 +132,20 @@ class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(localizations.searchCertifiedTechnicians),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: Column(
         children: [
           // Filters Section
           Container(
-            color: Colors.white,
+            color: colorScheme.surface,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
@@ -168,12 +167,18 @@ class _TechniciansSearchScreenState extends State<TechniciansSearchScreen> {
                         child: DropdownButton<String>(
                           value: _selectedCity,
                           isExpanded: true,
-                          items: _cities.map((city) {
-                            return DropdownMenuItem(
-                              value: city,
-                              child: Text(city == 'Tous' ? localizations.all : city),
-                            );
-                          }).toList(),
+                          items: [
+                            DropdownMenuItem(
+                              value: CityService.allFilterId,
+                              child: Text(localizations.all),
+                            ),
+                            ..._cityOptions.map((option) {
+                              return DropdownMenuItem(
+                                value: option.id,
+                                child: Text(option.label),
+                              );
+                            }),
+                          ],
                           onChanged: (value) {
                             setState(() {
                               _selectedCity = value;
@@ -284,7 +289,8 @@ class _TechnicianCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = technician['name']?.toString() ?? 'N/A';
-    final city = technician['city']?.toString() ?? '';
+    final locale = Localizations.localeOf(context).languageCode;
+    final city = CityService.instance.getDisplayLabelForRecord(technician, locale);
     final phone = technician['phone']?.toString() ?? '';
     final speciality = technician['speciality']?.toString() ?? '';
     
@@ -327,6 +333,8 @@ class _TechnicianCard extends StatelessWidget {
                     children: [
                       Text(
                         name,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -337,6 +345,8 @@ class _TechnicianCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           speciality,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade600,
@@ -354,11 +364,15 @@ class _TechnicianCard extends StatelessWidget {
                 children: [
                   Icon(Icons.location_city, size: 16, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
-                  Text(
-                    city,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
+                  Expanded(
+                    child: Text(
+                      city,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                   ),
                 ],
@@ -369,11 +383,15 @@ class _TechnicianCard extends StatelessWidget {
                 children: [
                   Icon(Icons.phone, size: 16, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
-                  Text(
-                    phone,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
+                  Expanded(
+                    child: Text(
+                      phone,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                   ),
                 ],

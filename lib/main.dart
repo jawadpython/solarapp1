@@ -1,40 +1,49 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:noor_energy/core/theme/app_theme.dart';
 import 'package:noor_energy/core/services/auth_service.dart';
+import 'package:noor_energy/core/services/auth_deep_link_service.dart';
 import 'package:noor_energy/core/services/language_service.dart';
+import 'package:noor_energy/core/services/theme_service.dart';
+import 'package:noor_energy/core/utils/auth_helper.dart';
 import 'package:noor_energy/core/widgets/offline_overlay.dart';
+import 'package:noor_energy/core/widgets/splash_screen.dart';
 import 'package:noor_energy/features/auth/presentation/pages/login_page.dart';
+import 'package:noor_energy/core/navigation/app_navigator_keys.dart';
 import 'package:noor_energy/features/home/presentation/pages/home_screen.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 
 /// Set to true to always show Login page on app start (for testing).
 /// Set to false so users stay logged in across app restarts.
-const bool kForceLoginScreenOnStart = true;
+const bool kForceLoginScreenOnStart = false;
 
 /// Main entry point of the application.
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Preserve native splash until Flutter is ready
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   
-  // Initialize language service
+  // Initialize language and theme
   await LanguageService.instance.initialize();
-  
+  await ThemeService.instance.initialize();
+
   // Initialize Firebase with platform-specific configuration
   try {
     if (kIsWeb) {
       // Web: Use explicit configuration
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: "AIzaSyBIJ17OtVeS218IBjnmf1UoWsxsu3YY0-k",
-          authDomain: "tawfir-energy-prod-98053.firebaseapp.com",
-          projectId: "tawfir-energy-prod-98053",
-          storageBucket: "tawfir-energy-prod-98053.firebasestorage.app",
-          messagingSenderId: "751649516744",
-          appId: "1:751649516744:web:a43278ec8ae222cba449fd",
+          apiKey: "AIzaSyAP5DyZ9uuM3QxbYeBlwuV6vJSXBrIX60w",
+          authDomain: "solar-app-f698e.firebaseapp.com",
+          projectId: "solar-app-f698e",
+          storageBucket: "solar-app-f698e.firebasestorage.app",
+          messagingSenderId: "744790277180",
+          appId: "1:744790277180:web:0c03d9f13f78fa83695739",
         ),
       );
       debugPrint('✅ Firebase initialized successfully (Web)');
@@ -70,15 +79,16 @@ void main() async {
     }
   }
 
-  // Force Login screen: sign out any saved session so user sees Login first.
+  // Optional: force Login on every app start (for testing only).
   if (kForceLoginScreenOnStart && Firebase.apps.isNotEmpty) {
     try {
       await FirebaseAuth.instance.signOut();
-      debugPrint('✅ Auth: signed out on start so Login page is shown');
+      debugPrint('✅ Auth: signed out on start (testing)');
     } catch (e) {
       debugPrint('⚠️ Auth signOut on start: $e');
     }
   }
+  // When kForceLoginScreenOnStart is false, Firebase Auth keeps the user logged in across app restarts.
 
   runApp(const NoorEnergyApp());
 }
@@ -94,28 +104,30 @@ class _NoorEnergyAppState extends State<NoorEnergyApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize language service
     LanguageService.instance.initialize().then((_) {
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
     });
-    // Listen to language changes
     LanguageService.instance.addListener(_onLanguageChanged);
+    ThemeService.instance.addListener(_onThemeChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AuthDeepLinkService.instance.start();
+    });
   }
 
   @override
   void dispose() {
-    // Remove listener when widget is disposed
     LanguageService.instance.removeListener(_onLanguageChanged);
+    ThemeService.instance.removeListener(_onThemeChanged);
+    AuthDeepLinkService.instance.dispose();
     super.dispose();
   }
 
   void _onLanguageChanged() {
-    // Rebuild the app when language changes
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
+  }
+
+  void _onThemeChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -125,11 +137,12 @@ class _NoorEnergyAppState extends State<NoorEnergyApp> {
     final isRTL = currentLocale.languageCode == 'ar';
     
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       title: 'Tawfir Energy',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeService.instance.themeMode,
       locale: currentLocale,
       // Enable RTL layout for Arabic + offline overlay (block when no internet)
       builder: (context, child) {
@@ -148,27 +161,69 @@ class _NoorEnergyAppState extends State<NoorEnergyApp> {
 }
 
 // =============================================================================
-// AUTH GATE - Listens to Firebase auth state. Shows LoginPage unless we are
-// sure a user is signed in (stream emitted non-null user). Default = Login.
+// AUTH GATE - Shows splash screen while checking auth state, then navigates
+// to Home (logged in) or Login (not logged in) with a smooth transition.
 // =============================================================================
-class _AuthGate extends StatelessWidget {
+class _AuthGate extends StatefulWidget {
   const _AuthGate();
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: AuthService.instance.authStateChanges,
-      // Start with null so we show Login until stream says otherwise
-      initialData: null,
-      builder: (context, snapshot) {
-        // Only show Home when we have a signed-in user from the stream
-        final user = snapshot.data;
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  bool _isInitialized = false;
+  bool _minSplashTimeElapsed = false;
+  User? _user;
+  late final StreamSubscription<User?> _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription = AuthService.instance.authStateChanges.listen((user) {
+      if (mounted) {
+        setState(() {
+          _user = user;
+          if (!_isInitialized) _isInitialized = true;
+        });
         if (user != null) {
-          return const HomeScreen();
+          AuthHelper.initializeUserRole(user.uid);
+        } else {
+          AuthHelper.clearUserState();
         }
-        // No user (or still loading): always show Login page
-        return const LoginPage();
-      },
+      }
+    });
+    _startMinSplashTimer();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription.cancel();
+    super.dispose();
+  }
+
+  void _startMinSplashTimer() {
+    // Show splash for at least 1.5 seconds for a smooth experience
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        setState(() => _minSplashTimeElapsed = true);
+      }
+    });
+  }
+
+  bool get _shouldShowSplash => !_isInitialized || !_minSplashTimeElapsed;
+
+  @override
+  Widget build(BuildContext context) {
+    // Show splash while initializing or minimum time not elapsed
+    if (_shouldShowSplash) {
+      return const SplashScreen();
+    }
+
+    // After initialization, show appropriate screen with fade transition
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: _user != null ? const HomeScreen() : const LoginPage(),
     );
   }
 }

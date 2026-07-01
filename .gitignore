@@ -49,3 +49,7 @@ app.*.map.json
 **/*.jks
 **/*.keystore
 upload-keystore.jks
+
+# Firebase Functions secrets (Resend API key etc.)
+functions/.env
+functions/.env.*

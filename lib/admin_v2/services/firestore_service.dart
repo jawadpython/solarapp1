@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
+import 'package:noor_energy/core/services/city_service.dart';
 
 class AdminFirestoreService {
   FirebaseFirestore get _db {
@@ -20,6 +22,7 @@ class AdminFirestoreService {
   CollectionReference get _partners => _db.collection('partners');
   CollectionReference get _notifications => _db.collection('notifications');
   CollectionReference get _projectRequests => _db.collection('project_requests');
+  CollectionReference get _chats => _db.collection('chats');
 
   // Streams for real-time updates
   Stream<QuerySnapshot> streamDevisRequests() {
@@ -59,7 +62,8 @@ class AdminFirestoreService {
   }
 
   Stream<QuerySnapshot> streamNotifications() {
-    return _notifications.where('user', isEqualTo: 'admin').orderBy('date', descending: true).snapshots();
+    // No orderBy to avoid requiring a composite index; sort in UI if needed
+    return _notifications.where('user', isEqualTo: 'admin').snapshots();
   }
 
   // Update request status
@@ -72,6 +76,14 @@ class AdminFirestoreService {
       'status': status,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  // Delete any request document from a given collection
+  Future<void> deleteRequest({
+    required String collection,
+    required String requestId,
+  }) async {
+    await _db.collection(collection).doc(requestId).delete();
   }
 
   // Assign technician to request
@@ -111,12 +123,19 @@ class AdminFirestoreService {
     if (!appDoc.exists) return;
 
     final appData = appDoc.data() as Map<String, dynamic>;
-    
+    await CityService.instance.ensureLoaded();
+    final cityText = (appData['ville'] ?? appData['city'] ?? '').toString();
+    final cityFields = CityService.instance.resolveCityFields(
+      ville: cityText,
+      cityId: appData['cityId']?.toString(),
+    );
+
     // Create technician document
     await _technicians.add({
       'name': appData['name'] ?? '',
       'phone': appData['phone'] ?? '',
-      'city': appData['city'] ?? '',
+      'city': cityFields['city'] ?? '',
+      if (cityFields['cityId'] != null) 'cityId': cityFields['cityId'],
       'email': appData['email'] ?? '',
       'speciality': appData['speciality'] ?? '',
       'active': true,
@@ -138,13 +157,35 @@ class AdminFirestoreService {
     });
   }
 
+  // Permanently delete technician application document
+  Future<void> deleteTechnicianApplication(String applicationId) async {
+    await _technicianApplications.doc(applicationId).delete();
+  }
+
   // Approve partner application
-  Future<void> approvePartnerApplication(String applicationId) async {
+  /// [specialityOverride] is used when the application has no type (legacy data).
+  Future<void> approvePartnerApplication(
+    String applicationId, {
+    String? specialityOverride,
+  }) async {
     final appDoc = await _partnerApplications.doc(applicationId).get();
     if (!appDoc.exists) return;
 
     final appData = appDoc.data() as Map<String, dynamic>;
-    
+    final resolvedSpeciality = () {
+      final o = specialityOverride?.trim();
+      if (o != null && o.isNotEmpty) return o;
+      return PartnerServiceTypes.serviceTypeFromMap(appData);
+    }();
+
+    await CityService.instance.ensureLoaded();
+    final cityText = (appData['ville'] ?? appData['city'] ?? '').toString();
+    final cityFields = CityService.instance.resolveCityFields(
+      ville: cityText,
+      cityId: appData['cityId']?.toString(),
+    );
+    final city = cityFields['city'] ?? '';
+
     // Create partner document with all company information
     await _partners.add({
       'companyName': appData['nomEntreprise'] ?? appData['companyName'] ?? appData['name'] ?? '',
@@ -157,19 +198,22 @@ class AdminFirestoreService {
       'adresse': appData['adresse'] ?? '',
       'phone': appData['telephone'] ?? appData['phone'] ?? '',
       'telephone': appData['telephone'] ?? appData['phone'] ?? '',
-      'city': appData['ville'] ?? appData['city'] ?? '',
-      'ville': appData['ville'] ?? appData['city'] ?? '',
+      'city': city,
+      'ville': city,
+      if (cityFields['cityId'] != null) 'cityId': cityFields['cityId'],
       'email': appData['email'] ?? '',
-      'speciality': appData['speciality'] ?? '',
+      'speciality': resolvedSpeciality,
       'documentsEntreprise': appData['documentsEntreprise'] ?? '',
+      'documentsEntrepriseUrls': appData['documentsEntrepriseUrls'] ?? [],
       'active': true,
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    // Update application status
+    // Update application status + persist resolved type for admin history / exports
     await _partnerApplications.doc(applicationId).update({
       'status': 'approved',
       'updatedAt': FieldValue.serverTimestamp(),
+      'speciality': resolvedSpeciality,
     });
   }
 
@@ -179,6 +223,11 @@ class AdminFirestoreService {
       'status': 'rejected',
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  // Permanently delete partner application document
+  Future<void> deletePartnerApplication(String applicationId) async {
+    await _partnerApplications.doc(applicationId).delete();
   }
 
   // Delete technician
@@ -191,6 +240,47 @@ class AdminFirestoreService {
     await _partners.doc(partnerId).delete();
   }
 
+  /// Deletes a chat conversation from the admin panel.
+  ///
+  /// Message sub-documents are removed in batches when permitted; the chat
+  /// document is always deleted last so the conversation disappears from admin.
+  Future<void> deleteChatConversation(String chatId) async {
+    final chatRef = _chats.doc(chatId);
+    final messages = await chatRef.collection('messages').get();
+
+    const batchLimit = 500;
+    for (var i = 0; i < messages.docs.length; i += batchLimit) {
+      final batch = _db.batch();
+      final end = (i + batchLimit < messages.docs.length)
+          ? i + batchLimit
+          : messages.docs.length;
+      for (var j = i; j < end; j++) {
+        batch.delete(messages.docs[j].reference);
+      }
+      try {
+        await batch.commit();
+      } on FirebaseException catch (e) {
+        if (e.code == 'permission-denied') {
+          break;
+        }
+        rethrow;
+      }
+    }
+
+    await chatRef.delete();
+  }
+
+  // Update partner service type (`speciality`)
+  Future<void> updatePartnerServiceType({
+    required String partnerId,
+    required String serviceType,
+  }) async {
+    await _partners.doc(partnerId).update({
+      'speciality': serviceType.trim(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   // Mark notification as read
   Future<void> markNotificationRead(String notificationId) async {
     await _notifications.doc(notificationId).update({
@@ -199,28 +289,51 @@ class AdminFirestoreService {
     });
   }
 
-  // Get statistics
-  Future<Map<String, int>> getStatistics() async {
-    final devisSnapshot = await _devisRequests.get();
-    final installationSnapshot = await _installationRequests.get();
-    final maintenanceSnapshot = await _maintenanceRequests.get();
-    final pumpingSnapshot = await _pumpingRequests.get();
-    final projectSnapshot = await _projectRequests.get();
-    final technicianAppSnapshot = await _technicianApplications.where('status', isEqualTo: 'pending').get();
-    final partnerAppSnapshot = await _partnerApplications.where('status', isEqualTo: 'pending').get();
-    final techniciansSnapshot = await _technicians.where('active', isEqualTo: true).get();
-    final partnersSnapshot = await _partners.where('active', isEqualTo: true).get();
+  static Map<String, int> _defaultStats() => {
+        'devis': 0,
+        'installation': 0,
+        'maintenance': 0,
+        'pumping': 0,
+        'project': 0,
+        'pendingTechnicianApps': 0,
+        'pendingPartnerApps': 0,
+        'technicians': 0,
+        'partners': 0,
+      };
 
-    return {
-      'devis': devisSnapshot.docs.length,
-      'installation': installationSnapshot.docs.length,
-      'maintenance': maintenanceSnapshot.docs.length,
-      'pumping': pumpingSnapshot.docs.length,
-      'project': projectSnapshot.docs.length,
-      'pendingTechnicianApps': technicianAppSnapshot.docs.length,
-      'pendingPartnerApps': partnerAppSnapshot.docs.length,
-      'technicians': techniciansSnapshot.docs.length,
-      'partners': partnersSnapshot.docs.length,
-    };
+  // Get statistics (resilient: each collection read in try/catch so one failure doesn't break all)
+  Future<Map<String, int>> getStatistics() async {
+    final stats = _defaultStats();
+
+    if (Firebase.apps.isEmpty) return stats;
+
+    Future<int> safeCount(Future<QuerySnapshot> Function() query) async {
+      try {
+        final snapshot = await query();
+        return snapshot.docs.length;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    try {
+      stats['devis'] = await safeCount(() => _devisRequests.get());
+      stats['installation'] = await safeCount(() => _installationRequests.get());
+      stats['maintenance'] = await safeCount(() => _maintenanceRequests.get());
+      stats['pumping'] = await safeCount(() => _pumpingRequests.get());
+      stats['project'] = await safeCount(() => _projectRequests.get());
+      stats['pendingTechnicianApps'] = await safeCount(
+          () => _technicianApplications.where('status', isEqualTo: 'pending').get());
+      stats['pendingPartnerApps'] = await safeCount(
+          () => _partnerApplications.where('status', isEqualTo: 'pending').get());
+      stats['technicians'] = await safeCount(
+          () => _technicians.where('active', isEqualTo: true).get());
+      stats['partners'] = await safeCount(
+          () => _partners.where('active', isEqualTo: true).get());
+    } catch (_) {
+      // return default zeros
+    }
+
+    return stats;
   }
 }

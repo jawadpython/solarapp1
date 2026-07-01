@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
+import 'package:noor_energy/core/services/city_service.dart';
 import 'package:noor_energy/core/services/notification_service.dart';
 
 /// AdminService handles all admin-related Firestore operations
@@ -163,11 +165,11 @@ class AdminService {
       
       debugPrint('Active technicians after filtering: ${activeTechnicians.length}');
       
-      // Apply city filter if specified
+      // Apply city filter if specified (supports cityId + legacy city text)
       if (city != null && city.isNotEmpty && city != 'Tous') {
+        await CityService.instance.ensureLoaded();
         final cityFiltered = activeTechnicians.where((tech) {
-          final techCity = tech['city']?.toString() ?? '';
-          return techCity == city;
+          return CityService.instance.matchesCityFilter(tech, city);
         }).toList();
         debugPrint('After city filter ($city): ${cityFiltered.length} technicians');
         return cityFiltered;
@@ -381,6 +383,23 @@ class AdminService {
     }
   }
 
+  /// Update partner service type (`speciality`).
+  Future<bool> updatePartnerServiceType({
+    required String partnerId,
+    required String serviceType,
+  }) async {
+    try {
+      final value = serviceType.trim();
+      await _partners.doc(partnerId).update({
+        'speciality': value,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Get technician applications
   Future<List<Map<String, dynamic>>> getTechnicianApplications() async {
     try {
@@ -425,12 +444,19 @@ class AdminService {
       if (!appDoc.exists) return false;
       
       final appData = appDoc.data() as Map<String, dynamic>;
-      
+      await CityService.instance.ensureLoaded();
+      final cityText = (appData['ville'] ?? appData['city'] ?? '').toString();
+      final cityFields = CityService.instance.resolveCityFields(
+        ville: cityText,
+        cityId: appData['cityId']?.toString(),
+      );
+
       // Create technician document
       await _technicians.add({
         'name': appData['name'] ?? '',
         'phone': appData['phone'] ?? '',
-        'city': appData['city'] ?? '',
+        'city': cityFields['city'] ?? '',
+        if (cityFields['cityId'] != null) 'cityId': cityFields['cityId'],
         'email': appData['email'] ?? '',
         'speciality': appData['speciality'] ?? '',
         'active': true,
@@ -462,33 +488,77 @@ class AdminService {
     }
   }
 
-  /// Approve partner application
-  Future<bool> approvePartnerApplication(String applicationId) async {
+  /// Permanently delete technician application document.
+  Future<bool> deleteTechnicianApplication(String applicationId) async {
+    try {
+      await _technicianApplications.doc(applicationId).delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Approve partner application.
+  /// [specialityOverride] is stored on the partner when the application had no type (legacy forms).
+  Future<bool> approvePartnerApplication(
+    String applicationId, {
+    String? specialityOverride,
+  }) async {
     try {
       // Get application data
       final appDoc = await _partnerApplications.doc(applicationId).get();
       if (!appDoc.exists) return false;
-      
+
       final appData = appDoc.data() as Map<String, dynamic>;
-      
-      // Create partner document
+      final resolvedSpeciality = () {
+        final o = specialityOverride?.trim();
+        if (o != null && o.isNotEmpty) return o;
+        return PartnerServiceTypes.serviceTypeFromMap(appData);
+      }();
+
+      final companyName = appData['nomEntreprise'] ??
+          appData['companyName'] ??
+          appData['name'] ??
+          '';
+      final phone = appData['telephone'] ?? appData['phone'] ?? '';
+      await CityService.instance.ensureLoaded();
+      final cityText = (appData['ville'] ?? appData['city'] ?? '').toString();
+      final cityFields = CityService.instance.resolveCityFields(
+        ville: cityText,
+        cityId: appData['cityId']?.toString(),
+      );
+      final city = cityFields['city'] ?? '';
+
+      // Create partner document (aligned with admin_v2 + mobile savePartnerApplication fields)
       await _partners.add({
-        'companyName': appData['companyName'] ?? appData['name'] ?? '',
-        'name': appData['companyName'] ?? appData['name'] ?? '', // Keep for backward compatibility
-        'phone': appData['phone'] ?? '',
-        'city': appData['city'] ?? '',
+        'companyName': companyName,
+        'name': companyName,
+        'nomEntreprise': appData['nomEntreprise'] ?? companyName,
+        'phone': phone,
+        'telephone': phone,
+        'city': city,
+        'ville': city,
+        if (cityFields['cityId'] != null) 'cityId': cityFields['cityId'],
         'email': appData['email'] ?? '',
-        'speciality': appData['speciality'] ?? '',
+        'speciality': resolvedSpeciality,
+        'ICE': appData['ICE'] ?? '',
+        'IF': appData['IF'] ?? '',
+        'RC': appData['RC'] ?? '',
+        'Patente': appData['Patente'] ?? '',
+        'adresse': appData['adresse'] ?? '',
+        'documentsEntreprise': appData['documentsEntreprise'] ?? '',
+        'documentsEntrepriseUrls': appData['documentsEntrepriseUrls'] ?? [],
         'active': true,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
-      // Update application status
+
+      // Update application status + persist resolved type for admin history / exports
       await _partnerApplications.doc(applicationId).update({
         'status': 'approved',
         'updatedAt': FieldValue.serverTimestamp(),
+        'speciality': resolvedSpeciality,
       });
-      
+
       return true;
     } catch (e) {
       return false;
@@ -502,6 +572,16 @@ class AdminService {
         'status': 'rejected',
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Permanently delete partner application document.
+  Future<bool> deletePartnerApplication(String applicationId) async {
+    try {
+      await _partnerApplications.doc(applicationId).delete();
       return true;
     } catch (e) {
       return false;

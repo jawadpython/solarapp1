@@ -134,24 +134,36 @@ class FirestoreService {
   /// [panelPower] - Selected panel power in watts
   /// [estimatedPower] - Calculated installation power in kW
   Future<String> saveProjectRequest({
-    required String userId,
+    String? userId,
+    required String fullName,
+    required String phone,
+    required String city,
+    String? location,
     required String projectType,
     required double consumption,
     required bool isKwh,
     required int panelPower,
     required double estimatedPower,
   }) async {
-    // .add() creates a new document with auto-generated ID
-    final DocumentReference docRef = await projectRequestsCollection.add({
-      'userId': userId,
+    final data = <String, dynamic>{
+      'fullName': fullName,
+      'name': fullName,
+      'phone': phone,
+      'city': city,
+      if (location != null && location.isNotEmpty) 'location': location,
       'projectType': projectType,
       'consumption': consumption,
       'isKwh': isKwh,
       'panelPower': panelPower,
       'estimatedPower': estimatedPower,
-      'status': 'pending', // pending, approved, rejected
+      'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
+    if (userId != null && userId.isNotEmpty) {
+      data['userId'] = userId;
+    }
+
+    final DocumentReference docRef = await projectRequestsCollection.add(data);
     
     // Return the auto-generated document ID
     return docRef.id;
@@ -389,10 +401,12 @@ class FirestoreService {
     required String nom,
     required String prenom,
     required String ville,
+    String? cityId,
     required String telephone,
     required String specialite,
     String? userId,
     String? certificates,
+    List<String>? certificateUrls,
   }) async {
     if (Firebase.apps.isEmpty) {
       throw Exception('Firebase is not initialized. Please configure Firebase first.');
@@ -405,11 +419,13 @@ class FirestoreService {
       'name': '$prenom $nom', // Keep for backward compatibility
       'ville': ville,
       'city': ville, // Keep for backward compatibility
+      if (cityId != null && cityId.isNotEmpty) 'cityId': cityId,
       'telephone': telephone,
       'phone': telephone, // Keep for backward compatibility
       'specialite': specialite,
       'speciality': specialite, // Keep for backward compatibility
       'certificates': certificates,
+      'certificateUrls': certificateUrls,
       'status': 'pending',
       'source': 'mobile_app',
       'createdAt': FieldValue.serverTimestamp(),
@@ -444,10 +460,13 @@ class FirestoreService {
     required String patente,
     required String adresse,
     required String ville,
+    String? cityId,
     required String telephone,
     required String email,
+    required String speciality,
     String? userId,
     String? documentsEntreprise,
+    List<String>? documentsEntrepriseUrls,
   }) async {
     if (Firebase.apps.isEmpty) {
       throw Exception('Firebase is not initialized. Please configure Firebase first.');
@@ -465,10 +484,13 @@ class FirestoreService {
       'adresse': adresse,
       'ville': ville,
       'city': ville, // Keep for backward compatibility
+      if (cityId != null && cityId.isNotEmpty) 'cityId': cityId,
       'telephone': telephone,
       'phone': telephone, // Keep for backward compatibility
       'email': email,
+      'speciality': speciality,
       'documentsEntreprise': documentsEntreprise,
+      'documentsEntrepriseUrls': documentsEntrepriseUrls ?? [],
       'status': 'pending',
       'source': 'mobile_app',
       'createdAt': FieldValue.serverTimestamp(),

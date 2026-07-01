@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/widgets/empty_state_widget.dart';
+import 'package:noor_energy/core/widgets/skeleton_loading.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class PartnersListScreen extends StatefulWidget {
   const PartnersListScreen({super.key});
@@ -41,7 +44,7 @@ class _PartnersListScreenState extends State<PartnersListScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context)!.errorLoading}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -51,36 +54,24 @@ class _PartnersListScreenState extends State<PartnersListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Partenaires'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(AppLocalizations.of(context)!.partnersTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonListLoading(itemCount: 6)
           : _partners.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.business_center,
-                        size: 64,
-                        color: Colors.grey.shade400,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucun partenaire disponible',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
+              ?               EmptyStateWidget(
+                  icon: Icons.business_center,
+                  title: AppLocalizations.of(context)!.noPartnerAvailable,
+                  message: AppLocalizations.of(context)!.partnersListComingSoon,
+                  ctaLabel: AppLocalizations.of(context)!.refresh,
+                  onCtaTap: _loadPartners,
                 )
               : RefreshIndicator(
                   onRefresh: _loadPartners,
@@ -104,14 +95,15 @@ class _PartnerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -142,20 +134,24 @@ class _PartnerCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        partner['companyName']?.toString() ?? partner['name']?.toString() ?? 'N/A',
-                        style: const TextStyle(
+                        partner['companyName']?.toString() ?? partner['name']?.toString() ?? AppLocalizations.of(context)!.notAvailable,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
                       if (partner['speciality'] != null)
                         Text(
                           partner['speciality']?.toString() ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                     ],
@@ -167,13 +163,13 @@ class _PartnerCard extends StatelessWidget {
             if (partner['city'] != null)
               Row(
                 children: [
-                  Icon(Icons.location_city, size: 16, color: Colors.grey.shade600),
+                  Icon(Icons.location_city, size: 16, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Text(
-                    partner['city']?.toString() ?? 'N/A',
+                    partner['city']?.toString() ?? AppLocalizations.of(context)!.notAvailable,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade700,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -182,13 +178,17 @@ class _PartnerCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.phone, size: 16, color: Colors.grey.shade600),
+                  Icon(Icons.phone, size: 16, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 8),
-                  Text(
-                    partner['phone']?.toString() ?? 'N/A',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
+                  Expanded(
+                    child: Text(
+                      partner['phone']?.toString() ?? AppLocalizations.of(context)!.notAvailable,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],

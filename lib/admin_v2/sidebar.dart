@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'utils/app_theme.dart';
 
 /// Sidebar Navigation Widget
@@ -129,57 +130,64 @@ class Sidebar extends StatelessWidget {
                   onTap: () => onItemSelected(3),
                 ),
                 _MenuItem(
-                  icon: Icons.water_drop_rounded,
-                  label: 'Pompage',
+                  icon: Icons.assignment,
+                  label: 'Études & Projets',
                   index: 4,
                   selectedIndex: selectedIndex,
                   onTap: () => onItemSelected(4),
-                ),
-                _MenuItem(
-                  icon: Icons.assignment,
-                  label: 'Études & Projets',
-                  index: 5,
-                  selectedIndex: selectedIndex,
-                  onTap: () => onItemSelected(5),
                 ),
                 const SizedBox(height: 16),
                 _SectionHeader(title: 'CANDIDATURES'),
                 _MenuItem(
                   icon: Icons.person_add_rounded,
                   label: 'Techniciens',
-                  index: 6,
+                  index: 5,
                   selectedIndex: selectedIndex,
-                  onTap: () => onItemSelected(6),
+                  onTap: () => onItemSelected(5),
                 ),
                 _MenuItem(
                   icon: Icons.business_center_rounded,
                   label: 'Partenaires',
-                  index: 7,
+                  index: 6,
                   selectedIndex: selectedIndex,
-                  onTap: () => onItemSelected(7),
+                  onTap: () => onItemSelected(6),
                 ),
                 const SizedBox(height: 16),
                 _SectionHeader(title: 'GESTION'),
                 _MenuItem(
                   icon: Icons.people_rounded,
                   label: 'Techniciens',
+                  index: 7,
+                  selectedIndex: selectedIndex,
+                  onTap: () => onItemSelected(7),
+                ),
+                _MenuItem(
+                  icon: Icons.business_rounded,
+                  label: 'Partenaires',
                   index: 8,
                   selectedIndex: selectedIndex,
                   onTap: () => onItemSelected(8),
                 ),
                 _MenuItem(
-                  icon: Icons.business_rounded,
-                  label: 'Partenaires',
+                  icon: Icons.notifications_rounded,
+                  label: 'Notifications',
                   index: 9,
                   selectedIndex: selectedIndex,
                   onTap: () => onItemSelected(9),
                 ),
                 _MenuItem(
-                  icon: Icons.notifications_rounded,
-                  label: 'Notifications',
+                  icon: Icons.inventory_2_rounded,
+                  label: 'Produits',
                   index: 10,
                   selectedIndex: selectedIndex,
                   onTap: () => onItemSelected(10),
+                ),
+                _MenuItem(
+                  icon: Icons.chat_rounded,
+                  label: 'Messages',
+                  index: 11,
+                  selectedIndex: selectedIndex,
+                  onTap: () => onItemSelected(11),
                 ),
               ],
             ),
@@ -188,8 +196,15 @@ class Sidebar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
-              onPressed: () {
-                // Handle logout
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.signOut();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur de déconnexion: $e')),
+                  );
+                }
               },
               icon: const Icon(Icons.logout, size: 18),
               label: const Text('Déconnexion'),

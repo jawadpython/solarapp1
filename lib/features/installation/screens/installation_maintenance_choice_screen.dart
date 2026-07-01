@@ -7,28 +7,29 @@ class InstallationMaintenanceChoiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Services'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
               // Title
-              const Text(
+              Text(
                 'Que voulez-vous faire ?',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -37,7 +38,7 @@ class InstallationMaintenanceChoiceScreen extends StatelessWidget {
                 'Choisissez le service dont vous avez besoin',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 40),
@@ -68,6 +69,7 @@ class InstallationMaintenanceChoiceScreen extends StatelessWidget {
                   Navigator.pushNamed(context, AppRoutes.maintenanceRequest);
                 },
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -97,6 +99,8 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -106,23 +110,24 @@ class _ServiceCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: borderColor.withOpacity(0.3),
               width: 2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Theme.of(context).shadowColor.withOpacity(0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
           child: Row(
             children: [
-              // Icon Container
               Container(
                 width: 80,
                 height: 80,
@@ -137,33 +142,35 @@ class _ServiceCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 20),
-              // Text Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: colorScheme.onSurface,
                         letterSpacing: 0.3,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                         height: 1.4,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Arrow Icon
               Icon(
                 Icons.arrow_forward_ios,
                 color: iconColor,

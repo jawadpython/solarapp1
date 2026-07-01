@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/project_study/utils/project_calculator.dart';
 import 'package:noor_energy/features/project_study/widgets/result_card.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class ProjectFormScreen extends StatefulWidget {
   final String projectType;
@@ -145,12 +146,13 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Étude de projet'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: Text(AppLocalizations.of(context)!.projectStudyTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -187,12 +189,12 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
               const SizedBox(height: 32),
 
               // Consumption Input
-              const Text(
-                'Consommation électrique',
+              Text(
+                AppLocalizations.of(context)!.electricalConsumption,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -212,14 +214,14 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Entrez votre consommation',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -231,20 +233,20 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
               const SizedBox(height: 16),
 
               // Unit Toggle
-              const Text(
-                'Unité',
+              Text(
+                AppLocalizations.of(context)!.unitLabelShort,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: Row(
                   children: [
@@ -265,7 +267,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                               'kWh/mois',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _isKwh ? Colors.white : Colors.grey.shade700,
+                                color: _isKwh ? Colors.white : colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -289,7 +291,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                               'kW',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: !_isKwh ? Colors.white : Colors.grey.shade700,
+                                color: !_isKwh ? Colors.white : colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -302,21 +304,21 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
               const SizedBox(height: 24),
 
               // Panel Power Dropdown
-              const Text(
-                'Puissance du panneau',
+              Text(
+                AppLocalizations.of(context)!.panelPowerW,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
@@ -353,12 +355,12 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                 const SizedBox(height: 24),
               ] else ...[
                 // Estimated Power placeholder when no calculation
-                const Text(
-                  'Puissance d\'installation estimée',
+                Text(
+                  AppLocalizations.of(context)!.estimatedInstallationPower,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -366,20 +368,20 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: colorScheme.outline),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.bolt, color: Colors.grey.shade400, size: 28),
+                      Icon(Icons.bolt, color: colorScheme.onSurfaceVariant, size: 28),
                       const SizedBox(width: 12),
                       Text(
                         '0.00 kW',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade400,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -406,9 +408,9 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Demander un devis',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context)!.requestQuoteButton,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),

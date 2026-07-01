@@ -36,13 +36,14 @@ class _ResultPumpingScreenState extends State<ResultPumpingScreen> {
   @override
   Widget build(BuildContext context) {
     final result = widget.result;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.resultPumping),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -55,11 +56,11 @@ class _ResultPumpingScreenState extends State<ResultPumpingScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -89,7 +90,7 @@ class _ResultPumpingScreenState extends State<ResultPumpingScreen> {
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -142,32 +143,41 @@ class _ResultPumpingScreenState extends State<ResultPumpingScreen> {
             ),
             const SizedBox(height: 20),
             // Info Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(context)!.basedOnSunHoursInfo(
-                        result.sunHours.toStringAsFixed(1),
-                        _regionName ?? result.regionCode,
-                      ),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue.shade900,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final infoColor = isDark ? AppColors.infoOnDark : Colors.blue.shade700;
+                final infoBg = isDark ? infoColor.withOpacity(0.15) : Colors.blue.withOpacity(0.08);
+                final infoBorder = isDark ? infoColor.withOpacity(0.35) : Colors.blue.withOpacity(0.25);
+                final infoText = isDark ? Theme.of(context).colorScheme.onSurface : Colors.blue.shade900;
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: infoBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: infoBorder),
                   ),
-                ],
-              ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: infoColor, size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.basedOnSunHoursInfo(
+                            result.sunHours.toStringAsFixed(1),
+                            _regionName ?? result.regionCode,
+                          ),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: infoText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             // Disclaimer
@@ -176,7 +186,7 @@ class _ResultPumpingScreenState extends State<ResultPumpingScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -186,11 +196,15 @@ class _ResultPumpingScreenState extends State<ResultPumpingScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // Navigate to pumping devis form
                   Navigator.pushNamed(
                     context,
-                    AppRoutes.pumpingDevisForm,
-                    arguments: result,
+                    AppRoutes.quoteRequest,
+                    arguments: {
+                      'systemType': result.systemType,
+                      'panels': result.panels,
+                      'systemPower': result.pvPowerKW,
+                      'batteryCapacity': null,
+                    },
                   );
                 },
                 icon: const Icon(Icons.request_quote, size: 24),
@@ -235,10 +249,11 @@ class _ResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withValues(alpha: 0.2),
@@ -264,7 +279,7 @@ class _ResultItem extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

@@ -1278,6 +1278,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pour une puissance > 10 kW, 380V (Triphasé) est recommandé.';
 
   @override
+  String get regulatoryWarning =>
+      'Les installations > 11 kWc nécessitent un raccordement ONEE (Loi 82-21).';
+
+  @override
   String recommended(String voltage) {
     return 'Recommandé : $voltage';
   }
@@ -1480,7 +1484,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String errorLoading(String error) {
-    return 'Erreur lors du chargement: $error';
+    return 'Erreur lors du chargement';
   }
 
   @override
@@ -1494,4 +1498,483 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get offlineMessage =>
       'Veuillez vous connecter à Internet pour utiliser l\'application.';
+
+  @override
+  String get validationPleaseEnterEmail => 'Veuillez entrer votre email';
+
+  @override
+  String get validationPleaseEnterPassword =>
+      'Veuillez entrer votre mot de passe';
+
+  @override
+  String get validationPasswordMinLength =>
+      'Le mot de passe doit contenir au moins 6 caractères';
+
+  @override
+  String get validationPasswordsDoNotMatch =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
+  String get validationPleaseEnterName => 'Veuillez entrer votre nom';
+
+  @override
+  String get darkMode => 'Mode sombre';
+
+  @override
+  String get darkModeDescription => 'Utiliser le thème sombre';
+
+  @override
+  String get signInToContinue => 'Connectez-vous pour continuer';
+
+  @override
+  String get forgotPasswordTitle => 'Mot de passe oublié ?';
+
+  @override
+  String get forgotPasswordMessage =>
+      'Entrez votre email et nous vous enverrons un lien pour réinitialiser votre mot de passe.';
+
+  @override
+  String get yourEmail => 'Votre email';
+
+  @override
+  String get sendResetLink => 'Envoyer le lien de réinitialisation';
+
+  @override
+  String get checkEmailForReset =>
+      'Vérifiez votre email pour le lien de réinitialisation';
+
+  @override
+  String get passwordResetSuccessSnack =>
+      'Votre mot de passe a été mis à jour. Connectez-vous avec le nouveau mot de passe.';
+
+  @override
+  String get signUp => 'S\'inscrire';
+
+  @override
+  String get signUpDescription =>
+      'Utilisez votre email et un mot de passe (min 6 caractères).';
+
+  @override
+  String get yourFullName => 'Votre nom complet';
+
+  @override
+  String get atLeast6Characters => 'Au moins 6 caractères';
+
+  @override
+  String get repeatYourPassword => 'Répétez votre mot de passe';
+
+  @override
+  String get accountCreated =>
+      'Compte créé ! Vérifiez votre email pour confirmer (y compris le dossier spam).';
+
+  @override
+  String get verifyYourEmail => 'Vérifiez votre email';
+
+  @override
+  String get checkInboxSpam =>
+      'Vérifiez votre boîte de réception (et le dossier spam) pour le lien de vérification.';
+
+  @override
+  String get resend => 'Renvoyer';
+
+  @override
+  String get verificationEmailSent =>
+      'Email de vérification envoyé. Vérifiez la boîte de réception et le spam.';
+
+  @override
+  String get account => 'Compte';
+
+  @override
+  String get editName => 'Modifier le nom';
+
+  @override
+  String get yourName => 'Votre nom';
+
+  @override
+  String get nameUpdated => 'Nom mis à jour';
+
+  @override
+  String get logout => 'Déconnexion';
+
+  @override
+  String hiName(String name) {
+    return 'Salut, $name';
+  }
+
+  @override
+  String get validationPleaseEnterCompanyName =>
+      'Veuillez entrer le nom de l\'entreprise';
+
+  @override
+  String get validationPleaseEnterIce => 'Veuillez entrer l\'ICE';
+
+  @override
+  String get validationPleaseEnterIf => 'Veuillez entrer l\'IF';
+
+  @override
+  String get validationPleaseEnterRc => 'Veuillez entrer le RC';
+
+  @override
+  String get validationPleaseEnterPatente => 'Veuillez entrer la Patente';
+
+  @override
+  String get validationPleaseEnterAddress => 'Veuillez entrer l\'adresse';
+
+  @override
+  String get validationPleaseEnterCity => 'Veuillez entrer votre ville';
+
+  @override
+  String get validationPleaseEnterPhone =>
+      'Veuillez entrer votre numéro de téléphone';
+
+  @override
+  String get validationPleaseEnterEmailPartner => 'Veuillez entrer votre email';
+
+  @override
+  String get validationPleaseEnterLastName => 'Veuillez entrer votre nom';
+
+  @override
+  String get validationPleaseEnterFirstName => 'Veuillez entrer votre prénom';
+
+  @override
+  String get validationPleaseEnterSpecialty =>
+      'Veuillez entrer votre spécialité';
+
+  @override
+  String referenceLabel(String ref) {
+    return 'Ref : $ref';
+  }
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get menu => 'Menu';
+
+  @override
+  String callToComingSoon(String phone) {
+    return 'Appel vers $phone (fonctionnalité à venir)';
+  }
+
+  @override
+  String whatsAppToComingSoon(String phone) {
+    return 'WhatsApp vers $phone (fonctionnalité à venir)';
+  }
+
+  @override
+  String get certifiedTechniciansTitle => 'Techniciens Certifiés';
+
+  @override
+  String get cityFilterLabel => 'Ville :';
+
+  @override
+  String get specialtyFilterLabel => 'Spécialité :';
+
+  @override
+  String get noTechnicianFound => 'Aucun technicien trouvé';
+
+  @override
+  String get modifyFiltersOrRetry =>
+      'Modifiez les filtres ou réessayez plus tard.';
+
+  @override
+  String get refresh => 'Actualiser';
+
+  @override
+  String get active => 'Actif';
+
+  @override
+  String get inactive => 'Inactif';
+
+  @override
+  String get notAvailable => 'N/D';
+
+  @override
+  String get partnersTitle => 'Partenaires';
+
+  @override
+  String get noPartnerAvailable => 'Aucun partenaire disponible';
+
+  @override
+  String get partnersListComingSoon =>
+      'La liste des partenaires sera mise à jour prochainement.';
+
+  @override
+  String get companyDocumentsOptional => 'Documents entreprise (optionnel)';
+
+  @override
+  String get documentsUrlsComingSoon =>
+      'URLs des documents (sera activé plus tard)';
+
+  @override
+  String get certificatesOptional => 'Certificats (optionnel)';
+
+  @override
+  String get certificatesUrlsComingSoon =>
+      'URLs des certificats (sera activé plus tard)';
+
+  @override
+  String get exampleIce => 'Ex : 123456789012345';
+
+  @override
+  String get exampleIf => 'Ex : 12345678';
+
+  @override
+  String get exampleRc => 'Ex : 12345';
+
+  @override
+  String get examplePatente => 'Ex : 123456';
+
+  @override
+  String get exampleAddress => 'Ex : 123 Rue Example, Quartier...';
+
+  @override
+  String get exampleLastName => 'Ex : Alami';
+
+  @override
+  String get exampleFirstName => 'Ex : Ahmed';
+
+  @override
+  String get newStudyDevisRequest => 'Nouvelle demande d\'étude de devis';
+
+  @override
+  String typeAndConsumption(String type, String consumption) {
+    return 'Type : $type - Consommation : $consumption';
+  }
+
+  @override
+  String get projectStudyTitle => 'Étude de projet';
+
+  @override
+  String get selectProjectType => 'Sélectionnez le type de projet';
+
+  @override
+  String get pumpingStudyTitle => 'PUMPING - Étude de projet';
+
+  @override
+  String get onGridStudyTitle => 'ON-GRID - Étude de projet';
+
+  @override
+  String get offGridStudyTitle => 'OFF-GRID - Étude de projet';
+
+  @override
+  String get hybridStudyTitle => 'HYBRID - Étude de projet';
+
+  @override
+  String get powerUnit => 'Unité de puissance';
+
+  @override
+  String pumpPowerKwHp(String unit) {
+    return 'Puissance de la pompe ($unit)';
+  }
+
+  @override
+  String get wellDepthM => 'Profondeur du puits (m)';
+
+  @override
+  String get workingHoursPerDay => 'Heures de travail par jour';
+
+  @override
+  String get dailyConsumptionKwh => 'Consommation quotidienne (kWh)';
+
+  @override
+  String get monthlyConsumptionKwh => 'Consommation mensuelle (kWh)';
+
+  @override
+  String get sunHoursPerDay => 'Heures d\'ensoleillement par jour';
+
+  @override
+  String get autonomyDaysLabel => 'Jours d\'autonomie';
+
+  @override
+  String get batteryVoltage => 'Tension batterie';
+
+  @override
+  String get solarCoveragePercent => 'Couverture solaire (%)';
+
+  @override
+  String get blackoutHoursOptional => 'Heures de coupure (optionnel)';
+
+  @override
+  String get electricalConsumption => 'Consommation électrique';
+
+  @override
+  String get enterYourConsumption => 'Entrez votre consommation';
+
+  @override
+  String get unitLabelShort => 'Unité';
+
+  @override
+  String get kwhPerMonth => 'kWh/mois';
+
+  @override
+  String get estimatedInstallationPower => 'Puissance d\'installation estimée';
+
+  @override
+  String get requestQuoteButton => 'Demander un devis';
+
+  @override
+  String get pleaseEnterConsumption => 'Veuillez entrer la consommation';
+
+  @override
+  String get pleaseEnterValidNumber => 'Veuillez entrer un nombre valide';
+
+  @override
+  String get pleaseEnterDepth => 'Veuillez entrer la profondeur';
+
+  @override
+  String get pleaseEnterHours => 'Veuillez entrer les heures';
+
+  @override
+  String get pleaseEnterDays => 'Veuillez entrer les jours d\'autonomie';
+
+  @override
+  String get pleaseEnterPercentage => 'Veuillez entrer le pourcentage';
+
+  @override
+  String get percentageBetween1And100 =>
+      'Veuillez entrer un pourcentage entre 1 et 100';
+
+  @override
+  String get pleaseEnterSunHours =>
+      'Veuillez entrer les heures d\'ensoleillement';
+
+  @override
+  String get selectAutonomyDays => 'Sélectionnez les jours d\'autonomie';
+
+  @override
+  String exPlaceholder(String value) {
+    return 'Ex : $value';
+  }
+
+  @override
+  String get startSolarJourney => 'Démarrez votre projet solaire';
+
+  @override
+  String get fillDetailsForStudy =>
+      'Remplissez les champs ci-dessous pour une étude personnalisée.';
+
+  @override
+  String get projectTypeLabel => 'Type de projet';
+
+  @override
+  String get residential => 'Résidentiel';
+
+  @override
+  String get commercial => 'Commercial';
+
+  @override
+  String get locationLabel => 'Localisation';
+
+  @override
+  String get enterCityOrAddressHint => 'Entrez votre ville ou adresse';
+
+  @override
+  String get getStudy => 'Obtenir l\'étude';
+
+  @override
+  String get installationOrMaintenance => 'Installation ou maintenance';
+
+  @override
+  String get chooseService => 'Choisissez un service';
+
+  @override
+  String get installationService => 'Installation';
+
+  @override
+  String get maintenanceService => 'Maintenance';
+
+  @override
+  String get productDetails => 'Détails du produit';
+
+  @override
+  String get requestQuoteTitle => 'Demander un devis';
+
+  @override
+  String get financingForm => 'Financement';
+
+  @override
+  String get interventionChoice => 'Intervention';
+
+  @override
+  String get emptyStateTitle => 'Rien ici';
+
+  @override
+  String get emptyStateMessage => 'Aucun élément à afficher.';
+
+  @override
+  String get labelOptional => 'Libellé (optionnel)';
+
+  @override
+  String get hintOptional => 'Indication (optionnel)';
+
+  @override
+  String get addressLabel => 'Adresse';
+
+  @override
+  String get addressOptional => 'Adresse (optionnel)';
+
+  @override
+  String get enterAddressManually => 'Entrez votre adresse manuellement';
+
+  @override
+  String get placeType => 'Type de lieu';
+
+  @override
+  String get trustedBy => 'Ils nous font confiance';
+
+  @override
+  String get trustedBySubtitle =>
+      'Des entreprises qui ont choisi nos solutions solaires';
+
+  @override
+  String get uploadCertificateImages =>
+      'Télécharger les images des certificats';
+
+  @override
+  String get tapToUploadCertificates =>
+      'Appuyez pour télécharger les photos de certificats';
+
+  @override
+  String get imagesSelected => 'images sélectionnées';
+
+  @override
+  String get uploading => 'Téléchargement';
+
+  @override
+  String get certificatesHint =>
+      'Décrivez vos certifications (ex: Installation solaire, Électricité)';
+
+  @override
+  String get supportChat => 'Chat Support';
+
+  @override
+  String get chatWithSupport =>
+      'Discutez avec notre équipe de support. Nous répondons généralement en quelques heures.';
+
+  @override
+  String get errorLoadingChat => 'Erreur de chargement du chat';
+
+  @override
+  String get noMessagesYet => 'Aucun message';
+
+  @override
+  String get startConversation =>
+      'Commencez une conversation avec notre équipe';
+
+  @override
+  String get typeMessage => 'Tapez un message...';
+
+  @override
+  String get chatInfoDescription =>
+      'Notre équipe de support est là pour vous aider avec toutes vos questions sur les solutions d\'énergie solaire, les installations ou le support technique.';
+
+  @override
+  String get today => 'Aujourd\'hui';
+
+  @override
+  String get yesterday => 'Hier';
+
+  @override
+  String get noProducts => 'Aucun produit disponible pour le moment';
 }

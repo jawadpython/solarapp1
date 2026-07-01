@@ -108,6 +108,51 @@ class _InstallationPageState extends State<InstallationPage> {
     }
   }
 
+  Future<void> _deleteRequest(BuildContext context, Map<String, dynamic> item) async {
+    final requestId = item['id']?.toString() ?? '';
+    if (requestId.isEmpty) return;
+
+    final name = item['name']?.toString() ?? 'cette demande';
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer la demande'),
+        content: Text('Voulez-vous supprimer la demande de $name ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await firestoreService.deleteRequest(
+        collection: 'installation_requests',
+        requestId: requestId,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Demande supprimée')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur de suppression: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -260,6 +305,12 @@ class _InstallationPageState extends State<InstallationPage> {
                                     },
                                     color: AppTheme.infoColor,
                                     tooltip: 'Voir détails',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, size: 18),
+                                    onPressed: () => _deleteRequest(context, item),
+                                    color: AppTheme.errorColor,
+                                    tooltip: 'Supprimer',
                                   ),
                                   PopupMenuButton<String>(
                                     offset: const Offset(0, 40),

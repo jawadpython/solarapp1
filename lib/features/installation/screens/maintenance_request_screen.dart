@@ -23,8 +23,6 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
   bool _isSubmitting = false;
   String? _selectedUrgency;
 
-  List<String> _selectedMedia = [];
-
   @override
   void initState() {
     super.initState();
@@ -177,24 +175,6 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
     _cityController.clear();
     setState(() {
       _selectedUrgency = null;
-      _selectedMedia = [];
-    });
-  }
-
-
-  void _pickMedia() {
-    // TODO: Implement media picker (photo/video)
-    setState(() {
-      _selectedMedia.add('media_${_selectedMedia.length + 1}');
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.mediaAdded)),
-    );
-  }
-
-  void _removeMedia(int index) {
-    setState(() {
-      _selectedMedia.removeAt(index);
     });
   }
 
@@ -207,12 +187,13 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.maintenanceRequest),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -234,10 +215,10 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                         labelText: AppLocalizations.of(context)!.fullNameLabel,
                         hintText: AppLocalizations.of(context)!.nameHint,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: colorScheme.outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -261,10 +242,10 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                         labelText: 'Téléphone *',
                         hintText: AppLocalizations.of(context)!.phoneHint,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: colorScheme.outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -287,10 +268,10 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                         labelText: 'Ville *',
                         hintText: AppLocalizations.of(context)!.cityHint,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: colorScheme.outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -320,10 +301,10 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.describeProblemHint,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -347,13 +328,14 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                 isRequired: false,
                 child: DropdownButtonFormField<String>(
                   value: _selectedUrgency,
+                  isExpanded: true,
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.selectUrgency,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -377,153 +359,20 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 3: Add Photo/Video
+              // Section 3: Address - Manual Entry
               _SectionCard(
-                title: AppLocalizations.of(context)!.addPhotoVideo,
-                isRequired: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_selectedMedia.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Aucun média sélectionné',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: List.generate(_selectedMedia.length, (index) {
-                          final isVideo = _selectedMedia[index].contains('video');
-                          return Stack(
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: Icon(
-                                  isVideo ? Icons.videocam : Icons.image,
-                                  size: 40,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                              if (isVideo)
-                                Positioned(
-                                  bottom: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.6),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: const Icon(
-                                      Icons.play_arrow,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              Positioned(
-                                top: -8,
-                                right: -8,
-                                child: IconButton(
-                                  icon: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  onPressed: () => _removeMedia(index),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _pickMedia,
-                            icon: const Icon(Icons.photo_library),
-                            label: Text(AppLocalizations.of(context)!.photo),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _pickMedia,
-                            icon: const Icon(Icons.videocam),
-                            label: Text(AppLocalizations.of(context)!.video),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 4: GPS Location - Manual Entry
-              _SectionCard(
-                title: AppLocalizations.of(context)!.gpsLocation,
+                title: AppLocalizations.of(context)!.addressLabel,
                 isRequired: true,
                 child: TextFormField(
                   controller: _locationController,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.addressGps,
+                    labelText: AppLocalizations.of(context)!.addressLabel,
                     hintText: AppLocalizations.of(context)!.cityHint,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -531,7 +380,7 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     prefixIcon: const Icon(Icons.location_city),
-                    helperText: 'Entrez votre adresse ou coordonnées GPS manuellement',
+                    helperText: AppLocalizations.of(context)!.enterAddressManually,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -551,9 +400,9 @@ class _MaintenanceRequestScreenState extends State<MaintenanceRequestScreen> {
                   onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    disabledForegroundColor: Colors.grey.shade600,
+                    foregroundColor: colorScheme.onPrimary,
+                    disabledBackgroundColor: colorScheme.outline,
+                    disabledForegroundColor: colorScheme.onSurfaceVariant,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -617,44 +466,49 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Theme.of(context).shadowColor.withOpacity(0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (isRequired) ...[
-                const SizedBox(width: 8),
-                const Text(
+              if (isRequired)
+                Text(
                   '*',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: colorScheme.error,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
             ],
           ),
           const SizedBox(height: 16),

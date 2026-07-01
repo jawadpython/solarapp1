@@ -42,13 +42,14 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
   Widget build(BuildContext context) {
     final result = widget.result;
     final savingRatePercent = (result.savingRate * 100).toStringAsFixed(0);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.calculationResult),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -61,11 +62,11 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Theme.of(context).shadowColor.withOpacity(0.08),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -93,10 +94,10 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
                       Expanded(
                         child: Text(
                           AppLocalizations.of(context)!.calculationResults,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -142,11 +143,11 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Theme.of(context).shadowColor.withOpacity(0.08),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -155,32 +156,38 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.savings,
-                          color: Colors.green,
-                          size: 24,
-                        ),
-                      ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final green = isDark ? AppColors.successOnDark : Colors.green;
+                      return Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: green.withOpacity(isDark ? 0.2 : 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.savings,
+                              color: green,
+                              size: 24,
+                            ),
+                          ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
                           AppLocalizations.of(context)!.savings,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
                     ],
+                  );
+                    },
                   ),
                   const SizedBox(height: 20),
                   _SavingsRow(
@@ -209,29 +216,37 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
             ),
             const SizedBox(height: 20),
             // Info Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 24),
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final infoColor = isDark ? AppColors.infoOnDark : Colors.blue.shade700;
+                final infoBg = isDark ? infoColor.withOpacity(0.15) : Colors.blue.withOpacity(0.12);
+                final infoBorder = isDark ? infoColor.withOpacity(0.35) : Colors.blue.withOpacity(0.3);
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: infoBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: infoBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: infoColor, size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)!.basedOnSunHours(result.monthName, _regionName ?? result.regionCode),
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.blue.shade900,
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ],
               ),
+            );
+              },
             ),
             const SizedBox(height: 20),
             // Footer Text
@@ -240,7 +255,7 @@ class _CalculatorResultScreenState extends State<CalculatorResultScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -302,10 +317,11 @@ class _ResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withOpacity(0.2),
@@ -331,7 +347,7 @@ class _ResultItem extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -366,13 +382,19 @@ class _SavingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final green = isDark ? AppColors.successOnDark : Colors.green;
+    final greenMuted = isDark ? green.withOpacity(0.2) : Colors.green.withOpacity(0.12);
+    final greenBorder = isDark ? green.withOpacity(0.4) : Colors.green.withOpacity(0.3);
+    final greenText = isDark ? green : Colors.green.shade700;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlight ? Colors.green.shade50 : Colors.grey.shade50,
+        color: isHighlight ? greenMuted : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isHighlight ? Colors.green.shade200 : Colors.grey.shade300,
+          color: isHighlight ? greenBorder : colorScheme.outline,
           width: isHighlight ? 2 : 1,
         ),
       ),
@@ -384,7 +406,7 @@ class _SavingsRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: isHighlight ? FontWeight.w600 : FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: colorScheme.onSurface,
             ),
           ),
           Text(
@@ -392,7 +414,7 @@ class _SavingsRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: isHighlight ? Colors.green.shade700 : Colors.green,
+              color: isHighlight ? greenText : green,
             ),
           ),
         ],

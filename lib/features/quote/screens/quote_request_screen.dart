@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/services/notification_service.dart';
 
 class QuoteRequestScreen extends StatefulWidget {
   final String systemType;
@@ -27,6 +30,7 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
   final _noteController = TextEditingController();
   
   String _selectedUsageType = 'Home';
+  bool _isSubmitting = false;
 
   final List<String> _usageTypes = ['Home', 'Agriculture', 'Industry'];
 
@@ -39,10 +43,64 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
     super.dispose();
   }
 
-  void _submitRequest() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Save to Firebase
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      if (Firebase.apps.isEmpty) {
+        throw Exception('Firebase is not initialized.');
+      }
+
+      final db = FirebaseFirestore.instance;
+      final id = DateTime.now().millisecondsSinceEpoch.toString();
+      final requestData = {
+        'id': id,
+        'createdAt': FieldValue.serverTimestamp(),
+        'date': Timestamp.now(),
+        'fullName': _nameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'city': _cityController.text.trim(),
+        'note': _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        'systemType': widget.systemType,
+        'usageType': _selectedUsageType,
+        'panels': widget.panels,
+        'powerKW': widget.systemPower,
+        'batteryKwh': widget.batteryCapacity,
+        'status': 'pending',
+        'source': 'quote_request_screen',
+      };
+
+      final docRef = await db.collection('devis_requests').add(requestData);
+
+      try {
+        await NotificationService().createAdminNotification(
+          type: NotificationType.devisRequest,
+          title: 'Nouvelle demande de devis',
+          message:
+              '${_nameController.text.trim()} (${_cityController.text.trim()}) - ${widget.systemType}',
+          requestId: docRef.id,
+          requestCollection: 'devis_requests',
+        );
+      } catch (_) {
+        // Notification failure should not block request creation.
+      }
+
+      if (!mounted) return;
       _showSuccessDialog();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de l\'envoi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -111,57 +169,7 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
               ),
               const SizedBox(height: 24),
               
-              // Action Buttons
-              Row(
-                children: [
-                  // WhatsApp Button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Open WhatsApp
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('WhatsApp - Fonctionnalité à venir')),
-                        );
-                      },
-                      icon: const Icon(Icons.chat, size: 20),
-                      label: const Text('WhatsApp'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF25D366),
-                        side: const BorderSide(color: Color(0xFF25D366), width: 2),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  
-                  // Call Button
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: Make phone call
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Appel - Fonctionnalité à venir')),
-                        );
-                      },
-                      icon: const Icon(Icons.phone, size: 20),
-                      label: const Text('Appeler'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               
               // Close Button
               SizedBox(
@@ -189,12 +197,13 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Demande de devis'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -252,7 +261,7 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
                       const SizedBox(height: 12),
                       _ReadOnlyField(
                         label: 'Capacité batterie',
-                        value: '${widget.batteryCapacity!.toStringAsFixed(2)} Ah',
+                        value: '${widget.batteryCapacity!.toStringAsFixed(2)} kWh',
                       ),
                     ],
                   ],
@@ -421,7 +430,7 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _submitRequest,
+                  onPressed: _isSubmitting ? null : _submitRequest,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -430,13 +439,22 @@ class _QuoteRequestScreenState extends State<QuoteRequestScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Envoyer la demande',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Envoyer la demande',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

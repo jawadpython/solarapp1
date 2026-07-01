@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
 import 'package:noor_energy/features/admin/widgets/admin_shared_widgets.dart';
+import 'package:noor_energy/features/admin/widgets/partner_documents_dialog.dart';
 
 class AdminApplicationsListScreen extends StatefulWidget {
   const AdminApplicationsListScreen({super.key});
@@ -78,8 +80,64 @@ class _AdminApplicationsListScreenState extends State<AdminApplicationsListScree
     }
   }
 
-  Future<void> _approvePartner(String applicationId) async {
-    final success = await _adminService.approvePartnerApplication(applicationId);
+  Future<void> _approvePartner(Map<String, dynamic> app) async {
+    final applicationId = app['id']?.toString() ?? '';
+    if (applicationId.isEmpty) return;
+
+    final resolved = PartnerServiceTypes.serviceTypeFromMap(app);
+    String? specialityOverride;
+
+    if (resolved.isEmpty && mounted) {
+      String selected = PartnerServiceTypes.canonicalLabels.first;
+      final picked = await showDialog<String>(
+        context: context,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: const Text('Type de service'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Aucun type de service sur cette candidature. Choisissez celui enregistré pour le partenaire :',
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButton<String>(
+                      value: selected,
+                      isExpanded: true,
+                      items: PartnerServiceTypes.canonicalLabels
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) {
+                        if (v != null) setDialogState(() => selected = v);
+                      },
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Annuler'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, selected),
+                    child: const Text('Approuver'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+      if (!mounted || picked == null) return;
+      specialityOverride = picked;
+    }
+
+    final success = await _adminService.approvePartnerApplication(
+      applicationId,
+      specialityOverride: specialityOverride,
+    );
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,6 +171,61 @@ class _AdminApplicationsListScreenState extends State<AdminApplicationsListScree
         _loadApplications();
       }
     }
+  }
+
+  Future<void> _confirmDeleteApplication({
+    required String title,
+    required String message,
+    required Future<bool> Function() deleteFn,
+  }) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirm != true) return;
+    final ok = await deleteFn();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? 'Candidature supprimée' : 'Impossible de supprimer (vérifiez les règles Firestore)',
+        ),
+        backgroundColor: ok ? Colors.green : Colors.red,
+      ),
+    );
+    if (ok) _loadApplications();
+  }
+
+  Future<void> _deleteTechnicianApplication(String applicationId) async {
+    await _confirmDeleteApplication(
+      title: 'Supprimer la candidature',
+      message:
+          'Supprimer définitivement cette candidature technicien ? Cette action est irréversible.',
+      deleteFn: () => _adminService.deleteTechnicianApplication(applicationId),
+    );
+  }
+
+  Future<void> _deletePartnerApplication(String applicationId) async {
+    await _confirmDeleteApplication(
+      title: 'Supprimer la candidature',
+      message:
+          'Supprimer définitivement cette candidature partenaire ? Cette action est irréversible.',
+      deleteFn: () => _adminService.deletePartnerApplication(applicationId),
+    );
   }
 
   @override
@@ -165,8 +278,10 @@ class _AdminApplicationsListScreenState extends State<AdminApplicationsListScree
               email: app['email'] ?? 'N/A',
               speciality: app['speciality'] ?? 'N/A',
               date: app['createdAt'],
+              partnerApplicationForDocuments: null,
               onApprove: () => _approveTechnician(app['id']),
               onReject: () => _rejectTechnician(app['id']),
+              onDelete: () => _deleteTechnicianApplication(app['id']),
             )),
             const SizedBox(height: 24),
           ],
@@ -188,8 +303,10 @@ class _AdminApplicationsListScreenState extends State<AdminApplicationsListScree
               email: app['email'] ?? 'N/A',
               speciality: app['speciality'] ?? 'N/A',
               date: app['createdAt'],
-              onApprove: () => _approvePartner(app['id']),
+              partnerApplicationForDocuments: app,
+              onApprove: () => _approvePartner(app),
               onReject: () => _rejectPartner(app['id']),
+              onDelete: () => _deletePartnerApplication(app['id']),
             )),
           ],
         ],
@@ -205,8 +322,10 @@ class _ApplicationCard extends StatelessWidget {
   final String email;
   final String speciality;
   final dynamic date;
+  final Map<String, dynamic>? partnerApplicationForDocuments;
   final VoidCallback onApprove;
   final VoidCallback onReject;
+  final VoidCallback onDelete;
 
   const _ApplicationCard({
     required this.name,
@@ -215,8 +334,10 @@ class _ApplicationCard extends StatelessWidget {
     required this.email,
     required this.speciality,
     required this.date,
+    this.partnerApplicationForDocuments,
     required this.onApprove,
     required this.onReject,
+    required this.onDelete,
   });
 
   @override
@@ -296,6 +417,29 @@ class _ApplicationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              if (partnerApplicationForDocuments != null) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => showPartnerDocumentsDialog(
+                      context,
+                      partnerApplicationForDocuments!,
+                    ),
+                    icon: const Icon(Icons.attach_file, size: 18),
+                    label: Text(
+                      'Voir documents (${partnerDocumentsEntrepriseUrls(partnerApplicationForDocuments!).length})',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -330,6 +474,18 @@ class _ApplicationCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: onDelete,
+                  icon: Icon(Icons.delete_outline, color: Colors.red.shade700),
+                  label: Text(
+                    'Supprimer définitivement',
+                    style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/widgets/success_dialog.dart';
 import 'package:noor_energy/features/calculator/models/devis_request.dart';
 import 'package:noor_energy/features/calculator/models/solar_result.dart';
 import 'package:noor_energy/features/calculator/services/devis_service.dart';
@@ -125,7 +126,19 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
       
       if (mounted) {
         _clearForm();
-        _showSuccessDialog();
+        final loc = AppLocalizations.of(context)!;
+        showSuccessDialog(
+          context,
+          title: loc.success,
+          message: loc.devisRequestSentSuccess,
+          onDone: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.homeScreen,
+              (route) => false,
+            );
+          },
+        );
       }
     } catch (e, stackTrace) {
       print('❌❌❌ ERROR in _submitRequest: $e ❌❌❌');
@@ -188,91 +201,16 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
            _cityController.text.trim().isNotEmpty;
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                AppLocalizations.of(context)!.success,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          AppLocalizations.of(context)!.devisRequestSentSuccess,
-          style: const TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // WhatsApp placeholder - can be implemented later
-              // For now, just show a message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context)!.whatsAppFeatureComing),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            child: Text(AppLocalizations.of(context)!.whatsAppContact),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRoutes.homeScreen,
-                (route) => false,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(AppLocalizations.of(context)!.backToHome),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final result = widget.result;
-
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.requestQuote),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -287,23 +225,23 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.blue.shade200),
+                  border: Border.all(color: colorScheme.primary.withOpacity(0.5)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.blue.shade700),
+                        Icon(Icons.info_outline, color: colorScheme.primary),
                         const SizedBox(width: 8),
                         Text(
                           AppLocalizations.of(context)!.technicalData,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade900,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -350,10 +288,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               // User Input Section
               Text(
                 AppLocalizations.of(context)!.contactInfo,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 20),
@@ -378,10 +316,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.nameHint,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -398,10 +336,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               // Phone
               Text(
                 AppLocalizations.of(context)!.phoneLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -417,10 +355,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.phoneHint,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -437,10 +375,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
               // City
               Text(
                 AppLocalizations.of(context)!.cityLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -455,10 +393,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.cityHint,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -472,25 +410,25 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // GPS Location (Optional) - Manual Entry
+              // Address (Optional) - Manual Entry
               Text(
-                AppLocalizations.of(context)!.gpsOptional,
-                style: const TextStyle(
+                AppLocalizations.of(context)!.addressOptional,
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _gpsController,
                 decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.gpsCoordinates,
+                  hintText: AppLocalizations.of(context)!.enterAddressManually,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -501,17 +439,17 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                     vertical: 16,
                   ),
                   prefixIcon: const Icon(Icons.location_on_outlined),
-                  helperText: AppLocalizations.of(context)!.enterAddressOrGpsManually,
+                  helperText: AppLocalizations.of(context)!.enterAddressManually,
                 ),
               ),
               const SizedBox(height: 20),
               // Note (Optional)
               Text(
                 AppLocalizations.of(context)!.noteOptional,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -521,10 +459,10 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.addAdditionalInfo,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -545,8 +483,8 @@ class _DevisRequestScreenState extends State<DevisRequestScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    disabledForegroundColor: Colors.grey.shade600,
+                    disabledBackgroundColor: colorScheme.outline,
+                    disabledForegroundColor: colorScheme.onSurfaceVariant,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -591,6 +529,7 @@ class _ReadOnlyField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -600,7 +539,7 @@ class _ReadOnlyField extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade700,
+              color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -611,7 +550,7 @@ class _ReadOnlyField extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.blue.shade900,
+              color: colorScheme.onSurface,
             ),
           ),
         ),

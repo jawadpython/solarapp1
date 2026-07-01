@@ -21,7 +21,6 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
 
   String? _selectedSystemType;
   String? _selectedLocationType;
-  List<String> _selectedPhotos = [];
 
   final List<String> _systemTypes = ['On-grid', 'Off-grid', 'Hybride', 'Pompe'];
   final List<String> _locationTypes = ['Maison', 'Entreprise', 'Ferme', 'Autre'];
@@ -117,7 +116,7 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
             : _descriptionController.text.trim(),
         city: _locationController.text.trim(),
         location: _locationController.text.trim(),
-        photoUrls: _selectedPhotos.isEmpty ? null : _selectedPhotos,
+        photoUrls: null,
         userId: userId,
       );
 
@@ -195,42 +194,18 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
     setState(() {
       _selectedSystemType = null;
       _selectedLocationType = null;
-      _selectedPhotos = [];
-    });
-  }
-
-
-  void _pickPhoto() {
-    if (_selectedPhotos.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.maxPhotosAllowed)),
-      );
-      return;
-    }
-    
-    // TODO: Implement image picker
-    setState(() {
-      _selectedPhotos.add('photo_${_selectedPhotos.length + 1}.jpg');
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.photoAdded)),
-    );
-  }
-
-  void _removePhoto(int index) {
-    setState(() {
-      _selectedPhotos.removeAt(index);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.installation),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -242,32 +217,54 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
             children: [
               // Section 1: System Type
               _SectionCard(
-                title: 'Type de système',
+                title: AppLocalizations.of(context)!.systemType,
                 isRequired: true,
                 child: Column(
-                  children: _systemTypes.map((type) => _RadioOption(
-                        value: type,
-                        groupValue: _selectedSystemType,
-                        onChanged: (value) {
-                          setState(() => _selectedSystemType = value);
-                        },
-                      )).toList(),
+                  children: _systemTypes.map((type) {
+                    final loc = AppLocalizations.of(context)!;
+                    final label = type == 'On-grid'
+                        ? loc.onGridSystem
+                        : type == 'Off-grid'
+                            ? loc.offGridSystem
+                            : type == 'Hybride'
+                                ? loc.hybridSystem
+                                : loc.pumpSystem;
+                    return _RadioOption(
+                      value: type,
+                      groupValue: _selectedSystemType,
+                      onChanged: (value) {
+                        setState(() => _selectedSystemType = value);
+                      },
+                      label: label,
+                    );
+                  }).toList(),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Section 2: Location Type
+              // Section 2: Place Type
               _SectionCard(
-                title: AppLocalizations.of(context)!.locationType,
+                title: AppLocalizations.of(context)!.placeType,
                 isRequired: true,
                 child: Column(
-                  children: _locationTypes.map((type) => _RadioOption(
-                        value: type,
-                        groupValue: _selectedLocationType,
-                        onChanged: (value) {
-                          setState(() => _selectedLocationType = value);
-                        },
-                      )).toList(),
+                  children: _locationTypes.map((type) {
+                    final loc = AppLocalizations.of(context)!;
+                    final label = type == 'Maison'
+                        ? loc.homeLocation
+                        : type == 'Entreprise'
+                            ? loc.businessLocation
+                            : type == 'Ferme'
+                                ? loc.farmLocation
+                                : loc.otherLocation;
+                    return _RadioOption(
+                      value: type,
+                      groupValue: _selectedLocationType,
+                      onChanged: (value) {
+                        setState(() => _selectedLocationType = value);
+                      },
+                      label: label,
+                    );
+                  }).toList(),
                 ),
               ),
               const SizedBox(height: 20),
@@ -284,10 +281,10 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                         labelText: 'Nom *',
                         hintText: AppLocalizations.of(context)!.nameHint,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: colorScheme.outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -311,10 +308,10 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                         labelText: 'Téléphone *',
                         hintText: AppLocalizations.of(context)!.phoneHint,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: colorScheme.outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -338,10 +335,10 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                         labelText: 'Description courte',
                         hintText: AppLocalizations.of(context)!.describeBriefly,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surfaceContainerHighest,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: colorScheme.outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -356,9 +353,9 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 4: Location - Manual Entry
+              // Section 4: Address - Manual Entry
               _SectionCard(
-                title: AppLocalizations.of(context)!.gpsLocation,
+                title: AppLocalizations.of(context)!.addressLabel,
                 isRequired: true,
                 child: TextFormField(
                   controller: _locationController,
@@ -366,10 +363,10 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                     labelText: 'Ville / Adresse *',
                     hintText: AppLocalizations.of(context)!.cityHint,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -387,100 +384,6 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 20),
-
-              // Section 5: Photos (1-3)
-              _SectionCard(
-                title: AppLocalizations.of(context)!.photosOptional,
-                isRequired: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_selectedPhotos.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.camera_alt_outlined,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Aucune photo sélectionnée',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: List.generate(_selectedPhotos.length, (index) {
-                          return Stack(
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: Icon(
-                                  Icons.image,
-                                  size: 40,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                              Positioned(
-                                top: -8,
-                                right: -8,
-                                child: IconButton(
-                                  icon: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  onPressed: () => _removePhoto(index),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _selectedPhotos.length >= 3 ? null : _pickPhoto,
-                      icon: const Icon(Icons.add_photo_alternate),
-                      label: Text('Ajouter une photo (${_selectedPhotos.length}/3)'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 32),
 
               // Submit Button
@@ -491,9 +394,9 @@ class _InstallationRequestScreenState extends State<InstallationRequestScreen> {
                   onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    disabledForegroundColor: Colors.grey.shade600,
+                    foregroundColor: colorScheme.onPrimary,
+                    disabledBackgroundColor: colorScheme.outline,
+                    disabledForegroundColor: colorScheme.onSurfaceVariant,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -538,19 +441,23 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Theme.of(context).shadowColor.withOpacity(0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,18 +466,18 @@ class _SectionCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               if (isRequired) ...[
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   '*',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: colorScheme.error,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -590,15 +497,20 @@ class _RadioOption extends StatelessWidget {
   final String value;
   final String? groupValue;
   final ValueChanged<String?> onChanged;
+  /// Optional localized label (e.g. Arabic). If null, [value] is shown.
+  final String? label;
 
   const _RadioOption({
     required this.value,
     required this.groupValue,
     required this.onChanged,
+    this.label,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final displayText = label ?? value;
     return InkWell(
       onTap: () => onChanged(value),
       borderRadius: BorderRadius.circular(12),
@@ -608,12 +520,12 @@ class _RadioOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: groupValue == value
               ? AppColors.primary.withOpacity(0.1)
-              : Colors.grey.shade50,
+              : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: groupValue == value
                 ? AppColors.primary
-                : Colors.grey.shade300,
+                : colorScheme.outline,
             width: groupValue == value ? 2 : 1,
           ),
         ),
@@ -628,13 +540,13 @@ class _RadioOption extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                value,
+                displayText,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: groupValue == value
                       ? FontWeight.w600
                       : FontWeight.normal,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ),

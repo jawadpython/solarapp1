@@ -120,7 +120,34 @@ class TechnicianApplicationsPage extends StatelessWidget {
                             ),
                             Expanded(
                               flex: 2,
-                              child: Text(item['speciality']?.toString() ?? 'N/A'),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Text(item['speciality']?.toString() ?? 'N/A')),
+                                  if (item['certificateUrls'] != null && (item['certificateUrls'] as List).isNotEmpty)
+                                    Tooltip(
+                                      message: '${(item['certificateUrls'] as List).length} certificat(s)',
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        margin: const EdgeInsets.only(left: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.infoColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.image, size: 14, color: AppTheme.infoColor),
+                                            const SizedBox(width: 2),
+                                            Text(
+                                              '${(item['certificateUrls'] as List).length}',
+                                              style: const TextStyle(fontSize: 11, color: AppTheme.infoColor, fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                             Expanded(
                               flex: 2,
@@ -211,6 +238,54 @@ class TechnicianApplicationsPage extends StatelessWidget {
                                     },
                                     color: AppTheme.infoColor,
                                     tooltip: 'Voir détails',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Supprimer la candidature'),
+                                          content: const Text(
+                                            'Supprimer définitivement cette candidature ? Cette action est irréversible.',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context, false),
+                                              child: const Text('Annuler'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.pop(context, true),
+                                              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
+                                              child: const Text('Supprimer'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        try {
+                                          await firestoreService.deleteTechnicianApplication(
+                                            item['id']?.toString() ?? '',
+                                          );
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Candidature supprimée')),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Échec: $e'),
+                                                backgroundColor: AppTheme.errorColor,
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                    color: AppTheme.errorColor,
+                                    tooltip: 'Supprimer',
                                   ),
                                 ],
                               ),

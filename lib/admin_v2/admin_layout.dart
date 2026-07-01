@@ -5,13 +5,14 @@ import 'pages/dashboard_page.dart';
 import 'pages/devis_page.dart';
 import 'pages/installation_page.dart';
 import 'pages/maintenance_page.dart';
-import 'pages/pumping_page.dart';
 import 'pages/project_page.dart';
 import 'pages/technician_applications_page.dart';
 import 'pages/partner_applications_page.dart';
 import 'pages/technicians_page.dart';
 import 'pages/partners_page.dart';
 import 'pages/notifications_page.dart';
+import 'pages/products_page.dart';
+import 'pages/chats_page.dart';
 
 /// Clean Admin Layout V2 - Built for Flutter Web
 /// 
@@ -51,19 +52,21 @@ class _AdminLayoutV2State extends State<AdminLayoutV2> {
       case 3:
         return const MaintenancePage(key: ValueKey('maintenance'));
       case 4:
-        return const PumpingPage(key: ValueKey('pumping'));
-      case 5:
         return const ProjectPage(key: ValueKey('project'));
-      case 6:
+      case 5:
         return const TechnicianApplicationsPage(key: ValueKey('tech_apps'));
-      case 7:
+      case 6:
         return const PartnerApplicationsPage(key: ValueKey('partner_apps'));
-      case 8:
+      case 7:
         return const TechniciansPage(key: ValueKey('technicians'));
-      case 9:
+      case 8:
         return const PartnersPage(key: ValueKey('partners'));
-      case 10:
+      case 9:
         return const NotificationsPage(key: ValueKey('notifications'));
+      case 10:
+        return const ProductsPage(key: ValueKey('products'));
+      case 11:
+        return const ChatsPage(key: ValueKey('chats'));
       default:
         return const DashboardPage(key: ValueKey('dashboard_default'));
     }

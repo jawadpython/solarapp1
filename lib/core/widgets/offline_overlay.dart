@@ -88,14 +88,14 @@ class _OfflineOverlayState extends State<OfflineOverlay> {
                       Icon(
                         Icons.wifi_off_rounded,
                         size: 72,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(height: 24),
                       Text(
                         title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -103,7 +103,7 @@ class _OfflineOverlayState extends State<OfflineOverlay> {
                       Text(
                         message,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                         textAlign: TextAlign.center,
                       ),

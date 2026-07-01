@@ -5,53 +5,138 @@ import 'package:noor_energy/features/marketplace/screens/product_details_screen.
 import 'package:noor_energy/features/marketplace/services/product_service.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 
-class MarketplaceScreen extends StatelessWidget {
+class MarketplaceScreen extends StatefulWidget {
   const MarketplaceScreen({super.key});
 
   @override
+  State<MarketplaceScreen> createState() => _MarketplaceScreenState();
+}
+
+class _MarketplaceScreenState extends State<MarketplaceScreen> {
+  final ProductService _productService = ProductService();
+  String _selectedCategory = 'All';
+  final List<String> _categories = [
+    'All',
+    'Inverter',
+    'Panel',
+    'Battery',
+    'Accessory',
+    'Pump',
+  ];
+
+  @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.shop),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(localizations.shop),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 80,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Message
-              Text(
-                AppLocalizations.of(context)!.shopComingSoon,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  height: 1.4,
-                ),
-              ),
-            ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Category filter
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: _categories.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(cat),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) setState(() => _selectedCategory = cat);
+                    },
+                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    checkmarkColor: AppColors.primary,
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
+          // Products grid
+          Expanded(
+            child: StreamBuilder<List<ProductModel>>(
+              stream: _productService.getProducts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+                        const SizedBox(height: 16),
+                        Text(
+                          '${localizations.error}: ${snapshot.error}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: colorScheme.onSurface),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                var products = snapshot.data ?? [];
+                if (_selectedCategory != 'All') {
+                  products = products
+                      .where((p) =>
+                          p.category.toLowerCase() ==
+                          _selectedCategory.toLowerCase())
+                      .toList();
+                }
+
+                if (products.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 64,
+                          color: colorScheme.outline,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          localizations.noProducts,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.72,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return _ProductCard(product: products[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -167,45 +252,55 @@ class _ProductCard extends StatelessWidget {
                       // Power and Usage
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Power
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.flash_on,
-                                size: 14,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${product.powerKw.toStringAsFixed(1)} kW',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.flash_on,
+                                  size: 14,
+                                  color: AppColors.primary,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    '${product.powerKw.toStringAsFixed(1)} kW',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 4),
                           // Usage Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              product.usage,
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.primary,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                product.usage,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                         ],

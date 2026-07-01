@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 
@@ -8,12 +7,13 @@ class EspaceProScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.proSpace),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SafeArea(
@@ -86,25 +86,31 @@ class _RegistrationCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: borderColor.withOpacity(0.3),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+        child: Builder(
+          builder: (context) {
+            final colorScheme = Theme.of(context).colorScheme;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: borderColor.withOpacity(0.3),
+                  width: 2,
+                ),
+                boxShadow: isDark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Theme.of(context).shadowColor.withOpacity(0.06),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
-            ],
-          ),
-          child: Column(
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Icon Container
@@ -129,10 +135,12 @@ class _RegistrationCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: colorScheme.onSurface,
                         letterSpacing: 0.3,
                       ),
                     ),
@@ -163,7 +171,7 @@ class _RegistrationCard extends StatelessWidget {
                 description,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -175,7 +183,7 @@ class _RegistrationCard extends StatelessWidget {
                   onPressed: onTap,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: iconColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -200,6 +208,8 @@ class _RegistrationCard extends StatelessWidget {
               ),
             ],
           ),
+        );
+          },
         ),
       ),
     );

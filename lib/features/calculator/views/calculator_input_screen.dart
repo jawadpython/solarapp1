@@ -58,7 +58,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
   bool _isLoadingRegions = true;
 
   final List<int> _panelWpOptions = [240, 280, 300, 450, 500, 550, 600, 650, 700];
-  final List<int> _batteryKwhOptions = [5, 10, 15, 20, 25]; // Extended for HYBRID
+  final List<int> _batteryKwhOptions = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // HYBRID nominal capacity (kWh)
   final List<int> _autonomyDaysOptions = [1, 2]; // For OFF-GRID: now [1, 2, 3] handled in dropdown
   final List<String> _flowUnitOptions = ['m3/h', 'L/min'];
   final List<String> _pumpTypeOptions = ['AC', 'DC'];
@@ -327,12 +327,13 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.solarCalculator),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -350,7 +351,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 20),
@@ -402,7 +403,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                     AppLocalizations.of(context)!.pleaseSelectSystemType,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.red.shade700,
+                      color: colorScheme.error,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -713,15 +714,16 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
     required String hint,
     String? Function(String?)? validator,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
@@ -732,10 +734,10 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: colorScheme.surfaceContainerHighest,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: colorScheme.outline),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -785,24 +787,25 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
   }
 
   Widget _buildCoverageSlider(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context)!.desiredCoveragePercent,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: Column(
             children: [
@@ -813,7 +816,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                     '30%',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -836,7 +839,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
                     _selectedSystemType == 'HYBRID' ? '90%' : '100%',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -900,44 +903,54 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '${AppLocalizations.of(context)!.region} *',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: _isLoadingRegions
-                ? const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                : DropdownButton<String>(
-                    value: _selectedRegionCode,
-                    isExpanded: true,
-                    icon: const Icon(Icons.keyboard_arrow_down),
-                    hint: Text(AppLocalizations.of(context)!.selectRegionHint),
-                    items: _regions.map((region) {
-                      return DropdownMenuItem(
-                        value: region.regionCode,
-                        child: Text(region.regionNameFr),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() => _selectedRegionCode = value);
-                    },
+        Builder(
+          builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${AppLocalizations.of(context)!.region} *',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
                   ),
-          ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: cs.outline),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: _isLoadingRegions
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : DropdownButton<String>(
+                            value: _selectedRegionCode,
+                            isExpanded: true,
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            hint: Text(AppLocalizations.of(context)!.selectRegionHint),
+                            items: _regions.map((region) {
+                              return DropdownMenuItem(
+                                value: region.regionCode,
+                                child: Text(region.regionNameFr),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() => _selectedRegionCode = value);
+                            },
+                          ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         if (_selectedRegionCode == null && !_isLoadingRegions)
           Padding(
@@ -946,7 +959,7 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
               AppLocalizations.of(context)!.fieldRequired,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.red.shade700,
+                color: Theme.of(context).colorScheme.error,
               ),
             ),
           ),
@@ -975,24 +988,25 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
     required List<DropdownMenuItem<T>> items,
     required void Function(T?) onChanged,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
@@ -1047,87 +1061,92 @@ class _CalculatorInputScreenState extends State<CalculatorInputScreen> {
         });
       },
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : Colors.grey.shade300,
-            width: isSelected ? 2.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            // Icon in left side
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
+      child: Builder(
+        builder: (context) {
+          final colorScheme = Theme.of(context).colorScheme;
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isSelected ? color.withValues(alpha: 0.15) : colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected ? color : colorScheme.outline,
+                width: isSelected ? 2.5 : 1,
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 32,
-              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: isDark ? 0.25 : 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : isDark
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Theme.of(context).shadowColor.withValues(alpha: 0.06),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
             ),
-            const SizedBox(width: 20),
-            // Title and description
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? color : AppColors.textPrimary,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: isDark ? 0.2 : 0.15),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                      height: 1.4,
-                    ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 32,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? color : colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Icon(
+                    Icons.check_circle,
+                    color: color,
+                    size: 28,
+                  )
+                else
+                  Icon(
+                    Icons.radio_button_unchecked,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 28,
+                  ),
+              ],
             ),
-            // Selection indicator
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: color,
-                size: 28,
-              )
-            else
-              Icon(
-                Icons.radio_button_unchecked,
-                color: Colors.grey.shade400,
-                size: 28,
-              ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

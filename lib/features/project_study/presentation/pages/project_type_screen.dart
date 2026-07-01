@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class ProjectTypeScreen extends StatelessWidget {
@@ -6,12 +7,13 @@ class ProjectTypeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Étude de projet'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: Text(AppLocalizations.of(context)!.projectStudyTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: Padding(
@@ -19,12 +21,12 @@ class ProjectTypeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Sélectionnez le type de projet',
+            Text(
+              AppLocalizations.of(context)!.selectProjectType,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 24),
@@ -33,7 +35,7 @@ class ProjectTypeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 0.95,
+                childAspectRatio: 0.88,
                 children: [
                   _ProjectTypeCard(
                     title: 'ON-GRID',
@@ -109,6 +111,7 @@ class _ProjectTypeCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.solar_power,
@@ -118,6 +121,9 @@ class _ProjectTypeCard extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

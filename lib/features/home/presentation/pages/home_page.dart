@@ -14,7 +14,10 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         title: const Text('Tawfir Energy'),
         actions: [
           // Logout: sign out and let auth stream switch to LoginPage
@@ -107,19 +110,25 @@ class HomePage extends StatelessWidget {
                   icon: Icons.calculate,
                   title: 'Calculator',
                   subtitle: 'Estimate savings',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRoutes.calulatorInput);
+                  },
                 ),
                 _ServiceCard(
                   icon: Icons.inventory_2,
                   title: 'Products',
                   subtitle: 'Browse panels',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRoutes.companiesSearch);
+                  },
                 ),
                 _ServiceCard(
                   icon: Icons.support_agent,
                   title: 'Support',
                   subtitle: 'Get help',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, AppRoutes.techniciansList);
+                  },
                 ),
               ],
             ),
@@ -165,6 +174,9 @@ class _ServiceCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -172,6 +184,8 @@ class _ServiceCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/project_study/widgets/result_card.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class HybridFormScreen extends StatefulWidget {
@@ -65,12 +66,13 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('HYBRID - Étude de projet'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: Text(AppLocalizations.of(context)!.hybridStudyTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -107,12 +109,12 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
               const SizedBox(height: 32),
 
               // Daily Consumption
-              const Text(
-                'Consommation quotidienne (kWh)',
+              Text(
+                AppLocalizations.of(context)!.dailyConsumptionKwh,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -132,10 +134,10 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 15',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -147,12 +149,12 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
               const SizedBox(height: 24),
 
               // Solar Coverage
-              const Text(
-                'Couverture solaire (%)',
+              Text(
+                AppLocalizations.of(context)!.solarCoveragePercent,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -173,10 +175,10 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 70',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -188,12 +190,12 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
               const SizedBox(height: 24),
 
               // Blackout Hours (Optional)
-              const Text(
-                'Heures de coupure (optionnel)',
+              Text(
+                AppLocalizations.of(context)!.blackoutHoursOptional,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -204,10 +206,10 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 4 (heures par jour)',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -219,21 +221,21 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
               const SizedBox(height: 24),
 
               // Panel Power
-              const Text(
-                'Puissance du panneau (W)',
+              Text(
+                AppLocalizations.of(context)!.panelPowerW,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
@@ -286,9 +288,9 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
                           }
                         : null,
                     icon: const Icon(Icons.request_quote, size: 24),
-                    label: const Text(
-                      'Demander un devis',
-                      style: TextStyle(
+                    label: Text(
+                      AppLocalizations.of(context)!.requestQuoteButton,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -296,7 +298,7 @@ class _HybridFormScreenState extends State<HybridFormScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2196F3),
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledBackgroundColor: colorScheme.outline,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),

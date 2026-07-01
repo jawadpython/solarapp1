@@ -1,10 +1,10 @@
-import 'dart:developer' as developer;
-import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/firestore_service.dart';
+import 'package:noor_energy/core/widgets/success_dialog.dart';
 import 'package:noor_energy/core/services/notification_service.dart';
-import 'package:noor_energy/routes/app_routes.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 
 class EtudeDevisScreen extends StatefulWidget {
@@ -16,8 +16,11 @@ class EtudeDevisScreen extends StatefulWidget {
 
 class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _cityController = TextEditingController();
   final _consumptionController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _addressController = TextEditingController();
   final _firestoreService = FirestoreService();
 
   String? _selectedSystemType;
@@ -27,21 +30,59 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
   final List<String> _systemTypes = ['On-grid', 'Off-grid', 'Hybride', 'Pompe'];
 
   @override
+  void initState() {
+    super.initState();
+    _fullNameController.addListener(_syncFormValidity);
+    _phoneController.addListener(_syncFormValidity);
+    _cityController.addListener(_syncFormValidity);
+    _consumptionController.addListener(_syncFormValidity);
+    _addressController.addListener(_syncFormValidity);
+  }
+
+  void _syncFormValidity() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_consumptionMethod == null) {
+      _consumptionMethod = AppLocalizations.of(context)!.enterKwh;
+    }
+  }
+
+  @override
   void dispose() {
+    _fullNameController.removeListener(_syncFormValidity);
+    _phoneController.removeListener(_syncFormValidity);
+    _cityController.removeListener(_syncFormValidity);
+    _consumptionController.removeListener(_syncFormValidity);
+    _addressController.removeListener(_syncFormValidity);
+    _fullNameController.dispose();
+    _phoneController.dispose();
+    _cityController.dispose();
     _consumptionController.dispose();
-    _locationController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
-  bool get _isFormValid {
-    return _selectedSystemType != null &&
-        _consumptionMethod != null &&
-        _locationController.text.isNotEmpty &&
-        _consumptionController.text.isNotEmpty;
+  bool _isFormValid(AppLocalizations loc) {
+    if (_selectedSystemType == null || _consumptionMethod == null) return false;
+    if (_fullNameController.text.trim().isEmpty) return false;
+    if (_phoneController.text.trim().isEmpty) return false;
+    if (_cityController.text.trim().isEmpty) return false;
+    final consumptionText = _consumptionController.text.trim();
+    if (consumptionText.isEmpty) return false;
+    if (_consumptionMethod == loc.enterKwh) {
+      final kwh = double.tryParse(consumptionText);
+      if (kwh == null || kwh <= 0) return false;
+    }
+    return true;
   }
 
   Future<void> _submitRequest() async {
-    if (!_formKey.currentState!.validate() || !_isFormValid) {
+    final loc = AppLocalizations.of(context)!;
+    if (!_formKey.currentState!.validate() || !_isFormValid(loc)) {
       return;
     }
 
@@ -50,18 +91,20 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
     });
 
     try {
-      print('🚀🚀🚀 Étude Devis submission started 🚀🚀🚀');
-      debugPrint('🚀 Étude Devis submission started');
-      developer.log('Étude Devis submission started', name: 'EtudeDevisScreen');
+      final fullName = _fullNameController.text.trim();
+      final phone = _phoneController.text.trim();
+      final city = _cityController.text.trim();
+      final address = _addressController.text.trim();
+      final userId = FirebaseAuth.instance.currentUser?.uid;
 
       // Parse consumption value
       double consumption = 0.0;
-      bool isKwh = _consumptionMethod == AppLocalizations.of(context)!.enterKwh;
+      bool isKwh = _consumptionMethod == loc.enterKwh;
       
       if (isKwh) {
         consumption = double.tryParse(_consumptionController.text.trim()) ?? 0.0;
         if (consumption <= 0) {
-          throw Exception(AppLocalizations.of(context)!.invalidConsumption);
+          throw Exception(loc.invalidConsumption);
         }
       }
 
@@ -77,19 +120,16 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
         projectType = 'ON-GRID';
       }
 
-      print('📋 Data: projectType=$projectType, consumption=$consumption, isKwh=$isKwh, location=${_locationController.text}');
-      debugPrint('📋 Data: projectType=$projectType, consumption=$consumption, isKwh=$isKwh');
-
       // Estimate power (simplified calculation - 1kW per 100kWh/month)
       double estimatedPower = isKwh ? (consumption / 100).clamp(1.0, 100.0) : 5.0;
       int panelPower = 400; // Default panel power in watts
 
-      print('💾 Saving to Firestore...');
-      debugPrint('💾 Saving to Firestore...');
-
-      // Save to Firestore using project_requests collection
       final requestId = await _firestoreService.saveProjectRequest(
-        userId: '', // No user ID for anonymous requests
+        userId: userId,
+        fullName: fullName,
+        phone: phone,
+        city: city,
+        location: address.isNotEmpty ? address : null,
         projectType: projectType,
         consumption: consumption,
         isKwh: isKwh,
@@ -97,33 +137,31 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
         estimatedPower: estimatedPower,
       );
 
-      print('✅✅✅ Successfully saved! Request ID: $requestId ✅✅✅');
-      debugPrint('✅ Successfully saved! Request ID: $requestId');
+      if (kDebugMode) debugPrint('✅ Étude devis saved: $requestId');
 
-      // Create admin notification
       try {
         await NotificationService().createAdminNotification(
           type: NotificationType.projectRequest,
-          title: 'Nouvelle demande d\'étude de devis',
-          message: 'Type: $projectType - Consommation: ${isKwh ? "$consumption kWh" : "Facture"}',
+          title: loc.newStudyDevisRequest,
+          message: '$fullName ($city) — $projectType, ${isKwh ? '$consumption kWh' : 'Facture'}',
           requestId: requestId,
           requestCollection: 'project_requests',
         );
-        print('✅ Admin notification created');
       } catch (e) {
-        print('⚠️ Failed to create notification: $e');
-        // Don't fail the whole operation
+        if (kDebugMode) debugPrint('⚠️ Failed to create notification: $e');
       }
 
       if (mounted) {
-        _showSuccessDialog();
+        showSuccessDialog(
+          context,
+          title: loc.requestSent,
+          message: loc.devisRequestSentSuccess,
+          referenceNumber: requestId,
+          onDone: () => Navigator.of(context).pop(),
+        );
       }
-    } catch (e, stackTrace) {
-      print('❌❌❌ ERROR: $e ❌❌❌');
-      print('📋 Stack trace: $stackTrace');
-      debugPrint('❌ ERROR: $e');
-      debugPrint('📋 Stack trace: $stackTrace');
-      developer.log('ERROR in _submitRequest', error: e, stackTrace: stackTrace, name: 'EtudeDevisScreen');
+    } catch (e) {
+      if (kDebugMode) debugPrint('❌ Étude devis error: $e');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -131,27 +169,6 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
             content: Text('${AppLocalizations.of(context)!.errorSending}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: AppLocalizations.of(context)!.details,
-              textColor: Colors.white,
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(AppLocalizations.of(context)!.errorDetails),
-                    content: SingleChildScrollView(
-                      child: Text('$e\n\n$stackTrace'),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(AppLocalizations.of(context)!.close),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
           ),
         );
       }
@@ -164,58 +181,15 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
     }
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.check, color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                AppLocalizations.of(context)!.requestSent,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          AppLocalizations.of(context)!.devisRequestSentSuccess,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: Text(AppLocalizations.of(context)!.ok),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.quoteRequest),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -225,6 +199,97 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Contact information
+              _SectionCard(
+                title: AppLocalizations.of(context)!.contactInfo,
+                isRequired: true,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _fullNameController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.fullNameLabel,
+                        hintText: AppLocalizations.of(context)!.nameHint,
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: colorScheme.outline),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.person_outline),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return AppLocalizations.of(context)!.enterYourName;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.phoneLabel,
+                        hintText: AppLocalizations.of(context)!.phoneHint,
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: colorScheme.outline),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.phone_outlined),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return AppLocalizations.of(context)!.enterYourPhone;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _cityController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.cityLabel,
+                        hintText: AppLocalizations.of(context)!.cityHint,
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: colorScheme.outline),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        prefixIcon: const Icon(Icons.location_city),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return AppLocalizations.of(context)!.validationPleaseEnterCity;
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // Section 1: System Type
               _SectionCard(
                 title: AppLocalizations.of(context)!.systemTypeLabel,
@@ -245,73 +310,58 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               _SectionCard(
                 title: AppLocalizations.of(context)!.consumption,
                 isRequired: true,
-                child: Builder(
-                  builder: (context) {
-                    if (_consumptionMethod == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) setState(() => _consumptionMethod = AppLocalizations.of(context)!.enterKwh);
-                      });
-                    }
-                    return TextFormField(
-                      controller: _consumptionController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.consumptionKwh,
-                        hintText: AppLocalizations.of(context)!.consumptionExample,
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        prefixIcon: const Icon(Icons.bolt),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.enterConsumption;
-                        }
-                        return null;
-                      },
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section 3: GPS Location - Manual Entry
-              _SectionCard(
-                title: AppLocalizations.of(context)!.gpsLocation,
-                isRequired: true,
                 child: TextFormField(
-                  controller: _locationController,
+                  controller: _consumptionController,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.addressGps,
-                    hintText: AppLocalizations.of(context)!.cityHint,
+                    labelText: AppLocalizations.of(context)!.consumptionKwh,
+                    hintText: AppLocalizations.of(context)!.consumptionExample,
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outline),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: AppColors.primary, width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    prefixIcon: const Icon(Icons.location_city),
-                    helperText: AppLocalizations.of(context)!.gpsCoordinates,
+                    prefixIcon: const Icon(Icons.bolt),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.enterCityOrAddress;
+                      return AppLocalizations.of(context)!.enterConsumption;
                     }
                     return null;
                   },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Section 3: Address (optional)
+              _SectionCard(
+                title: AppLocalizations.of(context)!.addressLabel,
+                isRequired: false,
+                child: TextFormField(
+                  controller: _addressController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.addressLabel,
+                    hintText: AppLocalizations.of(context)!.enterAddressManually,
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerHighest,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: colorScheme.outline),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    prefixIcon: const Icon(Icons.home_outlined),
+                    helperText: AppLocalizations.of(context)!.enterAddressManually,
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -320,7 +370,9 @@ class _EtudeDevisScreenState extends State<EtudeDevisScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
+                  onPressed: (_isFormValid(AppLocalizations.of(context)!) && !_isSubmitting)
+                      ? _submitRequest
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -369,15 +421,16 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -390,10 +443,10 @@ class _SectionCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               if (isRequired) ...[
@@ -439,12 +492,12 @@ class _RadioOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: groupValue == value
               ? AppColors.primary.withOpacity(0.1)
-              : Colors.grey.shade50,
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: groupValue == value
                 ? AppColors.primary
-                : Colors.grey.shade300,
+                : Theme.of(context).colorScheme.outline,
             width: groupValue == value ? 2 : 1,
           ),
         ),
@@ -465,7 +518,7 @@ class _RadioOption extends StatelessWidget {
                   fontWeight: groupValue == value
                       ? FontWeight.w600
                       : FontWeight.normal,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),

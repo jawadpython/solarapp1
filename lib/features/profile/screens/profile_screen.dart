@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/services/auth_service.dart';
 import 'package:noor_energy/core/services/language_service.dart';
+import 'package:noor_energy/core/services/theme_service.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -18,38 +20,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit name'),
-        content: TextField(
-          controller: nameController,
-          textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            labelText: 'Name',
-            hintText: 'Your name',
-            border: OutlineInputBorder(),
+      builder: (ctx) {
+        final loc = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(loc.editName),
+          content: TextField(
+            controller: nameController,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              labelText: loc.name,
+              hintText: loc.yourName,
+              border: const OutlineInputBorder(),
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) return;
-              try {
-                await AuthService.instance.updateDisplayName(name);
-                if (context.mounted) Navigator.of(ctx).pop();
-                if (context.mounted) setState(() {});
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Name updated'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                }
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(loc.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final name = nameController.text.trim();
+                if (name.isEmpty) return;
+                HapticFeedback.lightImpact();
+                try {
+                  await AuthService.instance.updateDisplayName(name);
+                  if (context.mounted) Navigator.of(ctx).pop();
+                  if (context.mounted) setState(() {});
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(loc.nameUpdated),
+                        backgroundColor: AppColors.success,
+                      ),
+                    );
+                  }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -62,10 +67,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Save'),
+            child: Text(loc.save),
           ),
         ],
-      ),
+      );
+      }
     );
   }
 
@@ -74,13 +80,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentLocale = LanguageService.instance.currentLocale;
     final name = AuthService.instance.currentUserDisplayName;
     final email = AuthService.instance.currentUserEmail;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profile),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -100,11 +107,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Icon(Icons.person, color: AppColors.primary, size: 24),
                         const SizedBox(width: 12),
                         Text(
-                          'Account',
+                          AppLocalizations.of(context)!.account,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -117,20 +124,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Name',
+                                AppLocalizations.of(context)!.name,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 name?.isNotEmpty == true ? name! : '—',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: AppColors.textPrimary,
+                                  color: colorScheme.onSurface,
                                 ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -138,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         IconButton(
                           onPressed: () => _showEditNameDialog(context),
                           icon: Icon(Icons.edit_outlined, color: AppColors.primary, size: 22),
-                          tooltip: 'Edit name',
+                          tooltip: AppLocalizations.of(context)!.editName,
                         ),
                       ],
                     ),
@@ -147,19 +156,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Email',
+                          AppLocalizations.of(context)!.email,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           email?.isNotEmpty == true ? email! : '—',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Dark mode
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.dark_mode, color: AppColors.primary, size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!.darkMode,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                AppLocalizations.of(context)!.darkModeDescription,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: ThemeService.instance.isDarkMode,
+                          onChanged: (value) async {
+                            HapticFeedback.lightImpact();
+                            await ThemeService.instance.toggleDarkMode();
+                          },
+                          activeColor: AppColors.primary,
                         ),
                       ],
                     ),
@@ -184,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -236,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -246,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       AppLocalizations.of(context)!.otherSettingsComing,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -283,10 +343,10 @@ class _LanguageOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.shade50,
+          color: isSelected ? AppColors.primary.withOpacity(0.1) : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -303,7 +363,7 @@ class _LanguageOption extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),

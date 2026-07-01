@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
 import 'package:noor_energy/features/admin/widgets/admin_shared_widgets.dart';
+import 'package:noor_energy/features/admin/widgets/partner_documents_dialog.dart';
 
 class AdminPartnersListScreen extends StatefulWidget {
   const AdminPartnersListScreen({super.key});
@@ -64,6 +66,71 @@ class _AdminPartnersListScreenState extends State<AdminPartnersListScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _editPartnerServiceType(Map<String, dynamic> partner) async {
+    final partnerId = partner['id']?.toString() ?? '';
+    if (partnerId.isEmpty) return;
+
+    final current = PartnerServiceTypes.serviceTypeFromMap(partner);
+    String selected = current.isEmpty
+        ? PartnerServiceTypes.canonicalLabels.first
+        : current;
+
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Modifier type de service'),
+              content: DropdownButton<String>(
+                value: selected,
+                isExpanded: true,
+                items: PartnerServiceTypes.canonicalLabels
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    setDialogState(() => selected = v);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, selected),
+                  child: const Text('Enregistrer'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (!mounted || picked == null) return;
+
+    final success = await _adminService.updatePartnerServiceType(
+      partnerId: partnerId,
+      serviceType: picked,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Type de service mis à jour'
+              : 'Erreur lors de la mise à jour',
+        ),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+    if (success) {
+      _loadPartners();
     }
   }
 
@@ -182,10 +249,21 @@ class _AdminPartnersListScreenState extends State<AdminPartnersListScreen> {
                           InfoRow(icon: Icons.location_city, label: 'Ville', value: partner['city'] ?? 'N/A'),
                           const SizedBox(height: 12),
                           InfoRow(icon: Icons.email, label: 'Email', value: partner['email'] ?? 'N/A'),
-                          if (partner['speciality'] != null) ...[
-                            const SizedBox(height: 12),
-                            InfoRow(icon: Icons.build, label: 'Spécialité', value: partner['speciality'] ?? 'N/A'),
-                          ],
+                          const SizedBox(height: 12),
+                          InfoRow(
+                            icon: Icons.category,
+                            label: 'Type de service',
+                            value: () {
+                              final st = PartnerServiceTypes.serviceTypeFromMap(partner);
+                              return st.isEmpty ? 'Non renseigné' : st;
+                            }(),
+                          ),
+                          const SizedBox(height: 12),
+                          InfoRow(
+                            icon: Icons.attach_file,
+                            label: 'Documents',
+                            value: '${partnerDocumentsEntrepriseUrls(partner).length} fichier(s)',
+                          ),
                         ],
                       ),
                     ),
@@ -224,6 +302,40 @@ class _AdminPartnersListScreenState extends State<AdminPartnersListScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => showPartnerDocumentsDialog(context, partner),
+                        icon: const Icon(Icons.description, size: 18),
+                        label: const Text('Voir documents'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _editPartnerServiceType(partner),
+                        icon: const Icon(Icons.category, size: 18),
+                        label: const Text('Modifier type de service'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(

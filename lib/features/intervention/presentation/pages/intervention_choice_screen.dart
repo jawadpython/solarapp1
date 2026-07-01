@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class InterventionChoiceScreen extends StatelessWidget {
@@ -7,12 +6,13 @@ class InterventionChoiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Type d\'intervention'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SafeArea(
@@ -22,13 +22,12 @@ class InterventionChoiceScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              // Title
-              const Text(
+              Text(
                 'Choisissez votre type d\'intervention',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -93,6 +92,8 @@ class _InterventionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -102,24 +103,25 @@ class _InterventionCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: borderColor.withOpacity(0.3),
               width: 2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Theme.of(context).shadowColor.withOpacity(0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Icon Container
               Container(
                 width: 80,
                 height: 80,
@@ -134,35 +136,32 @@ class _InterventionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Title
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                   letterSpacing: 0.3,
                 ),
               ),
               const SizedBox(height: 12),
-              // Description
               Text(
                 description,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 24),
-              // Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: onTap,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: iconColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -171,12 +170,18 @@ class _InterventionCard extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        buttonText,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      Flexible(
+                        child: Text(
+                          buttonText,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),

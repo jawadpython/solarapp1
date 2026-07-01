@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
@@ -10,20 +9,24 @@ class SearchChoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(localizations.whatAreYouLookingFor),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
             // Companies Card
             _ChoiceCard(
               icon: Icons.business,
@@ -45,8 +48,11 @@ class SearchChoiceScreen extends StatelessWidget {
                 Navigator.pushNamed(context, AppRoutes.techniciansSearch);
               },
             ),
-          ],
-        ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -70,11 +76,13 @@ class _ChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: Colors.white,
+      color: colorScheme.surface,
       borderRadius: BorderRadius.circular(24),
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      elevation: isDark ? 0 : 2,
+      shadowColor: isDark ? Colors.transparent : Theme.of(context).shadowColor.withOpacity(0.1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
@@ -82,7 +90,7 @@ class _ChoiceCard extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.grey.shade100),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -105,10 +113,12 @@ class _ChoiceCard extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -116,9 +126,11 @@ class _ChoiceCard extends StatelessWidget {
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
+                maxLines: 6,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

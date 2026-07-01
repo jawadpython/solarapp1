@@ -29,14 +29,16 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final typeColor = _getTypeColor(projectType);
-    
+    final colorScheme = Theme.of(context).colorScheme;
+    final surface = colorScheme.surface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      elevation: 4,
-      shadowColor: typeColor.withOpacity(0.3),
+      elevation: isDark ? 0 : 4,
+      shadowColor: isDark ? Colors.transparent : Theme.of(context).shadowColor.withOpacity(0.2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(
-          color: typeColor.withOpacity(0.2),
+          color: typeColor.withOpacity(isDark ? 0.35 : 0.2),
           width: 1.5,
         ),
       ),
@@ -46,11 +48,17 @@ class ResultCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              typeColor.withOpacity(0.08),
-              typeColor.withOpacity(0.03),
-              Colors.white,
-            ],
+            colors: isDark
+                ? [
+                    typeColor.withOpacity(0.15),
+                    typeColor.withOpacity(0.06),
+                    surface,
+                  ]
+                : [
+                    typeColor.withOpacity(0.08),
+                    typeColor.withOpacity(0.03),
+                    surface,
+                  ],
           ),
         ),
         padding: const EdgeInsets.all(24),
@@ -84,12 +92,12 @@ class ResultCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Résultat estimé',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: colorScheme.onSurface,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -187,7 +195,7 @@ class ResultCard extends StatelessWidget {
       _ResultItem(
         icon: Icons.battery_charging_full,
         label: 'Capacité batterie',
-        value: '${batteryCapacity.toStringAsFixed(2)} Ah',
+        value: '${batteryCapacity.toStringAsFixed(2)} kWh',
         color: Colors.green,
       ),
       _ResultItem(
@@ -210,7 +218,7 @@ class ResultCard extends StatelessWidget {
       _ResultItem(
         icon: Icons.battery_charging_full,
         label: 'Stockage batterie',
-        value: '${batteryCapacity.toStringAsFixed(2)} Ah',
+        value: '${batteryCapacity.toStringAsFixed(2)} kWh',
         color: Colors.green,
       ),
       _ResultItem(
@@ -277,11 +285,12 @@ class _ResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withOpacity(0.2),
@@ -289,7 +298,7 @@ class _ResultItem extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Theme.of(context).shadowColor.withOpacity(0.08),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -314,7 +323,7 @@ class _ResultItem extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.2,
                   ),

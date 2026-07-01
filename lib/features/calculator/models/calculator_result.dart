@@ -24,6 +24,7 @@ class OnGridResult extends CalculatorResult {
   final double coveragePct; // coverage_pct (30-100%)
   final String voltage; // 220V or 380V
   final bool showVoltageWarning; // Warning if inverter > 5kW and voltage = 220V
+  final bool showRegulatoryWarning; // Warning if PV > 11 kWc (Loi 82-21)
   final double savingMonth;
   final double savingYear;
   final double saving10Y;
@@ -46,6 +47,7 @@ class OnGridResult extends CalculatorResult {
     required this.coveragePct,
     required this.voltage,
     required this.showVoltageWarning,
+    this.showRegulatoryWarning = false,
     required this.savingMonth,
     required this.savingYear,
     required this.saving10Y,
@@ -78,6 +80,7 @@ class HybridResult extends CalculatorResult {
   final double coveragePct; // Coverage percentage (30-100%)
   final String voltage; // 220V or 380V
   final bool showVoltageWarning; // Warning if inverter > 5kW and voltage = 220V
+  final bool showRegulatoryWarning; // Warning if PV > 11 kWc (Loi 82-21)
   final double savingMonth;
   final double savingYear;
   final double saving10Y;
@@ -110,6 +113,7 @@ class HybridResult extends CalculatorResult {
     required this.coveragePct,
     required this.voltage,
     required this.showVoltageWarning,
+    this.showRegulatoryWarning = false,
     required this.savingMonth,
     required this.savingYear,
     required this.saving10Y,
@@ -131,6 +135,7 @@ class OffGridResult extends CalculatorResult {
   final double inverterKW; // Recommended inverter
   final String? voltage; // Optional: 220V or 380V
   final bool showVoltageWarning; // Warning if inverter > 5kW and voltage = 220V
+  final bool showRegulatoryWarning; // Warning if PV > 11 kWc (Loi 82-21)
   final String? recommendedVoltage; // Recommended voltage if not chosen by user
   final int panelWp;
 
@@ -148,6 +153,7 @@ class OffGridResult extends CalculatorResult {
     required this.inverterKW,
     this.voltage,
     required this.showVoltageWarning,
+    this.showRegulatoryWarning = false,
     this.recommendedVoltage,
     required this.panelWp,
   });

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
+import 'package:noor_energy/features/admin/widgets/partner_documents_dialog.dart';
 import '../services/firestore_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/date_formatter.dart';
@@ -10,6 +12,66 @@ import '../widgets/request_detail_dialog.dart';
 /// Partners Management Page with delete functionality
 class PartnersPage extends StatelessWidget {
   const PartnersPage({super.key});
+
+  Future<void> _editPartnerServiceType(
+    BuildContext context,
+    AdminFirestoreService firestoreService,
+    Map<String, dynamic> item,
+  ) async {
+    final partnerId = item['id']?.toString() ?? '';
+    if (partnerId.isEmpty) return;
+
+    final current = PartnerServiceTypes.serviceTypeFromMap(item);
+    String selected = current.isEmpty
+        ? PartnerServiceTypes.canonicalLabels.first
+        : current;
+
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Modifier type de service'),
+              content: DropdownButton<String>(
+                value: selected,
+                isExpanded: true,
+                items: PartnerServiceTypes.canonicalLabels
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    setDialogState(() => selected = v);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, selected),
+                  child: const Text('Enregistrer'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (!context.mounted || picked == null) return;
+
+    await firestoreService.updatePartnerServiceType(
+      partnerId: partnerId,
+      serviceType: picked,
+    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Type de service mis à jour')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +126,20 @@ class PartnersPage extends StatelessWidget {
                   }).toList();
                   return ExportBar(
                     data: allData,
-                    columns: const ['Date', 'Entreprise', 'ICE', 'IF', 'RC', 'Patente', 'Adresse', 'Ville', 'Téléphone', 'Email', 'Statut'],
+                    columns: const [
+                      'Date',
+                      'Entreprise',
+                      'ICE',
+                      'IF',
+                      'RC',
+                      'Patente',
+                      'Adresse',
+                      'Ville',
+                      'Téléphone',
+                      'Email',
+                      'Type de service',
+                      'Statut',
+                    ],
                     title: 'Partenaires',
                     fileName: 'partners',
                   );
@@ -87,7 +162,7 @@ class PartnersPage extends StatelessWidget {
                     }).toList() ?? [];
                     return SimpleDataTable(
                       data: data,
-                      columns: const ['Date', 'Entreprise', 'ICE', 'RC', 'Téléphone', 'Ville', 'Email', 'Statut', 'Actions'],
+                      columns: const ['Date', 'Entreprise', 'ICE', 'RC', 'Téléphone', 'Ville', 'Email', 'Type de service', 'Statut', 'Actions'],
                       buildRow: (context, item, index) {
                         final isActive = item['active'] == true;
                         return Row(
@@ -143,6 +218,16 @@ class PartnersPage extends StatelessWidget {
                             ),
                             Expanded(
                               flex: 2,
+                              child: Text(
+                                () {
+                                  final st = PartnerServiceTypes.serviceTypeFromMap(item);
+                                  return st.isEmpty ? '—' : st;
+                                }(),
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
@@ -170,6 +255,12 @@ class PartnersPage extends StatelessWidget {
                               child: Row(
                                 children: [
                                   IconButton(
+                                    icon: const Icon(Icons.attach_file, size: 18),
+                                    onPressed: () => showPartnerDocumentsDialog(context, item),
+                                    color: AppTheme.primaryColor,
+                                    tooltip: 'Documents entreprise',
+                                  ),
+                                  IconButton(
                                     icon: const Icon(Icons.visibility, size: 18),
                                     onPressed: () {
                                       showDialog(
@@ -183,6 +274,16 @@ class PartnersPage extends StatelessWidget {
                                     },
                                     color: AppTheme.infoColor,
                                     tooltip: 'Voir détails',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.category, size: 18),
+                                    onPressed: () => _editPartnerServiceType(
+                                      context,
+                                      firestoreService,
+                                      item,
+                                    ),
+                                    color: AppTheme.primaryColor,
+                                    tooltip: 'Modifier type de service',
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete, size: 18),

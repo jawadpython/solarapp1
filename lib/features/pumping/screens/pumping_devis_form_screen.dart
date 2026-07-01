@@ -141,12 +141,13 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Demander un Devis Pompage'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -163,12 +164,12 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Résumé du calcul',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -239,12 +240,12 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
               TextFormField(
                 controller: _gpsController,
                 decoration: InputDecoration(
-                  labelText: 'Coordonnées GPS (optionnel)',
+                  labelText: 'Adresse (optionnel)',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   prefixIcon: const Icon(Icons.location_on),
-                  helperText: 'Entrez votre adresse ou coordonnées GPS manuellement (Ex: 33.5731, -7.5898)',
+                  helperText: 'Entrez votre adresse manuellement',
                 ),
               ),
               const SizedBox(height: 16),
@@ -262,11 +263,11 @@ class _PumpingDevisFormScreenState extends State<PumpingDevisFormScreen> {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: (_isFormValid && !_isSubmitting) ? _submitRequest : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey.shade300,
-                  disabledForegroundColor: Colors.grey.shade600,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    disabledBackgroundColor: colorScheme.outline,
+                    disabledForegroundColor: colorScheme.onSurfaceVariant,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

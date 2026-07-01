@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
@@ -84,12 +83,14 @@ class _TechnicianAssignmentSheetState extends State<TechnicianAssignmentSheet> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.65,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -159,9 +160,8 @@ class _TechnicianAssignmentSheetState extends State<TechnicianAssignmentSheet> {
               ),
             )
           else
-            Flexible(
+            Expanded(
               child: ListView.builder(
-                shrinkWrap: true,
                 itemCount: _technicians.length,
                 itemBuilder: (context, index) {
                   final tech = _technicians[index];
@@ -170,9 +170,15 @@ class _TechnicianAssignmentSheetState extends State<TechnicianAssignmentSheet> {
                       backgroundColor: AppColors.primary.withOpacity(0.1),
                       child: Icon(Icons.person, color: AppColors.primary),
                     ),
-                    title: Text(tech['name'] ?? 'N/A'),
+                    title: Text(
+                      tech['name'] ?? 'N/A',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     subtitle: Text(
                       '${tech['city'] ?? 'N/A'} • ${tech['speciality'] ?? 'N/A'}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.arrow_forward),

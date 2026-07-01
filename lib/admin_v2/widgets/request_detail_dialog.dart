@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../utils/app_theme.dart';
 import '../utils/status_chip.dart';
 import '../utils/date_formatter.dart';
+
+List<dynamic> _certificateUrlsList(Map<String, dynamic> data) {
+  final urls = data['certificateUrls'];
+  if (urls == null) return const [];
+  if (urls is List) return urls;
+  return const [];
+}
+
+List<dynamic> _partnerDocumentUrlsList(Map<String, dynamic> data) {
+  final urls = data['documentsEntrepriseUrls'];
+  if (urls == null) return const [];
+  if (urls is List) return urls;
+  return const [];
+}
+
+bool _isImageUrl(String url) {
+  final lower = url.toLowerCase();
+  return lower.contains('.jpg') ||
+      lower.contains('.jpeg') ||
+      lower.contains('.png') ||
+      lower.contains('.webp');
+}
 
 class RequestDetailDialog extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -14,6 +38,56 @@ class RequestDetailDialog extends StatelessWidget {
     required this.collection,
     required this.requestId,
   });
+
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image, size: 64, color: Colors.white),
+                          SizedBox(height: 16),
+                          Text('Image non disponible', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +138,15 @@ class RequestDetailDialog extends StatelessWidget {
                 if (data['telephone'] != null) _DetailRow('Téléphone', Text(data['telephone'].toString())),
                 if (data['phone'] != null && data['telephone'] == null) _DetailRow('Téléphone', Text(data['phone'].toString())),
                 if (data['email'] != null) _DetailRow('Email', Text(data['email'].toString())),
-                if (data['speciality'] != null) _DetailRow('Spécialité', Text(data['speciality'].toString())),
+                _DetailRow(
+                  'Type de service',
+                  Text(
+                    (() {
+                      final st = PartnerServiceTypes.serviceTypeFromMap(data);
+                      return st.isEmpty ? 'Non renseigné' : st;
+                    })(),
+                  ),
+                ),
                 if (data['documentsEntreprise'] != null) _DetailRow('Documents Entreprise', Text(data['documentsEntreprise'].toString())),
                 if (data['active'] != null) _DetailRow('Statut', Text(data['active'] == true ? 'Actif' : 'Inactif')),
                 if (data['status'] != null) _DetailRow('Statut Candidature', StatusChip(status: data['status']?.toString() ?? 'pending')),
@@ -84,8 +166,8 @@ class RequestDetailDialog extends StatelessWidget {
               if (data['problemDescription'] != null) _DetailRow('Description', Text(data['problemDescription'].toString())),
               if (data['description'] != null) _DetailRow('Description', Text(data['description'].toString())),
               if (data['note'] != null) _DetailRow('Note', Text(data['note'].toString())),
-              if (data['gps'] != null) _DetailRow('GPS', Text(data['gps'].toString())),
-              if (data['location'] != null) _DetailRow('Localisation', Text(data['location'].toString())),
+              if (data['gps'] != null) _DetailRow('Adresse', Text(data['gps'].toString())),
+              if (data['location'] != null) _DetailRow('Adresse', Text(data['location'].toString())),
               if (data['projectType'] != null) _DetailRow('Type de projet', Text(data['projectType'].toString())),
               if (data['consumption'] != null) _DetailRow('Consommation', Text(data['consumption'].toString())),
               if (data['isKwh'] != null) _DetailRow('Unité', Text(data['isKwh'] == true ? 'kWh' : 'kW')),
@@ -94,7 +176,7 @@ class RequestDetailDialog extends StatelessWidget {
               if (data['savingsMonth'] != null) _DetailRow('Économies/Mois', Text(data['savingsMonth'].toString())),
               if (data['savingsYear'] != null) _DetailRow('Économies/An', Text(data['savingsYear'].toString())),
               if (data['regionCode'] != null) _DetailRow('Région', Text(data['regionCode'].toString())),
-              if (data['locationType'] != null) _DetailRow('Type Localisation', Text(data['locationType'].toString())),
+              if (data['locationType'] != null) _DetailRow('Type de lieu', Text(data['locationType'].toString())),
               // Request-specific fields (only for requests, not partners)
               if (collection != 'partners' && collection != 'partner_applications') ...[
                 if (data['systemType'] != null) _DetailRow('Type système', Text(data['systemType'].toString())),
@@ -105,8 +187,8 @@ class RequestDetailDialog extends StatelessWidget {
                 if (data['problemDescription'] != null) _DetailRow('Description', Text(data['problemDescription'].toString())),
                 if (data['description'] != null) _DetailRow('Description', Text(data['description'].toString())),
                 if (data['note'] != null) _DetailRow('Note', Text(data['note'].toString())),
-                if (data['gps'] != null) _DetailRow('GPS', Text(data['gps'].toString())),
-                if (data['location'] != null) _DetailRow('Localisation', Text(data['location'].toString())),
+                if (data['gps'] != null) _DetailRow('Adresse', Text(data['gps'].toString())),
+                if (data['location'] != null) _DetailRow('Adresse', Text(data['location'].toString())),
                 if (data['projectType'] != null) _DetailRow('Type de projet', Text(data['projectType'].toString())),
                 if (data['consumption'] != null) _DetailRow('Consommation', Text(data['consumption'].toString())),
                 if (data['isKwh'] != null) _DetailRow('Unité', Text(data['isKwh'] == true ? 'kWh' : 'kW')),
@@ -115,11 +197,138 @@ class RequestDetailDialog extends StatelessWidget {
                 if (data['savingsMonth'] != null) _DetailRow('Économies/Mois', Text(data['savingsMonth'].toString())),
                 if (data['savingsYear'] != null) _DetailRow('Économies/An', Text(data['savingsYear'].toString())),
                 if (data['regionCode'] != null) _DetailRow('Région', Text(data['regionCode'].toString())),
-                if (data['locationType'] != null) _DetailRow('Type Localisation', Text(data['locationType'].toString())),
+                if (data['locationType'] != null) _DetailRow('Type de lieu', Text(data['locationType'].toString())),
                 if (data['assignedTechnician'] != null) 
                   _DetailRow('Technicien Assigné', Text(data['assignedTechnician']['name']?.toString() ?? 'N/A')),
               ],
               if (data['userId'] != null) _DetailRow('User ID', Text(data['userId'].toString())),
+              // Technician certificates text
+              if (data['certificates'] != null && data['certificates'].toString().isNotEmpty)
+                _DetailRow('Certificats', Text(data['certificates'].toString())),
+              // Certificate Images Section
+              if (_certificateUrlsList(data).isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                const Text(
+                  'Images des Certificats',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _certificateUrlsList(data).length,
+                    itemBuilder: (context, index) {
+                      final imageUrl = _certificateUrlsList(data)[index].toString();
+                      return GestureDetector(
+                        onTap: () => _showFullImage(context, imageUrl),
+                        child: Container(
+                          width: 200,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.borderColor),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.broken_image, size: 48, color: AppTheme.textSecondary),
+                                        const SizedBox(height: 8),
+                                        const Text('Image non disponible', style: TextStyle(color: AppTheme.textSecondary), textAlign: TextAlign.center),
+                                        const SizedBox(height: 8),
+                                        TextButton.icon(
+                                          onPressed: () => launchUrl(Uri.parse(imageUrl), mode: LaunchMode.externalApplication),
+                                          icon: const Icon(Icons.open_in_new, size: 18),
+                                          label: const Text('Ouvrir l\'image'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${_certificateUrlsList(data).length} image(s) - Cliquez pour agrandir',
+                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ],
+              if (_partnerDocumentUrlsList(data).isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                const Text(
+                  'Documents Entreprise',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _partnerDocumentUrlsList(data).length,
+                  itemBuilder: (context, index) {
+                    final docUrl = _partnerDocumentUrlsList(data)[index].toString();
+                    final isImage = _isImageUrl(docUrl);
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        isImage ? Icons.image : Icons.picture_as_pdf,
+                        color: isImage ? AppTheme.infoColor : AppTheme.errorColor,
+                      ),
+                      title: Text('Document ${index + 1}'),
+                      subtitle: Text(
+                        docUrl,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: TextButton.icon(
+                        onPressed: () => launchUrl(
+                          Uri.parse(docUrl),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: const Text('Ouvrir'),
+                      ),
+                    );
+                  },
+                ),
+              ],
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

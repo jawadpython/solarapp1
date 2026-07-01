@@ -1,7 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Location permissions for GPS feature -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     
     <application
@@ -29,6 +26,35 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Open Firebase Auth email-action links & return users to this app -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="solar-app-f698e.firebaseapp.com"
+                    android:pathPrefix="/__/auth" />
+            </intent-filter>
+            <!-- Deep link fallback from hosted thank-you pages after verify/reset in browser -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="com.tawfir.energy"
+                    android:host="auth" />
+            </intent-filter>
+            <!-- com.tawfir.energy://email_verified … (Firebase / OS may omit host auth) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="com.tawfir.energy"
+                    android:host="email_verified"
+                    />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

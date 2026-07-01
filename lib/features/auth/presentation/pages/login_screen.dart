@@ -25,8 +25,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.topRight,
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: colorScheme.outline),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: PopupMenuButton<String>(
@@ -116,9 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.email,
-                    prefixIcon: Icon(Icons.email_outlined, color: Colors.grey.shade600),
+                    prefixIcon: Icon(Icons.email_outlined, color: colorScheme.onSurfaceVariant),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -137,18 +138,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.password,
-                    prefixIcon: Icon(Icons.lock_outlined, color: Colors.grey.shade600),
+                    prefixIcon: Icon(Icons.lock_outlined, color: colorScheme.onSurfaceVariant),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       onPressed: () {
                         setState(() => _obscurePassword = !_obscurePassword);
                       },
                     ),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -165,7 +166,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.login);
+                    },
                     child: Text(
                       AppLocalizations.of(context)!.forgotPassword,
                       style: TextStyle(
@@ -206,9 +209,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.noAccount,
-                      style: TextStyle(color: AppColors.textSecondary),
+                    Flexible(
+                      child: Text(
+                        AppLocalizations.of(context)!.noAccount,
+                        style: TextStyle(color: AppColors.textSecondary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {

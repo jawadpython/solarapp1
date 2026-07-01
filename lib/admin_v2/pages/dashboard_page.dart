@@ -25,16 +25,26 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _loadStatistics() async {
+    setState(() => _isLoading = true);
     try {
       final stats = await _firestoreService.getStatistics();
-      setState(() {
-        _statistics = stats;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _statistics = stats;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _statistics = {
+            'devis': 0, 'installation': 0, 'maintenance': 0, 'pumping': 0,
+            'project': 0, 'pendingTechnicianApps': 0, 'pendingPartnerApps': 0,
+            'technicians': 0, 'partners': 0,
+          };
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -59,12 +69,28 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Vue d\'ensemble de votre activité',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppTheme.textSecondary,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _isLoading
+                          ? 'Chargement...'
+                          : (_statistics.values.every((v) => v == 0)
+                              ? 'Vue d\'ensemble — Aucune donnée pour le moment'
+                              : 'Vue d\'ensemble de votre activité'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                  if (!_isLoading)
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: _loadStatistics,
+                      tooltip: 'Actualiser',
+                    ),
+                ],
               ),
               const SizedBox(height: 32),
               // Statistics Cards

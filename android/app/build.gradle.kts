@@ -95,10 +95,9 @@ android {
                 signingConfigs.getByName("debug") // Fallback for development
             }
             
-            // Enable code shrinking, obfuscation, and optimization
-            // Set to false temporarily if build fails, then enable after fixing issues
+            // Enable code shrinking and obfuscation (shrinkResources disabled to avoid processReleaseResources failures on Windows)
             isMinifyEnabled = true
-            isShrinkResources = true
+            isShrinkResources = false
             
             // ProGuard rules
             proguardFiles(

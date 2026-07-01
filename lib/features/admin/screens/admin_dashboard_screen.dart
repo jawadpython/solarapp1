@@ -39,16 +39,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Security check: Only admins can access
-    // TEMPORARILY DISABLED FOR TESTING - Boutique button navigation
-    // if (!UserStateService.instance.isAdmin) {
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     Navigator.of(context).pushReplacementNamed(AppRoutes.homeScreen);
-    //   });
-    //   return const Scaffold(
-    //     body: Center(child: CircularProgressIndicator()),
-    //   );
-    // }
+    // Security check: only admins can access this screen
+    if (!UserStateService.instance.isAdmin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.homeScreen);
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,

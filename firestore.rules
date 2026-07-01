@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if the caller is an admin via the admins collection or custom claim
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Admins: read own doc only (to verify own admin status); write only via Console/Functions
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Users: read own or admin; write own (role field cannot be changed by the user)
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+      allow delete: if isAdmin();
+    }
+
+    // Chats: users see/update own chat; admins see all
+    match /chats/{chatId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+
+      // Messages: any authenticated user in the chat can read/create
+      match /messages/{messageId} {
+        allow read, create: if request.auth != null;
+        allow update, delete: if false;
+      }
+    }
+
+    // Request collections: users create their own; read/manage own or admin
+    match /devis_requests/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /installation_requests/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /maintenance_requests/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /pumping_requests/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /project_studies/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /project_requests/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Applications: users submit own; admins manage all
+    match /technician_applications/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /partner_applications/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Technicians directory: public read for in-app search; admin-only write
+    match /technicians/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Partners: auth required to read (contains company PII); admin-only write
+    match /partners/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Products catalog: public read for marketplace; admin-only write
+    match /products/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Notifications: any auth user can create (client triggers admin notifications);
+    // users read own; admins read/update/delete all
+    match /notifications/{docId} {
+      allow create: if request.auth != null;
+      allow read: if isAdmin() ||
+        (request.auth != null && resource.data.user == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+  }
+}

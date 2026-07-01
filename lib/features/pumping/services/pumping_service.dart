@@ -152,11 +152,11 @@ class PumpingService {
     final waterNeed = waterNeedTable[input.cropType] ?? waterNeedTable['Autre']!;
 
     // Get irrigation efficiency factor
-    final factor = irrigationFactor[input.irrigationType] ??
+    final efficiency = irrigationFactor[input.irrigationType] ??
         irrigationFactor['Autre']!;
 
-    // Calculate daily water need: waterDay = areaHa * waterNeed * factor
-    final waterDay = areaHa * waterNeed * factor;
+    // Required pumped water increases when irrigation efficiency decreases.
+    final waterDay = areaHa * waterNeed / efficiency;
 
     // Calculate flow rate: Q = waterDay / hoursPerDay
     final q = waterDay / input.hoursPerDay!;

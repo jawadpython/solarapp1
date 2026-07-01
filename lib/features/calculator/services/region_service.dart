@@ -79,34 +79,55 @@ class RegionService {
     }
   }
 
-  /// Get sun hours for a specific region based on current month
-  /// Returns 5.5 as fallback if region code is not found or error occurs
-  Future<double> getSunHoursByRegion(String regionCode) async {
+  static const double _fallbackSunHours = 5.5;
+
+  Future<List<double>?> _monthlySunHours(String regionCode) async {
     try {
       final sunHoursMap = await loadSunHours();
-
       if (!sunHoursMap.containsKey(regionCode)) {
         debugPrint('Region code not found: $regionCode');
-        return 5.5;
+        return null;
       }
-
       final monthHours = sunHoursMap[regionCode];
       if (monthHours == null || monthHours.isEmpty) {
         debugPrint('Sun hours data is empty for region: $regionCode');
-        return 5.5;
+        return null;
       }
-
-      final monthIndex = DateTime.now().month - 1; // 0-11 for Jan-Dec
-      if (monthIndex >= 0 && monthIndex < monthHours.length) {
-        return monthHours[monthIndex];
-      }
-
-      debugPrint('Invalid month index: $monthIndex');
-      return 5.5;
+      return monthHours;
     } catch (e) {
-      debugPrint('Error getting sun hours for region $regionCode: $e');
-      return 5.5;
+      debugPrint('Error loading sun hours for region $regionCode: $e');
+      return null;
     }
+  }
+
+  /// Get sun hours for a specific region based on current month.
+  /// Returns 5.5 as fallback if region code is not found or error occurs.
+  Future<double> getSunHoursByRegion(String regionCode) async {
+    final monthHours = await _monthlySunHours(regionCode);
+    if (monthHours == null) return _fallbackSunHours;
+
+    final monthIndex = DateTime.now().month - 1;
+    if (monthIndex >= 0 && monthIndex < monthHours.length) {
+      return monthHours[monthIndex];
+    }
+
+    debugPrint('Invalid month index: $monthIndex');
+    return _fallbackSunHours;
+  }
+
+  /// Annual average peak-sun hours (h/day) for ON-GRID / HYBRID / POMPAGE sizing.
+  Future<double> getAnnualAverageSunHours(String regionCode) async {
+    final monthHours = await _monthlySunHours(regionCode);
+    if (monthHours == null) return _fallbackSunHours;
+    final sum = monthHours.reduce((a, b) => a + b);
+    return sum / monthHours.length;
+  }
+
+  /// Worst-month (December index 11) sun hours for conservative OFF-GRID sizing.
+  Future<double> getWorstMonthSunHours(String regionCode) async {
+    final monthHours = await _monthlySunHours(regionCode);
+    if (monthHours == null) return _fallbackSunHours;
+    return monthHours.reduce((a, b) => a < b ? a : b);
   }
 
   /// Get region name by code

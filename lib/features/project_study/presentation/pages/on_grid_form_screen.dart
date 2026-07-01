@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/features/project_study/widgets/result_card.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:noor_energy/routes/app_routes.dart';
 
 class OnGridFormScreen extends StatefulWidget {
@@ -59,12 +60,13 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('ON-GRID - Étude de projet'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: Text(AppLocalizations.of(context)!.onGridStudyTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -101,12 +103,12 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
               const SizedBox(height: 32),
 
               // Monthly Consumption
-              const Text(
-                'Consommation mensuelle (kWh)',
+              Text(
+                AppLocalizations.of(context)!.monthlyConsumptionKwh,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -126,10 +128,10 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 500',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -141,12 +143,12 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
               const SizedBox(height: 24),
 
               // Sun Hours
-              const Text(
-                'Heures d\'ensoleillement par jour',
+              Text(
+                AppLocalizations.of(context)!.sunHoursPerDay,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -166,10 +168,10 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
                 decoration: InputDecoration(
                   hintText: 'Ex: 5.5',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -181,21 +183,21 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
               const SizedBox(height: 24),
 
               // Panel Power
-              const Text(
-                'Puissance du panneau (W)',
+              Text(
+                AppLocalizations.of(context)!.panelPowerW,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
@@ -249,8 +251,8 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
                           }
                         : null,
                     icon: const Icon(Icons.request_quote, size: 24),
-                    label: const Text(
-                      'Demander un devis',
+                    label: Text(
+                      AppLocalizations.of(context)!.requestQuoteButton,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -259,7 +261,7 @@ class _OnGridFormScreenState extends State<OnGridFormScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF9800),
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledBackgroundColor: colorScheme.outline,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),

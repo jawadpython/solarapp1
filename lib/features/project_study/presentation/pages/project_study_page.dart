@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 import 'package:noor_energy/core/widgets/app_button.dart';
 import 'package:noor_energy/core/widgets/app_text_field.dart';
+import 'package:noor_energy/l10n/app_localizations.dart';
 
 class ProjectStudyPage extends StatefulWidget {
   const ProjectStudyPage({super.key});
@@ -24,9 +25,14 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Project Study'),
+        title: Text(loc.projectStudyTitle),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -34,22 +40,25 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Start Your Solar Journey',
+              loc.startSolarJourney,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Fill in the details below to get a personalized solar study',
-              style: Theme.of(context).textTheme.bodyMedium,
+              loc.fillDetailsForStudy,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 32),
-            // Project Type
             Text(
-              'Project Type',
+              loc.projectTypeLabel,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
                   ),
             ),
             const SizedBox(height: 12),
@@ -57,7 +66,7 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
               children: [
                 Expanded(
                   child: _TypeChip(
-                    label: 'Residential',
+                    label: loc.residential,
                     isSelected: _selectedType == 'Residential',
                     onTap: () => setState(() => _selectedType = 'Residential'),
                   ),
@@ -65,7 +74,7 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _TypeChip(
-                    label: 'Commercial',
+                    label: loc.commercial,
                     isSelected: _selectedType == 'Commercial',
                     onTap: () => setState(() => _selectedType = 'Commercial'),
                   ),
@@ -74,15 +83,15 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
             ),
             const SizedBox(height: 24),
             AppTextField(
-              label: 'Location',
-              hint: 'Enter your city or address',
+              label: loc.addressLabel,
+              hint: loc.enterCityOrAddressHint,
               controller: _locationController,
               prefixIcon: const Icon(Icons.location_on_outlined),
             ),
             const SizedBox(height: 16),
             AppTextField(
-              label: 'Monthly Consumption (kWh)',
-              hint: 'Enter your average consumption',
+              label: loc.monthlyConsumptionKwh,
+              hint: loc.enterYourConsumption,
               controller: _consumptionController,
               keyboardType: TextInputType.number,
               prefixIcon: const Icon(Icons.bolt_outlined),
@@ -91,7 +100,7 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
             SizedBox(
               width: double.infinity,
               child: AppButton(
-                text: 'Generate Study',
+                text: loc.getStudy,
                 onPressed: () {
                   _showResultDialog(context);
                 },
@@ -104,17 +113,16 @@ class _ProjectStudyPageState extends State<ProjectStudyPage> {
   }
 
   void _showResultDialog(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Study Generated'),
-        content: const Text(
-          'Your solar project study has been created. Our team will contact you soon with detailed recommendations.',
-        ),
+        title: Text(loc.success),
+        content: Text(loc.requestSentSuccess),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(loc.ok),
           ),
         ],
       ),
@@ -135,6 +143,7 @@ class _TypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -142,7 +151,7 @@ class _TypeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Colors.transparent,
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            color: isSelected ? AppColors.primary : colorScheme.outline,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -152,7 +161,7 @@ class _TypeChip extends StatelessWidget {
             label,
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : Colors.grey.shade700,
+              color: isSelected ? Colors.white : colorScheme.onSurfaceVariant,
             ),
           ),
         ),

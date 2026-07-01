@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
+import 'package:noor_energy/core/constants/partner_service_types.dart';
+import 'package:noor_energy/core/services/city_service.dart';
 import 'package:noor_energy/features/admin/services/admin_service.dart';
 import 'package:noor_energy/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,14 +16,14 @@ class CompaniesSearchScreen extends StatefulWidget {
 
 class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
   final _adminService = AdminService();
-  String? _selectedCity;
-  String? _selectedServiceType;
   List<Map<String, dynamic>> _allCompanies = [];
   List<Map<String, dynamic>> _filteredCompanies = [];
   bool _isLoading = true;
 
-  List<String> _cities = [];
-  List<String> _serviceTypes = [];
+  List<CityFilterOption> _cityOptions = const [];
+  List<String> _serviceTypes = PartnerServiceTypes.defaultFilterOptions();
+  String? _selectedCity = CityService.allFilterId;
+  String? _selectedServiceType = 'Tous';
 
   @override
   void initState() {
@@ -35,30 +37,31 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
     });
 
     try {
-      final companies = await _adminService.getPartners();
-      
-      // Extract unique cities and service types
-      final citiesSet = <String>{};
+      final locale = Localizations.localeOf(context).languageCode;
+      await CityService.instance.ensureLoaded();
+      final raw = await _adminService.getPartners();
+      final companies = raw.where((p) => p['active'] != false).toList();
+
       final serviceTypesSet = <String>{};
-      
-      for (var company in companies) {
-        final city = company['city']?.toString();
-        final speciality = company['speciality']?.toString();
-        
-        if (city != null && city.isNotEmpty) {
-          citiesSet.add(city);
-        }
-        if (speciality != null && speciality.isNotEmpty) {
-          serviceTypesSet.add(speciality);
+      for (final company in companies) {
+        final st = PartnerServiceTypes.serviceTypeFromMap(company);
+        if (st.isNotEmpty) {
+          serviceTypesSet.add(st);
         }
       }
+      serviceTypesSet.addAll(PartnerServiceTypes.canonicalLabels);
+
+      final cityOptions =
+          CityService.instance.buildFilterOptions(companies, locale);
+      final typeRest = serviceTypesSet.toList()..sort();
+      final typeOptions = ['Tous', ...typeRest];
 
       if (mounted) {
         setState(() {
           _allCompanies = companies;
-          _cities = ['Tous', ...citiesSet.toList()..sort()];
-          _serviceTypes = ['Tous', ...serviceTypesSet.toList()..sort()];
-          _selectedCity = 'Tous';
+          _cityOptions = cityOptions;
+          _serviceTypes = typeOptions;
+          _selectedCity = CityService.allFilterId;
           _selectedServiceType = 'Tous';
           _applyFilters();
           _isLoading = false;
@@ -67,6 +70,12 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
+          _allCompanies = [];
+          _filteredCompanies = [];
+          _cityOptions = [];
+          _serviceTypes = PartnerServiceTypes.defaultFilterOptions();
+          _selectedCity = CityService.allFilterId;
+          _selectedServiceType = 'Tous';
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,16 +91,16 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
   void _applyFilters() {
     setState(() {
       _filteredCompanies = _allCompanies.where((company) {
-        final city = company['city']?.toString() ?? '';
-        final speciality = company['speciality']?.toString() ?? '';
-        
-        final matchesCity = _selectedCity == null || 
-            _selectedCity == 'Tous' || 
-            city == _selectedCity;
-        final matchesServiceType = _selectedServiceType == null || 
-            _selectedServiceType == 'Tous' || 
+        final speciality = PartnerServiceTypes.serviceTypeFromMap(company);
+
+        final matchesCity = CityService.instance.matchesCityFilter(
+          company,
+          _selectedCity,
+        );
+        final matchesServiceType = _selectedServiceType == null ||
+            _selectedServiceType == 'Tous' ||
             speciality == _selectedServiceType;
-        
+
         return matchesCity && matchesServiceType;
       }).toList();
     });
@@ -117,19 +126,20 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(localizations.searchCertifiedCompanies),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
       body: Column(
         children: [
           // Filters Section
           Container(
-            color: Colors.white,
+            color: colorScheme.surface,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
@@ -151,12 +161,18 @@ class _CompaniesSearchScreenState extends State<CompaniesSearchScreen> {
                         child: DropdownButton<String>(
                           value: _selectedCity,
                           isExpanded: true,
-                          items: _cities.map((city) {
-                            return DropdownMenuItem(
-                              value: city,
-                              child: Text(city == 'Tous' ? localizations.all : city),
-                            );
-                          }).toList(),
+                          items: [
+                            DropdownMenuItem(
+                              value: CityService.allFilterId,
+                              child: Text(localizations.all),
+                            ),
+                            ..._cityOptions.map((option) {
+                              return DropdownMenuItem(
+                                value: option.id,
+                                child: Text(option.label),
+                              );
+                            }),
+                          ],
                           onChanged: (value) {
                             setState(() {
                               _selectedCity = value;
@@ -268,9 +284,10 @@ class _CompanyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final companyName = company['companyName']?.toString() ?? 
                        company['name']?.toString() ?? 'N/A';
-    final city = company['city']?.toString() ?? '';
+    final locale = Localizations.localeOf(context).languageCode;
+    final city = CityService.instance.getDisplayLabelForRecord(company, locale);
     final phone = company['phone']?.toString() ?? '';
-    final speciality = company['speciality']?.toString() ?? '';
+    final speciality = PartnerServiceTypes.serviceTypeFromMap(company);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -311,6 +328,8 @@ class _CompanyCard extends StatelessWidget {
                     children: [
                       Text(
                         companyName,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -321,6 +340,8 @@ class _CompanyCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           speciality,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade600,
@@ -338,11 +359,15 @@ class _CompanyCard extends StatelessWidget {
                 children: [
                   Icon(Icons.location_city, size: 16, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
-                  Text(
-                    city,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
+                  Expanded(
+                    child: Text(
+                      city,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                   ),
                 ],
@@ -353,11 +378,15 @@ class _CompanyCard extends StatelessWidget {
                 children: [
                   Icon(Icons.phone, size: 16, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
-                  Text(
-                    phone,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
+                  Expanded(
+                    child: Text(
+                      phone,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                   ),
                 ],

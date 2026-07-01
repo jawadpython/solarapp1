@@ -55,13 +55,26 @@ class NotificationsPage extends StatelessWidget {
                       return Center(child: Text('Erreur: ${snapshot.error}'));
                     }
 
-                    final notifications = snapshot.data?.docs.map((doc) {
+                    var notifications = snapshot.data?.docs.map((doc) {
                       final docData = doc.data() as Map<String, dynamic>;
-                      return {
+                      return <String, dynamic>{
                         ...docData,
                         'id': doc.id,
                       };
                     }).toList() ?? [];
+
+                    // Sort by date descending (date or createdAt)
+                    notifications.sort((a, b) {
+                      final aDate = a['date'] ?? a['createdAt'];
+                      final bDate = b['date'] ?? b['createdAt'];
+                      if (aDate == null && bDate == null) return 0;
+                      if (aDate == null) return 1;
+                      if (bDate == null) return -1;
+                      final aTime = aDate is Timestamp ? aDate.toDate() : (aDate is DateTime ? aDate : DateTime.tryParse(aDate.toString()));
+                      final bTime = bDate is Timestamp ? bDate.toDate() : (bDate is DateTime ? bDate : DateTime.tryParse(bDate.toString()));
+                      if (aTime == null || bTime == null) return 0;
+                      return bTime.compareTo(aTime);
+                    });
 
                     if (notifications.isEmpty) {
                       return Center(

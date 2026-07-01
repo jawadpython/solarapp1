@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:noor_energy/admin_web/routes/admin_web_routes.dart';
 import 'package:noor_energy/core/constants/app_colors.dart';
 
@@ -79,12 +80,6 @@ class AdminWebSidebar extends StatelessWidget {
                   title: 'Demandes Maintenance',
                   route: AdminWebRoutes.maintenanceRequests,
                 ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.water_drop,
-                  title: 'Demandes Pompage',
-                  route: AdminWebRoutes.pumpingRequests,
-                ),
                 const Divider(height: 32),
                 _buildMenuItem(
                   context,
@@ -123,9 +118,15 @@ class AdminWebSidebar extends StatelessWidget {
               ),
             ),
             child: TextButton.icon(
-              onPressed: () {
-                // TODO: Implement logout
-                debugPrint('Logout');
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.signOut();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur de déconnexion: $e')),
+                  );
+                }
               },
               icon: const Icon(Icons.logout, color: Colors.red),
               label: const Text(
